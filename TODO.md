@@ -57,6 +57,39 @@ eg_async_run(fetch_data_from_api, on_data_received, user_data);
 - [ ] Destruição automática de filhos ao destruir container
 - [ ] Integrar EgMemoryPool na alocação de widgets pequenos (EgLabel, EgButton, etc.)
 
+#### Propósito do EgMemoryPool
+
+O `EgMemoryPool` é um **alocador de memória otimizado** para objetos de tamanho fixo. Benefícios:
+
+1. **Reduz fragmentação de memória** - Aloca blocos contíguos
+2. **Melhora performance** - Evita chamadas frequentes a malloc/free
+3. **Cache-friendly** - Objetos próximos na memória
+
+**Onde será usado:**
+- Alocação de widgets pequenos (EgLabel, EgButton) que são criados/destruídos frequentemente
+- Alocação de handlers de signal (EgSignalHandler)
+- Alocação de bindings de property (EgBinding)
+- Alocação de callbacks de eventos
+
+**Exemplo de integração futura:**
+```c
+/* Pool global para widgets pequenos */
+static EgMemoryPool *g_widget_pool = NULL;
+
+void eg_init(void) {
+    g_widget_pool = eg_pool_new(sizeof(EgButton), 64); /* 64 botões pré-alocados */
+}
+
+EgButton *eg_button_new(const char *label) {
+    EgButton *btn = eg_pool_alloc(g_widget_pool);  /* Usa pool ao invés de malloc */
+    /* ... */
+}
+
+void eg_button_free(EgButton *btn) {
+    eg_pool_release(g_widget_pool, btn);  /* Devolve ao pool ao invés de free */
+}
+```
+
 ### Sistema de Eventos
 - [x] Suporte a múltiplos callbacks por evento (EgSignal)
 - [x] Desconectar callbacks (retornar handler ID)
