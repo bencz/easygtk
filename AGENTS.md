@@ -399,6 +399,11 @@ void eg_window_set_child(EgWindow *window, EgWidget *child);
 Define o widget filho (conteúdo) da janela.
 
 ```c
+void eg_window_set_titlebar(EgWindow *window, EgWidget *titlebar);
+```
+Define uma barra de título personalizada (ex: EgHeaderBar).
+
+```c
 void eg_window_on_close(EgWindow *window, EgCallback callback, void *user_data);
 void eg_window_on_destroy(EgWindow *window, EgCallback callback, void *user_data);
 ```
@@ -1118,6 +1123,214 @@ eg_expander_set_expanded(expander, false); /* começa recolhido */
 
 ---
 
+### Image (EgImage)
+
+Widget para exibição de imagens e ícones.
+
+```c
+EgImage *eg_image_new(void);
+EgImage *eg_image_new_from_file(const char *file_path);
+EgImage *eg_image_new_from_icon(const char *icon_name);
+EgImage *eg_image_new_from_resource(const char *resource_path);
+void eg_image_free(EgImage *image);
+
+void eg_image_set_from_file(EgImage *image, const char *file_path);
+void eg_image_set_from_icon(EgImage *image, const char *icon_name);
+void eg_image_set_from_resource(EgImage *image, const char *resource_path);
+
+void eg_image_set_pixel_size(EgImage *image, int pixel_size);
+int eg_image_get_pixel_size(EgImage *image);
+void eg_image_clear(EgImage *image);
+
+EgWidget *eg_image_as_widget(EgImage *image);
+```
+
+**Exemplo:**
+```c
+EgImage *icon = eg_image_new_from_icon("dialog-information");
+eg_image_set_pixel_size(icon, 48);
+
+EgImage *photo = eg_image_new_from_file("/path/to/image.png");
+```
+
+---
+
+### Picture (EgPicture)
+
+Widget para exibição de imagens maiores com controle de escala.
+
+```c
+typedef enum EgContentFit {
+    EG_CONTENT_FIT_FILL = 0,      /* Preenche (pode distorcer) */
+    EG_CONTENT_FIT_CONTAIN = 1,   /* Mantém proporção, cabe inteiro */
+    EG_CONTENT_FIT_COVER = 2,     /* Mantém proporção, cobre tudo */
+    EG_CONTENT_FIT_SCALE_DOWN = 3 /* Como contain, nunca aumenta */
+} EgContentFit;
+
+EgPicture *eg_picture_new(void);
+EgPicture *eg_picture_new_from_file(const char *file_path);
+EgPicture *eg_picture_new_from_resource(const char *resource_path);
+void eg_picture_free(EgPicture *picture);
+
+void eg_picture_set_filename(EgPicture *picture, const char *file_path);
+const char *eg_picture_get_filename(EgPicture *picture);
+void eg_picture_set_resource(EgPicture *picture, const char *resource_path);
+
+void eg_picture_set_content_fit(EgPicture *picture, EgContentFit fit);
+EgContentFit eg_picture_get_content_fit(EgPicture *picture);
+
+void eg_picture_set_can_shrink(EgPicture *picture, bool can_shrink);
+bool eg_picture_get_can_shrink(EgPicture *picture);
+
+void eg_picture_set_alternative_text(EgPicture *picture, const char *alt_text);
+const char *eg_picture_get_alternative_text(EgPicture *picture);
+
+EgWidget *eg_picture_as_widget(EgPicture *picture);
+```
+
+**Exemplo:**
+```c
+EgPicture *pic = eg_picture_new_from_file("photo.jpg");
+eg_picture_set_content_fit(pic, EG_CONTENT_FIT_CONTAIN);
+eg_picture_set_can_shrink(pic, true);
+eg_picture_set_alternative_text(pic, "Foto de exemplo");
+```
+
+---
+
+### Separator (EgSeparator)
+
+Linha separadora horizontal ou vertical.
+
+```c
+EgSeparator *eg_separator_new(EgOrientation orientation);
+EgSeparator *eg_separator_new_horizontal(void);
+EgSeparator *eg_separator_new_vertical(void);
+void eg_separator_free(EgSeparator *separator);
+
+EgWidget *eg_separator_as_widget(EgSeparator *separator);
+```
+
+**Exemplo:**
+```c
+EgSeparator *hsep = eg_separator_new_horizontal();
+eg_box_append(vbox, eg_separator_as_widget(hsep));
+```
+
+---
+
+### Spinner (EgSpinner)
+
+Indicador de carregamento animado.
+
+```c
+EgSpinner *eg_spinner_new(void);
+void eg_spinner_free(EgSpinner *spinner);
+
+void eg_spinner_start(EgSpinner *spinner);
+void eg_spinner_stop(EgSpinner *spinner);
+
+void eg_spinner_set_spinning(EgSpinner *spinner, bool spinning);
+bool eg_spinner_get_spinning(EgSpinner *spinner);
+
+EgWidget *eg_spinner_as_widget(EgSpinner *spinner);
+```
+
+**Exemplo:**
+```c
+EgSpinner *spinner = eg_spinner_new();
+eg_spinner_start(spinner);
+/* ... após carregar ... */
+eg_spinner_stop(spinner);
+```
+
+---
+
+### LevelBar (EgLevelBar)
+
+Barra de nível para exibir valores.
+
+```c
+typedef enum EgLevelBarMode {
+    EG_LEVEL_BAR_MODE_CONTINUOUS = 0,
+    EG_LEVEL_BAR_MODE_DISCRETE = 1
+} EgLevelBarMode;
+
+EgLevelBar *eg_level_bar_new(void);
+EgLevelBar *eg_level_bar_new_for_interval(double min_value, double max_value);
+void eg_level_bar_free(EgLevelBar *level_bar);
+
+void eg_level_bar_set_value(EgLevelBar *level_bar, double value);
+double eg_level_bar_get_value(EgLevelBar *level_bar);
+
+void eg_level_bar_set_min_value(EgLevelBar *level_bar, double min_value);
+double eg_level_bar_get_min_value(EgLevelBar *level_bar);
+void eg_level_bar_set_max_value(EgLevelBar *level_bar, double max_value);
+double eg_level_bar_get_max_value(EgLevelBar *level_bar);
+
+void eg_level_bar_set_mode(EgLevelBar *level_bar, EgLevelBarMode mode);
+EgLevelBarMode eg_level_bar_get_mode(EgLevelBar *level_bar);
+
+void eg_level_bar_set_inverted(EgLevelBar *level_bar, bool inverted);
+bool eg_level_bar_get_inverted(EgLevelBar *level_bar);
+
+void eg_level_bar_add_offset_value(EgLevelBar *level_bar, const char *name, double value);
+void eg_level_bar_remove_offset_value(EgLevelBar *level_bar, const char *name);
+
+EgWidget *eg_level_bar_as_widget(EgLevelBar *level_bar);
+```
+
+**Exemplo:**
+```c
+EgLevelBar *bar = eg_level_bar_new_for_interval(0.0, 100.0);
+eg_level_bar_set_value(bar, 75.0);
+eg_level_bar_add_offset_value(bar, "low", 25.0);
+eg_level_bar_add_offset_value(bar, "high", 75.0);
+```
+
+---
+
+### HeaderBar (EgHeaderBar)
+
+Barra de título personalizada para janelas.
+
+```c
+EgHeaderBar *eg_header_bar_new(void);
+void eg_header_bar_free(EgHeaderBar *header_bar);
+
+void eg_header_bar_set_title_widget(EgHeaderBar *header_bar, EgWidget *title_widget);
+EgWidget *eg_header_bar_get_title_widget(EgHeaderBar *header_bar);
+
+void eg_header_bar_pack_start(EgHeaderBar *header_bar, EgWidget *child);
+void eg_header_bar_pack_end(EgHeaderBar *header_bar, EgWidget *child);
+void eg_header_bar_remove(EgHeaderBar *header_bar, EgWidget *child);
+
+void eg_header_bar_set_show_title_buttons(EgHeaderBar *header_bar, bool show);
+bool eg_header_bar_get_show_title_buttons(EgHeaderBar *header_bar);
+
+void eg_header_bar_set_decoration_layout(EgHeaderBar *header_bar, const char *layout);
+const char *eg_header_bar_get_decoration_layout(EgHeaderBar *header_bar);
+
+EgWidget *eg_header_bar_as_widget(EgHeaderBar *header_bar);
+```
+
+**Exemplo:**
+```c
+EgHeaderBar *header = eg_header_bar_new();
+eg_header_bar_set_show_title_buttons(header, true);
+
+EgLabel *title = eg_label_new("Meu App");
+eg_header_bar_set_title_widget(header, eg_label_as_widget(title));
+
+EgButton *btn_menu = eg_button_new_with_icon("open-menu");
+eg_header_bar_pack_end(header, eg_button_as_widget(btn_menu));
+
+/* Usar como titlebar da janela */
+eg_window_set_titlebar(window, eg_header_bar_as_widget(header));
+```
+
+---
+
 ## Diálogos
 
 Diálogos de mensagem usando `GtkAlertDialog` (GTK4).
@@ -1169,6 +1382,151 @@ static void on_question_response(EgDialogResponse response, void *user_data) {
 
 eg_dialog_question(window, "Confirmar", "Deseja continuar?", 
                    on_question_response, NULL);
+```
+
+---
+
+### FileChooser
+
+Diálogos para seleção de arquivos e pastas.
+
+```c
+typedef void (*EgFileChooserCallback)(const char *path, void *user_data);
+typedef void (*EgFileChooserMultiCallback)(char **paths, int count, void *user_data);
+
+/* Filtro de arquivo */
+EgFileFilter *eg_file_filter_new(const char *name);
+void eg_file_filter_free(EgFileFilter *filter);
+void eg_file_filter_add_mime_type(EgFileFilter *filter, const char *mime_type);
+void eg_file_filter_add_pattern(EgFileFilter *filter, const char *pattern);
+void eg_file_filter_add_suffix(EgFileFilter *filter, const char *suffix);
+
+/* Diálogos */
+void eg_file_chooser_open(EgWindow *parent, const char *title,
+                          EgFileChooserCallback callback, void *user_data);
+void eg_file_chooser_open_with_filters(EgWindow *parent, const char *title,
+                                        EgFileFilter **filters,
+                                        EgFileChooserCallback callback, void *user_data);
+void eg_file_chooser_open_multiple(EgWindow *parent, const char *title,
+                                    EgFileChooserMultiCallback callback, void *user_data);
+void eg_file_chooser_save(EgWindow *parent, const char *title,
+                          const char *initial_name,
+                          EgFileChooserCallback callback, void *user_data);
+void eg_file_chooser_select_folder(EgWindow *parent, const char *title,
+                                    EgFileChooserCallback callback, void *user_data);
+```
+
+**Exemplo:**
+```c
+static void on_file_selected(const char *path, void *user_data) {
+    if (path != NULL) {
+        printf("Arquivo: %s\n", path);
+    } else {
+        printf("Cancelado\n");
+    }
+}
+
+/* Abrir com filtros */
+EgFileFilter *filter_img = eg_file_filter_new("Imagens");
+eg_file_filter_add_pattern(filter_img, "*.png");
+eg_file_filter_add_pattern(filter_img, "*.jpg");
+
+EgFileFilter *filters[] = { filter_img, NULL };
+eg_file_chooser_open_with_filters(window, "Abrir Imagem", filters, on_file_selected, NULL);
+
+/* Salvar */
+eg_file_chooser_save(window, "Salvar", "documento.txt", on_file_selected, NULL);
+
+/* Selecionar pasta */
+eg_file_chooser_select_folder(window, "Selecionar Pasta", on_file_selected, NULL);
+```
+
+---
+
+### ColorChooser
+
+Diálogo para seleção de cores.
+
+```c
+typedef struct EgColor {
+    double red;    /* 0.0 a 1.0 */
+    double green;  /* 0.0 a 1.0 */
+    double blue;   /* 0.0 a 1.0 */
+    double alpha;  /* 0.0 a 1.0 */
+} EgColor;
+
+typedef void (*EgColorChooserCallback)(const EgColor *color, void *user_data);
+
+void eg_color_chooser_dialog(EgWindow *parent, const char *title,
+                              const EgColor *initial_color,
+                              EgColorChooserCallback callback, void *user_data);
+void eg_color_chooser_dialog_with_alpha(EgWindow *parent, const char *title,
+                                         const EgColor *initial_color,
+                                         bool with_alpha,
+                                         EgColorChooserCallback callback, void *user_data);
+
+/* Utilitários de cor */
+EgColor eg_color_from_rgb(int red, int green, int blue);
+EgColor eg_color_from_rgba(int red, int green, int blue, double alpha);
+EgColor eg_color_from_string(const char *hex);
+char *eg_color_to_string(const EgColor *color, char *buffer, size_t buffer_size);
+```
+
+**Exemplo:**
+```c
+static void on_color_selected(const EgColor *color, void *user_data) {
+    if (color != NULL) {
+        char hex[16];
+        eg_color_to_string(color, hex, sizeof(hex));
+        printf("Cor: %s\n", hex);
+    }
+}
+
+EgColor initial = eg_color_from_rgb(52, 152, 219);
+eg_color_chooser_dialog_with_alpha(window, "Escolher Cor", &initial, true, on_color_selected, NULL);
+```
+
+---
+
+### AboutDialog
+
+Diálogo "Sobre" para informações do aplicativo.
+
+```c
+EgAboutDialog *eg_about_dialog_new(void);
+void eg_about_dialog_free(EgAboutDialog *dialog);
+
+void eg_about_dialog_set_program_name(EgAboutDialog *dialog, const char *name);
+void eg_about_dialog_set_version(EgAboutDialog *dialog, const char *version);
+void eg_about_dialog_set_copyright(EgAboutDialog *dialog, const char *copyright);
+void eg_about_dialog_set_comments(EgAboutDialog *dialog, const char *comments);
+void eg_about_dialog_set_license(EgAboutDialog *dialog, const char *license);
+void eg_about_dialog_set_wrap_license(EgAboutDialog *dialog, bool wrap_license);
+void eg_about_dialog_set_website(EgAboutDialog *dialog, const char *website);
+void eg_about_dialog_set_website_label(EgAboutDialog *dialog, const char *label);
+void eg_about_dialog_set_authors(EgAboutDialog *dialog, const char **authors);
+void eg_about_dialog_set_artists(EgAboutDialog *dialog, const char **artists);
+void eg_about_dialog_set_documenters(EgAboutDialog *dialog, const char **documenters);
+void eg_about_dialog_set_translator_credits(EgAboutDialog *dialog, const char *credits);
+void eg_about_dialog_set_logo_icon_name(EgAboutDialog *dialog, const char *icon_name);
+
+void eg_about_dialog_show(EgAboutDialog *dialog, EgWindow *parent);
+```
+
+**Exemplo:**
+```c
+EgAboutDialog *about = eg_about_dialog_new();
+eg_about_dialog_set_program_name(about, "Meu App");
+eg_about_dialog_set_version(about, "1.0.0");
+eg_about_dialog_set_copyright(about, "© 2024 Minha Empresa");
+eg_about_dialog_set_comments(about, "Um aplicativo incrível.");
+eg_about_dialog_set_website(about, "https://example.com");
+
+const char *authors[] = { "Autor 1", "Autor 2", NULL };
+eg_about_dialog_set_authors(about, authors);
+
+eg_about_dialog_set_logo_icon_name(about, "application-x-executable");
+eg_about_dialog_show(about, window);
 ```
 
 ---

@@ -39,6 +39,12 @@ typedef struct EgNotebook EgNotebook;
 typedef struct EgPaned EgPaned;
 typedef struct EgFrame EgFrame;
 typedef struct EgExpander EgExpander;
+typedef struct EgImage EgImage;
+typedef struct EgPicture EgPicture;
+typedef struct EgSeparator EgSeparator;
+typedef struct EgSpinner EgSpinner;
+typedef struct EgLevelBar EgLevelBar;
+typedef struct EgHeaderBar EgHeaderBar;
 
 /* Enumerações */
 typedef enum EgOrientation {
@@ -74,7 +80,13 @@ typedef enum EgWidgetType {
     EG_WIDGET_TYPE_NOTEBOOK,
     EG_WIDGET_TYPE_PANED,
     EG_WIDGET_TYPE_FRAME,
-    EG_WIDGET_TYPE_EXPANDER
+    EG_WIDGET_TYPE_EXPANDER,
+    EG_WIDGET_TYPE_IMAGE,
+    EG_WIDGET_TYPE_PICTURE,
+    EG_WIDGET_TYPE_SEPARATOR,
+    EG_WIDGET_TYPE_SPINNER,
+    EG_WIDGET_TYPE_LEVEL_BAR,
+    EG_WIDGET_TYPE_HEADER_BAR
 } EgWidgetType;
 
 /* Callbacks */

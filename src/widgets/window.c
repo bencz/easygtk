@@ -162,6 +162,15 @@ void eg_window_set_child(EgWindow *window, EgWidget *child) {
     }
 }
 
+void eg_window_set_titlebar(EgWindow *window, EgWidget *titlebar) {
+    if (window == NULL || window->base.native == NULL) return;
+    if (titlebar == NULL) {
+        gtk_window_set_titlebar(GTK_WINDOW(window->base.native), NULL);
+    } else {
+        gtk_window_set_titlebar(GTK_WINDOW(window->base.native), titlebar->native);
+    }
+}
+
 void eg_window_on_close(EgWindow *window, EgCallback callback, void *user_data) {
     if (window == NULL) return;
     

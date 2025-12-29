@@ -102,6 +102,14 @@ void eg_window_set_resizable(EgWindow *window, bool resizable);
 void eg_window_set_child(EgWindow *window, EgWidget *child);
 
 /**
+ * Define a barra de título personalizada da janela.
+ * 
+ * @param window Ponteiro para a janela
+ * @param titlebar Widget a ser usado como barra de título (ex: EgHeaderBar)
+ */
+void eg_window_set_titlebar(EgWindow *window, EgWidget *titlebar);
+
+/**
  * Define callback para quando a janela for fechada.
  * 
  * @param window Ponteiro para a janela

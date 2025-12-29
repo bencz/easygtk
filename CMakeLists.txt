@@ -40,6 +40,15 @@ set(EASYGTK_SOURCES
     src/widgets/paned.c
     src/widgets/frame.c
     src/widgets/expander.c
+    src/widgets/image.c
+    src/widgets/picture.c
+    src/widgets/separator.c
+    src/widgets/spinner.c
+    src/widgets/level_bar.c
+    src/widgets/header_bar.c
+    src/widgets/file_chooser.c
+    src/widgets/color_chooser.c
+    src/widgets/about_dialog.c
     src/widgets/dialog.c
     src/core/events.c
     src/core/clipboard.c
@@ -123,6 +132,10 @@ if(BUILD_EXAMPLES)
     add_executable(containers_example examples/containers_example.c)
     target_link_libraries(containers_example PRIVATE easygtk ${GTK4_LIBRARIES})
     target_include_directories(containers_example PRIVATE ${GTK4_INCLUDE_DIRS})
+
+    add_executable(new_widgets_example examples/new_widgets_example.c)
+    target_link_libraries(new_widgets_example PRIVATE easygtk ${GTK4_LIBRARIES})
+    target_include_directories(new_widgets_example PRIVATE ${GTK4_INCLUDE_DIRS})
 endif()
 
 # Install

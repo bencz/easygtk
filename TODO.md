@@ -218,50 +218,71 @@ void eg_button_free(EgButton *btn) {
 - [x] eg_dialog_confirm(..., callback)
 
 ### FileChooser
-- [ ] eg_file_chooser_open(parent, title, callback)
-- [ ] eg_file_chooser_save(parent, title, callback)
-- [ ] eg_file_chooser_select_folder(...)
-- [ ] Filtros de arquivo
+- [x] eg_file_chooser_open(parent, title, callback)
+- [x] eg_file_chooser_save(parent, title, callback)
+- [x] eg_file_chooser_select_folder(...)
+- [x] Filtros de arquivo (EgFileFilter)
+- [x] eg_file_chooser_open_multiple
+- [x] eg_file_chooser_open_with_filters
 
 ### ColorChooser
-- [ ] eg_color_chooser_dialog(parent, callback)
+- [x] eg_color_chooser_dialog(parent, callback)
+- [x] eg_color_chooser_dialog_with_alpha
+- [x] eg_color_from_rgb, eg_color_from_rgba, eg_color_from_string
+- [x] eg_color_to_string
 
 ### AboutDialog
-- [ ] eg_about_dialog_new()
-- [ ] eg_about_dialog_set_program_name, version, etc.
+- [x] eg_about_dialog_new()
+- [x] eg_about_dialog_set_program_name, version, copyright, comments
+- [x] eg_about_dialog_set_license, website, authors, artists
+- [x] eg_about_dialog_show
 
 ---
 
 ## Widgets de Exibição
 
 ### Image
-- [ ] eg_image_new_from_file(path)
-- [ ] eg_image_new_from_icon(icon_name)
-- [ ] eg_image_set_pixel_size
+- [x] eg_image_new(), eg_image_new_from_file(path)
+- [x] eg_image_new_from_icon(icon_name)
+- [x] eg_image_new_from_resource
+- [x] eg_image_set_pixel_size, eg_image_clear
+- [x] eg_image_set_from_file, eg_image_set_from_icon
 
 ### Picture
-- [ ] eg_picture_new_from_file(path)
-- [ ] eg_picture_set_content_fit
+- [x] eg_picture_new(), eg_picture_new_from_file(path)
+- [x] eg_picture_new_from_resource
+- [x] eg_picture_set_content_fit (EgContentFit)
+- [x] eg_picture_set_can_shrink
+- [x] eg_picture_set_alternative_text
 
 ### Separator
-- [ ] eg_separator_new(orientation)
+- [x] eg_separator_new(orientation)
+- [x] eg_separator_new_horizontal, eg_separator_new_vertical
 
 ### Spinner
-- [ ] eg_spinner_new()
-- [ ] eg_spinner_start / stop
+- [x] eg_spinner_new()
+- [x] eg_spinner_start / stop
+- [x] eg_spinner_set_spinning / get_spinning
 
 ### LevelBar
-- [ ] eg_level_bar_new()
-- [ ] eg_level_bar_set_value
+- [x] eg_level_bar_new(), eg_level_bar_new_for_interval
+- [x] eg_level_bar_set_value / get_value
+- [x] eg_level_bar_set_min_value / set_max_value
+- [x] eg_level_bar_set_mode (continuous/discrete)
+- [x] eg_level_bar_set_inverted
+- [x] eg_level_bar_add_offset_value / remove_offset_value
 
 ---
 
 ## Menus e Ações
 
 ### HeaderBar
-- [ ] eg_header_bar_new()
-- [ ] eg_header_bar_set_title
-- [ ] eg_header_bar_pack_start / pack_end
+- [x] eg_header_bar_new()
+- [x] eg_header_bar_set_title_widget
+- [x] eg_header_bar_pack_start / pack_end
+- [x] eg_header_bar_remove
+- [x] eg_header_bar_set_show_title_buttons
+- [x] eg_header_bar_set_decoration_layout
 
 ### PopoverMenu
 - [ ] eg_popover_menu_new()
@@ -290,5 +311,5 @@ void eg_button_free(EgButton *btn) {
 ## Prioridades Sugeridas
 
 1. **Alta**: ~~Timers~~, ~~CSS~~, ~~CheckButton~~, ~~Switch~~, ~~MessageDialog~~
-2. **Média**: ~~ScrolledWindow~~, ~~ComboBox~~, ~~ProgressBar~~, FileChooser
-3. **Baixa**: Menus, ListView, Notebook, HeaderBar
+2. **Média**: ~~ScrolledWindow~~, ~~ComboBox~~, ~~ProgressBar~~, ~~FileChooser~~, ~~ColorChooser~~
+3. **Baixa**: Menus, ListView, ~~Notebook~~, ~~HeaderBar~~, ~~Image~~, ~~Spinner~~, ~~LevelBar~~

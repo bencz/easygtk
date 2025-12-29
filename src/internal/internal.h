@@ -172,6 +172,36 @@ struct EgExpander {
     EgWidget base;
 };
 
+/* Estrutura de image */
+struct EgImage {
+    EgWidget base;
+};
+
+/* Estrutura de picture */
+struct EgPicture {
+    EgWidget base;
+};
+
+/* Estrutura de separator */
+struct EgSeparator {
+    EgWidget base;
+};
+
+/* Estrutura de spinner */
+struct EgSpinner {
+    EgWidget base;
+};
+
+/* Estrutura de level bar */
+struct EgLevelBar {
+    EgWidget base;
+};
+
+/* Estrutura de header bar */
+struct EgHeaderBar {
+    EgWidget base;
+};
+
 /* Estrutura para dados de callback */
 typedef struct {
     EgCallback callback;
