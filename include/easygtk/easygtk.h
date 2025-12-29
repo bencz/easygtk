@@ -29,6 +29,11 @@
 #include "dialog.h"
 #include "events.h"
 #include "clipboard.h"
+#include "dnd.h"
+#include "log.h"
+#include "cast.h"
+#include "refcount.h"
+#include "pool.h"
 
 #ifdef __cplusplus
 extern "C" {

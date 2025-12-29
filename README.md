@@ -171,6 +171,10 @@ int main(int argc, char *argv[]) {
 - **Cursor**: `eg_widget_set_cursor()`
 - **Opacity**: `eg_widget_set_opacity()`, `eg_widget_get_opacity()`
 - **Nome/ID**: `eg_widget_set_name()`, `eg_widget_get_name()`
+- **Drag and Drop**: `eg_widget_set_drag_source()`, `eg_widget_set_drop_target()`
+- **Logging**: `eg_log_debug()`, `eg_log_info()`, `eg_log_warning()`, `eg_log_error()`
+- **Type Casting**: `eg_widget_cast_to_*()`, `eg_widget_is_type()`, `eg_widget_is_container()`
+- **Ref-counting**: `eg_widget_ref()`, `eg_widget_unref()`
 
 ## Exemplos
 

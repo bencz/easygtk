@@ -3,6 +3,8 @@
  */
 
 #include <gtk/gtk.h>
+#include <stdlib.h>
+#include <string.h>
 #include "internal/internal.h"
 
 /* Funções da vtable */
@@ -30,9 +32,46 @@ const EgContainerVTable eg_grid_vtable = {
     .remove_child = grid_remove_child
 };
 
+/* Funções auxiliares para lista de filhos */
+static void child_list_init(EgChildList *list) {
+    list->children = NULL;
+    list->count = 0;
+    list->capacity = 0;
+}
+
+static void child_list_add(EgChildList *list, EgWidget *child) {
+    if (list->count >= list->capacity) {
+        size_t new_cap = list->capacity == 0 ? 4 : list->capacity * 2;
+        EgWidget **new_arr = realloc(list->children, new_cap * sizeof(EgWidget *));
+        if (new_arr == NULL) return;
+        list->children = new_arr;
+        list->capacity = new_cap;
+    }
+    list->children[list->count++] = child;
+}
+
+static void child_list_remove(EgChildList *list, EgWidget *child) {
+    for (size_t i = 0; i < list->count; i++) {
+        if (list->children[i] == child) {
+            memmove(&list->children[i], &list->children[i + 1], 
+                    (list->count - i - 1) * sizeof(EgWidget *));
+            list->count--;
+            return;
+        }
+    }
+}
+
+static void child_list_free(EgChildList *list) {
+    free(list->children);
+    list->children = NULL;
+    list->count = 0;
+    list->capacity = 0;
+}
+
 static void grid_destroy(EgWidget *widget) {
     EgGrid *grid = (EgGrid *)widget;
     if (grid == NULL) return;
+    child_list_free(&grid->children);
     eg_free(grid);
 }
 
@@ -85,6 +124,7 @@ EgGrid *eg_grid_new(void) {
     }
     
     eg_widget_init(&grid->base, EG_WIDGET_TYPE_GRID, gtk_grid, &eg_grid_vtable.base);
+    child_list_init(&grid->children);
     
     return grid;
 }
@@ -97,12 +137,14 @@ void eg_grid_attach(EgGrid *grid, EgWidget *child, int column, int row, int widt
     if (grid == NULL || grid->base.native == NULL) return;
     if (child == NULL || child->native == NULL) return;
     gtk_grid_attach(GTK_GRID(grid->base.native), child->native, column, row, width, height);
+    child_list_add(&grid->children, child);
 }
 
 void eg_grid_remove(EgGrid *grid, EgWidget *child) {
     if (grid == NULL || grid->base.native == NULL) return;
     if (child == NULL || child->native == NULL) return;
     gtk_grid_remove(GTK_GRID(grid->base.native), child->native);
+    child_list_remove(&grid->children, child);
 }
 
 void eg_grid_set_column_spacing(EgGrid *grid, int spacing) {

@@ -68,6 +68,8 @@ void eg_widget_init(EgWidget *widget, EgWidgetType type, GtkWidget *native, cons
     widget->vtable = vtable ? vtable : &eg_widget_vtable;
     widget->user_data = NULL;
     widget->user_data_destroy = NULL;
+    widget->ref_count = 1;
+    widget->is_floating = false;
 }
 
 void eg_widget_destroy_internal(EgWidget *widget) {

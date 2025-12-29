@@ -22,6 +22,8 @@ struct EgWidget {
     const EgWidgetVTable *vtable;
     void *user_data;
     EgDestroyNotify user_data_destroy;
+    uint32_t ref_count;
+    bool is_floating;
 };
 
 /* Estrutura de aplicação */
@@ -65,14 +67,23 @@ struct EgEntry {
     void *activate_data;
 };
 
+/* Lista de filhos para containers */
+typedef struct EgChildList {
+    EgWidget **children;
+    size_t count;
+    size_t capacity;
+} EgChildList;
+
 /* Estrutura de box */
 struct EgBox {
     EgWidget base;
+    EgChildList children;
 };
 
 /* Estrutura de grid */
 struct EgGrid {
     EgWidget base;
+    EgChildList children;
 };
 
 /* Estrutura de check button */

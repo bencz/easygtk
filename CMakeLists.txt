@@ -35,6 +35,11 @@ set(EASYGTK_SOURCES
     src/widgets/dialog.c
     src/core/events.c
     src/core/clipboard.c
+    src/core/dnd.c
+    src/core/log.c
+    src/core/cast.c
+    src/core/refcount.c
+    src/core/pool.c
 )
 
 # Create shared library

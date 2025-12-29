@@ -43,6 +43,143 @@ Este documento contém a referência completa da API EasyGTK para uso por agente
 - **VTables** - Polimorfismo em C para extensibilidade
 - **MVVM** - Suporte a properties observáveis e data binding
 
+---
+
+## Arquitetura Interna (VTables)
+
+### Conceito
+
+A biblioteca usa **VTables (Virtual Tables)** para implementar polimorfismo em C. Isso permite:
+- Evitar switches/ifs para determinar tipo de widget
+- Cada widget define suas próprias implementações de funções
+- Extensibilidade: novos widgets podem ser adicionados sem modificar código existente
+- O tipo do widget é determinado pela vtable, não por um campo enum
+
+### Estrutura Base (EgWidget)
+
+Todo widget herda de `EgWidget` que contém um ponteiro para sua vtable:
+
+```c
+/* src/internal/internal.h */
+struct EgWidget {
+    EgWidgetType type;              /* Tipo (redundante, vtable->type é preferido) */
+    GtkWidget *native;              /* Widget GTK nativo */
+    const EgWidgetVTable *vtable;   /* Ponteiro para vtable do tipo */
+    void *user_data;
+    EgDestroyNotify user_data_destroy;
+    uint32_t ref_count;             /* Contagem de referências */
+    bool is_floating;               /* Estado floating para ref-counting */
+};
+```
+
+### VTable Base
+
+```c
+/* src/internal/vtable.h */
+typedef struct EgWidgetVTable {
+    EgWidgetType type;              /* Identificador do tipo */
+    const char *type_name;          /* Nome legível ("EgButton", "EgLabel", etc.) */
+    
+    /* Funções virtuais */
+    void (*destroy)(EgWidget *widget);
+    void *(*get_native)(EgWidget *widget);
+    void (*set_visible)(EgWidget *widget, bool visible);
+    bool (*get_visible)(EgWidget *widget);
+    void (*set_sensitive)(EgWidget *widget, bool sensitive);
+    bool (*get_sensitive)(EgWidget *widget);
+} EgWidgetVTable;
+
+/* VTable estendida para containers */
+typedef struct EgContainerVTable {
+    EgWidgetVTable base;
+    void (*add_child)(EgWidget *container, EgWidget *child);
+    void (*remove_child)(EgWidget *container, EgWidget *child);
+} EgContainerVTable;
+```
+
+### Como Cada Widget Define Sua VTable
+
+Cada widget define uma vtable estática com suas implementações:
+
+```c
+/* Exemplo: src/widgets/button.c */
+static void button_destroy(EgWidget *widget);
+static void *button_get_native(EgWidget *widget);
+/* ... outras funções ... */
+
+const EgWidgetVTable eg_button_vtable = {
+    .type = EG_WIDGET_TYPE_BUTTON,
+    .type_name = "EgButton",
+    .destroy = button_destroy,
+    .get_native = button_get_native,
+    .set_visible = button_set_visible,
+    .get_visible = button_get_visible,
+    .set_sensitive = button_set_sensitive,
+    .get_sensitive = button_get_sensitive
+};
+```
+
+### Uso da VTable
+
+**Para obter o nome do tipo** (sem switch):
+```c
+const char *name = widget->vtable->type_name;  /* "EgButton", "EgLabel", etc. */
+```
+
+**Para verificar tipo** (sem switch):
+```c
+if (widget->vtable->type == EG_WIDGET_TYPE_BUTTON) { ... }
+/* Ou usando helper: */
+if (eg_widget_is_type(widget, EG_WIDGET_TYPE_BUTTON)) { ... }
+```
+
+**Para chamar função virtual**:
+```c
+widget->vtable->destroy(widget);  /* Chama destrutor correto */
+```
+
+### Criando Novo Widget
+
+Para criar um novo tipo de widget:
+
+1. **Definir estrutura** em `internal.h`:
+```c
+struct EgMyWidget {
+    EgWidget base;  /* DEVE ser primeiro campo */
+    /* campos específicos */
+};
+```
+
+2. **Definir vtable** no arquivo .c:
+```c
+const EgWidgetVTable eg_my_widget_vtable = {
+    .type = EG_WIDGET_TYPE_MY_WIDGET,
+    .type_name = "EgMyWidget",
+    .destroy = my_widget_destroy,
+    /* ... */
+};
+```
+
+3. **Inicializar widget** com `eg_widget_init`:
+```c
+EgMyWidget *eg_my_widget_new(void) {
+    EgMyWidget *w = EG_ALLOC(EgMyWidget);
+    GtkWidget *native = gtk_..._new();
+    eg_widget_init(&w->base, EG_WIDGET_TYPE_MY_WIDGET, native, &eg_my_widget_vtable);
+    return w;
+}
+```
+
+### Vantagens da Arquitetura
+
+1. **Sem switches gigantes** - Cada tipo sabe como se comportar
+2. **Type-safe casting** - `eg_widget_cast_to_button()` usa vtable->type
+3. **Extensível** - Novos widgets não modificam código existente
+4. **Performance** - Chamada de função via ponteiro é O(1)
+5. **Debug fácil** - `vtable->type_name` sempre disponível
+
+---
+
 ### Estrutura de Projeto
 
 ```
@@ -1265,6 +1402,148 @@ static void on_paste(const char *text, void *user_data) {
     }
 }
 eg_clipboard_get_text(eg_button_as_widget(btn), on_paste, NULL);
+```
+
+---
+
+## Drag and Drop
+
+Sistema de arrastar e soltar.
+
+```c
+typedef enum EgDragAction {
+    EG_DRAG_ACTION_COPY = 1 << 0,
+    EG_DRAG_ACTION_MOVE = 1 << 1,
+    EG_DRAG_ACTION_LINK = 1 << 2
+} EgDragAction;
+
+typedef const char *(*EgDragPrepareCallback)(EgWidget *widget, void *user_data);
+typedef void (*EgDropCallback)(EgWidget *widget, const char *data, double x, double y, void *user_data);
+
+void eg_widget_set_drag_source(EgWidget *widget, EgDragAction actions,
+                                EgDragPrepareCallback prepare_callback, void *user_data);
+void eg_widget_set_drop_target(EgWidget *widget, EgDragAction actions,
+                                EgDropCallback drop_callback, void *user_data);
+```
+
+**Exemplo:**
+```c
+/* Fonte de drag */
+static const char *on_drag_prepare(EgWidget *widget, void *user_data) {
+    (void)widget; (void)user_data;
+    return "Texto arrastado";
+}
+eg_widget_set_drag_source(eg_label_as_widget(label), EG_DRAG_ACTION_COPY, on_drag_prepare, NULL);
+
+/* Destino de drop */
+static void on_drop(EgWidget *widget, const char *data, double x, double y, void *user_data) {
+    (void)widget; (void)x; (void)y; (void)user_data;
+    printf("Recebido: %s\n", data);
+}
+eg_widget_set_drop_target(eg_box_as_widget(box), EG_DRAG_ACTION_COPY, on_drop, NULL);
+```
+
+---
+
+## Logging e Debug
+
+Sistema de logging com níveis e cores.
+
+```c
+typedef enum EgLogLevel {
+    EG_LOG_LEVEL_DEBUG = 0,
+    EG_LOG_LEVEL_INFO = 1,
+    EG_LOG_LEVEL_WARNING = 2,
+    EG_LOG_LEVEL_ERROR = 3,
+    EG_LOG_LEVEL_NONE = 4
+} EgLogLevel;
+
+void eg_log_set_level(EgLogLevel level);
+EgLogLevel eg_log_get_level(void);
+void eg_log_set_colors(bool enabled);
+
+void eg_log_debug(const char *domain, const char *format, ...);
+void eg_log_info(const char *domain, const char *format, ...);
+void eg_log_warning(const char *domain, const char *format, ...);
+void eg_log_error(const char *domain, const char *format, ...);
+
+void eg_widget_debug_print(EgWidget *widget);
+```
+
+**Exemplo:**
+```c
+eg_log_set_level(EG_LOG_LEVEL_DEBUG);
+eg_log_debug("MyApp", "Iniciando aplicação");
+eg_log_info("MyApp", "Usuário: %s", username);
+eg_log_warning("MyApp", "Arquivo não encontrado");
+eg_log_error("MyApp", "Falha crítica!");
+
+eg_widget_debug_print(eg_button_as_widget(btn)); /* Imprime info do widget */
+```
+
+---
+
+## Type Casting
+
+Conversão segura de tipos usando vtable.
+
+```c
+EgWindow *eg_widget_cast_to_window(EgWidget *widget);
+EgButton *eg_widget_cast_to_button(EgWidget *widget);
+EgLabel *eg_widget_cast_to_label(EgWidget *widget);
+EgEntry *eg_widget_cast_to_entry(EgWidget *widget);
+EgBox *eg_widget_cast_to_box(EgWidget *widget);
+EgGrid *eg_widget_cast_to_grid(EgWidget *widget);
+EgCheckButton *eg_widget_cast_to_check_button(EgWidget *widget);
+EgSwitch *eg_widget_cast_to_switch(EgWidget *widget);
+EgProgressBar *eg_widget_cast_to_progress_bar(EgWidget *widget);
+EgComboBox *eg_widget_cast_to_combo_box(EgWidget *widget);
+EgScrolledWindow *eg_widget_cast_to_scrolled_window(EgWidget *widget);
+
+bool eg_widget_is_type(EgWidget *widget, EgWidgetType type);
+bool eg_widget_is_container(EgWidget *widget);
+```
+
+**Exemplo:**
+```c
+void process_widget(EgWidget *widget) {
+    EgButton *btn = eg_widget_cast_to_button(widget);
+    if (btn != NULL) {
+        eg_button_set_label(btn, "Novo texto");
+        return;
+    }
+    
+    if (eg_widget_is_container(widget)) {
+        printf("É um container!\n");
+    }
+}
+```
+
+---
+
+## Reference Counting
+
+Sistema opcional de contagem de referências.
+
+```c
+EgWidget *eg_widget_ref(EgWidget *widget);
+void eg_widget_unref(EgWidget *widget);
+uint32_t eg_widget_get_ref_count(EgWidget *widget);
+
+void eg_widget_set_floating(EgWidget *widget, bool floating);
+bool eg_widget_is_floating(EgWidget *widget);
+EgWidget *eg_widget_ref_sink(EgWidget *widget);
+```
+
+**Exemplo:**
+```c
+EgButton *btn = eg_button_new("Test");
+eg_widget_ref(eg_button_as_widget(btn));  /* ref_count = 2 */
+
+/* ... usar o widget ... */
+
+eg_widget_unref(eg_button_as_widget(btn)); /* ref_count = 1 */
+eg_widget_unref(eg_button_as_widget(btn)); /* ref_count = 0, destruído */
 ```
 
 ---

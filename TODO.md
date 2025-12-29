@@ -52,9 +52,10 @@ eg_async_run(fetch_data_from_api, on_data_received, user_data);
 ## Core / Infraestrutura
 
 ### Gerenciamento de Memória
-- [ ] Sistema de ref-counting opcional para widgets
-- [ ] Pool de alocação para widgets pequenos
+- [x] Sistema de ref-counting opcional para widgets (eg_widget_ref, eg_widget_unref)
+- [x] Pool de alocação (EgMemoryPool) - **estrutura pronta, falta integrar aos widgets**
 - [ ] Destruição automática de filhos ao destruir container
+- [ ] Integrar EgMemoryPool na alocação de widgets pequenos (EgLabel, EgButton, etc.)
 
 ### Sistema de Eventos
 - [x] Suporte a múltiplos callbacks por evento (EgSignal)
@@ -62,20 +63,31 @@ eg_async_run(fetch_data_from_api, on_data_received, user_data);
 - [x] Eventos de teclado (key-press, key-release)
 - [x] Eventos de mouse (motion, enter, leave, scroll, click)
 - [x] Eventos de foco (focus-in, focus-out)
-- [ ] Drag and drop
+- [x] Drag and drop - **parcialmente implementado**
+  - [x] eg_widget_set_drag_source (básico)
+  - [x] eg_widget_set_drop_target (básico)
+  - [ ] eg_widget_on_drag_begin - buscar DragSourceData existente
+  - [ ] eg_widget_on_drag_end - buscar DragSourceData existente
+  - [ ] eg_widget_remove_drag_source - remover controllers
+  - [ ] eg_widget_remove_drop_target - remover controllers
 
 ### Utilitários Core
 - [x] Timers (eg_timeout_add, eg_idle_add)
 - [x] Clipboard (copiar/colar)
 - [x] Sistema de CSS (eg_css_load_from_file, eg_css_load_from_string)
-- [ ] Logging/debug helpers
-- [ ] Conversão de tipos helper (eg_widget_cast_to_button, etc.)
+- [x] Logging/debug helpers (eg_log_debug, eg_log_info, eg_log_warning, eg_log_error)
+- [x] Conversão de tipos helper (eg_widget_cast_to_button, eg_widget_is_type, etc.)
 
 ### Propriedades Genéricas de Widget
 - [x] Tooltip (eg_widget_set_tooltip, eg_widget_set_tooltip_markup)
 - [x] Cursor customizado (eg_widget_set_cursor)
 - [x] Opacity (eg_widget_set_opacity, eg_widget_get_opacity)
 - [x] Nome/ID para lookup (eg_widget_set_name, eg_widget_get_name)
+
+### Data Binding (property.c)
+- [x] Binding básico entre properties
+- [ ] Transformação de valores no binding (transform callback)
+- [ ] Transformação reversa no binding bidirecional
 
 ---
 

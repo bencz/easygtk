@@ -3,6 +3,8 @@
  */
 
 #include <gtk/gtk.h>
+#include <stdlib.h>
+#include <string.h>
 #include "internal/internal.h"
 
 /* Funções da vtable */
@@ -30,9 +32,46 @@ const EgContainerVTable eg_box_vtable = {
     .remove_child = box_remove_child
 };
 
+/* Funções auxiliares para lista de filhos */
+static void child_list_init(EgChildList *list) {
+    list->children = NULL;
+    list->count = 0;
+    list->capacity = 0;
+}
+
+static void child_list_add(EgChildList *list, EgWidget *child) {
+    if (list->count >= list->capacity) {
+        size_t new_cap = list->capacity == 0 ? 4 : list->capacity * 2;
+        EgWidget **new_arr = realloc(list->children, new_cap * sizeof(EgWidget *));
+        if (new_arr == NULL) return;
+        list->children = new_arr;
+        list->capacity = new_cap;
+    }
+    list->children[list->count++] = child;
+}
+
+static void child_list_remove(EgChildList *list, EgWidget *child) {
+    for (size_t i = 0; i < list->count; i++) {
+        if (list->children[i] == child) {
+            memmove(&list->children[i], &list->children[i + 1], 
+                    (list->count - i - 1) * sizeof(EgWidget *));
+            list->count--;
+            return;
+        }
+    }
+}
+
+static void child_list_free(EgChildList *list) {
+    free(list->children);
+    list->children = NULL;
+    list->count = 0;
+    list->capacity = 0;
+}
+
 static void box_destroy(EgWidget *widget) {
     EgBox *box = (EgBox *)widget;
     if (box == NULL) return;
+    child_list_free(&box->children);
     eg_free(box);
 }
 
@@ -88,6 +127,7 @@ EgBox *eg_box_new(EgOrientation orientation, int spacing) {
     }
     
     eg_widget_init(&box->base, EG_WIDGET_TYPE_BOX, gtk_box, &eg_box_vtable.base);
+    child_list_init(&box->children);
     
     return box;
 }
@@ -108,18 +148,21 @@ void eg_box_append(EgBox *box, EgWidget *child) {
     if (box == NULL || box->base.native == NULL) return;
     if (child == NULL || child->native == NULL) return;
     gtk_box_append(GTK_BOX(box->base.native), child->native);
+    child_list_add(&box->children, child);
 }
 
 void eg_box_prepend(EgBox *box, EgWidget *child) {
     if (box == NULL || box->base.native == NULL) return;
     if (child == NULL || child->native == NULL) return;
     gtk_box_prepend(GTK_BOX(box->base.native), child->native);
+    child_list_add(&box->children, child);
 }
 
 void eg_box_remove(EgBox *box, EgWidget *child) {
     if (box == NULL || box->base.native == NULL) return;
     if (child == NULL || child->native == NULL) return;
     gtk_box_remove(GTK_BOX(box->base.native), child->native);
+    child_list_remove(&box->children, child);
 }
 
 void eg_box_set_spacing(EgBox *box, int spacing) {
