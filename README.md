@@ -137,17 +137,31 @@ int main(int argc, char *argv[]) {
 
 ## Widgets Disponíveis
 
+### Básicos
 - **EgWindow**: Janela principal
 - **EgButton**: Botão
 - **EgLabel**: Texto estático
 - **EgEntry**: Campo de entrada de texto
-- **EgBox**: Container linear (horizontal/vertical)
-- **EgGrid**: Container em grade
+
+### Input
 - **EgCheckButton**: Checkbox (suporta agrupamento como radio buttons)
 - **EgSwitch**: Toggle switch liga/desliga
 - **EgProgressBar**: Barra de progresso (determinada e indeterminada)
 - **EgComboBox**: Dropdown de seleção
+- **EgSpinButton**: Campo numérico com incremento/decremento
+- **EgScale**: Slider para seleção de valores
+- **EgTextView**: Campo de texto multi-linha
+
+### Containers
+- **EgBox**: Container linear (horizontal/vertical)
+- **EgGrid**: Container em grade
 - **EgScrolledWindow**: Container com barras de rolagem
+- **EgStack**: Container que mostra um filho por vez (com transições)
+- **EgStackSwitcher**: Botões para alternar páginas do Stack
+- **EgNotebook**: Container com abas (tabs)
+- **EgPaned**: Container dividido em dois painéis redimensionáveis
+- **EgFrame**: Container com borda e título
+- **EgExpander**: Container expansível/recolhível
 
 ## Diálogos
 
@@ -181,13 +195,16 @@ int main(int argc, char *argv[]) {
 Após compilar, os exemplos estarão em `build/`:
 
 ```bash
-./build/hello_world      # Exemplo básico
-./build/form_example     # Formulário com grid
-./build/counter_example  # Contador simples
-./build/mvvm_example     # Demonstração MVVM
-./build/widgets_example  # CheckButton, Switch, ProgressBar
-./build/dialogs_example  # Diálogos, ComboBox, ScrolledWindow
-./build/events_example   # Eventos de teclado, mouse, foco, clipboard
+./build/hello_world           # Exemplo básico
+./build/form_example          # Formulário com grid
+./build/counter_example       # Contador simples
+./build/mvvm_example          # Demonstração MVVM
+./build/widgets_example       # CheckButton, Switch, ProgressBar
+./build/dialogs_example       # Diálogos, ComboBox, ScrolledWindow
+./build/events_example        # Eventos de teclado, mouse, foco, clipboard
+./build/dnd_example           # Drag and Drop
+./build/input_widgets_example # SpinButton, Scale, TextView, Frame
+./build/containers_example    # Stack, Notebook, Paned, Expander
 ```
 
 ## Licença

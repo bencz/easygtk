@@ -279,6 +279,62 @@ static void copy_property_value(EgProperty *source, EgProperty *target) {
     }
 }
 
+static bool apply_transform(EgProperty *source, EgProperty *target, 
+                             EgBindingTransform transform, void *user_data) {
+    if (transform == NULL) return false;
+    
+    /* Prepara valores para transformação */
+    switch (source->type) {
+        case EG_PROPERTY_TYPE_INT: {
+            int src_val = source->value.int_value;
+            int tgt_val = 0;
+            if (transform(&src_val, &tgt_val, user_data)) {
+                eg_property_set_int(target, tgt_val);
+                return true;
+            }
+            break;
+        }
+        case EG_PROPERTY_TYPE_DOUBLE: {
+            double src_val = source->value.double_value;
+            double tgt_val = 0.0;
+            if (transform(&src_val, &tgt_val, user_data)) {
+                eg_property_set_double(target, tgt_val);
+                return true;
+            }
+            break;
+        }
+        case EG_PROPERTY_TYPE_BOOL: {
+            bool src_val = source->value.bool_value;
+            bool tgt_val = false;
+            if (transform(&src_val, &tgt_val, user_data)) {
+                eg_property_set_bool(target, tgt_val);
+                return true;
+            }
+            break;
+        }
+        case EG_PROPERTY_TYPE_STRING: {
+            const char *src_val = source->value.string_value;
+            char *tgt_val = NULL;
+            if (transform(&src_val, &tgt_val, user_data)) {
+                eg_property_set_string(target, tgt_val);
+                /* Nota: o transform deve alocar tgt_val, e set_string faz cópia */
+                return true;
+            }
+            break;
+        }
+        case EG_PROPERTY_TYPE_POINTER: {
+            void *src_val = source->value.pointer_value;
+            void *tgt_val = NULL;
+            if (transform(&src_val, &tgt_val, user_data)) {
+                eg_property_set_pointer(target, tgt_val);
+                return true;
+            }
+            break;
+        }
+    }
+    return false;
+}
+
 static void binding_source_changed(void *sender, void *event_data, void *user_data) {
     (void)event_data;
     EgBinding *binding = (EgBinding *)user_data;
@@ -290,7 +346,11 @@ static void binding_source_changed(void *sender, void *event_data, void *user_da
     eg_signal_block(binding->target->changed_signal);
     
     if (binding->transform != NULL) {
-        /* TODO: implementar transformação */
+        /* Aplica transformação */
+        if (!apply_transform(source, binding->target, binding->transform, binding->user_data)) {
+            /* Se transformação falhar, copia diretamente */
+            copy_property_value(source, binding->target);
+        }
     } else {
         copy_property_value(source, binding->target);
     }
@@ -309,7 +369,11 @@ static void binding_target_changed(void *sender, void *event_data, void *user_da
     eg_signal_block(binding->source->changed_signal);
     
     if (binding->reverse_transform != NULL) {
-        /* TODO: implementar transformação reversa */
+        /* Aplica transformação reversa */
+        if (!apply_transform(target, binding->source, binding->reverse_transform, binding->user_data)) {
+            /* Se transformação falhar, copia diretamente */
+            copy_property_value(target, binding->source);
+        }
     } else {
         copy_property_value(target, binding->source);
     }

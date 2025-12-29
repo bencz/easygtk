@@ -839,6 +839,285 @@ eg_scrolled_window_set_child(scroll, eg_box_as_widget(content));
 
 ---
 
+### SpinButton (EgSpinButton)
+
+Campo numérico com botões de incremento/decremento.
+
+```c
+EgSpinButton *eg_spin_button_new(double min, double max, double step);
+EgSpinButton *eg_spin_button_new_int(int min, int max, int step);
+void eg_spin_button_free(EgSpinButton *spin_button);
+
+void eg_spin_button_set_value(EgSpinButton *spin_button, double value);
+double eg_spin_button_get_value(EgSpinButton *spin_button);
+int eg_spin_button_get_value_as_int(EgSpinButton *spin_button);
+
+void eg_spin_button_set_range(EgSpinButton *spin_button, double min, double max);
+void eg_spin_button_set_increments(EgSpinButton *spin_button, double step, double page);
+void eg_spin_button_set_digits(EgSpinButton *spin_button, unsigned int digits);
+void eg_spin_button_set_wrap(EgSpinButton *spin_button, bool wrap);
+
+void eg_spin_button_on_value_changed(EgSpinButton *spin_button, EgCallback callback, void *user_data);
+
+EgWidget *eg_spin_button_as_widget(EgSpinButton *spin_button);
+```
+
+**Exemplo:**
+```c
+EgSpinButton *spin = eg_spin_button_new_int(0, 100, 1);
+eg_spin_button_set_value(spin, 50);
+
+static void on_value_changed(EgWidget *widget, void *user_data) {
+    EgSpinButton *s = (EgSpinButton *)widget;
+    printf("Valor: %d\n", eg_spin_button_get_value_as_int(s));
+}
+eg_spin_button_on_value_changed(spin, on_value_changed, NULL);
+```
+
+---
+
+### Scale (EgScale)
+
+Slider para seleção de valores numéricos.
+
+```c
+EgScale *eg_scale_new(EgOrientation orientation, double min, double max, double step);
+EgScale *eg_scale_new_horizontal(double min, double max, double step);
+EgScale *eg_scale_new_vertical(double min, double max, double step);
+void eg_scale_free(EgScale *scale);
+
+void eg_scale_set_value(EgScale *scale, double value);
+double eg_scale_get_value(EgScale *scale);
+
+void eg_scale_set_range(EgScale *scale, double min, double max);
+void eg_scale_set_draw_value(EgScale *scale, bool draw_value);
+void eg_scale_set_digits(EgScale *scale, int digits);
+void eg_scale_add_mark(EgScale *scale, double value, int position, const char *markup);
+void eg_scale_clear_marks(EgScale *scale);
+
+void eg_scale_on_value_changed(EgScale *scale, EgCallback callback, void *user_data);
+
+EgWidget *eg_scale_as_widget(EgScale *scale);
+```
+
+**Exemplo:**
+```c
+EgScale *scale = eg_scale_new_horizontal(0.0, 100.0, 1.0);
+eg_scale_set_value(scale, 50.0);
+eg_scale_set_draw_value(scale, true);
+eg_scale_add_mark(scale, 0, 0, "Min");
+eg_scale_add_mark(scale, 100, 0, "Max");
+```
+
+---
+
+### TextView (EgTextView)
+
+Campo de texto multi-linha.
+
+```c
+EgTextView *eg_text_view_new(void);
+void eg_text_view_free(EgTextView *text_view);
+
+void eg_text_view_set_text(EgTextView *text_view, const char *text);
+char *eg_text_view_get_text(EgTextView *text_view);  /* Deve ser liberado com free() */
+
+void eg_text_view_set_editable(EgTextView *text_view, bool editable);
+bool eg_text_view_get_editable(EgTextView *text_view);
+
+void eg_text_view_set_wrap_mode(EgTextView *text_view, int mode);
+```
+`mode`: 0=none, 1=char, 2=word, 3=word_char
+
+```c
+void eg_text_view_set_monospace(EgTextView *text_view, bool monospace);
+void eg_text_view_on_changed(EgTextView *text_view, EgCallback callback, void *user_data);
+
+EgWidget *eg_text_view_as_widget(EgTextView *text_view);
+```
+
+**Exemplo:**
+```c
+EgTextView *tv = eg_text_view_new();
+eg_text_view_set_text(tv, "Texto\nmulti-linha");
+eg_text_view_set_wrap_mode(tv, 2); /* word wrap */
+
+/* Coloque dentro de ScrolledWindow para scroll */
+EgScrolledWindow *scroll = eg_scrolled_window_new();
+eg_scrolled_window_set_child(scroll, eg_text_view_as_widget(tv));
+```
+
+---
+
+### Stack (EgStack)
+
+Container que mostra apenas um filho por vez, com transições animadas.
+
+```c
+EgStack *eg_stack_new(void);
+void eg_stack_free(EgStack *stack);
+
+void eg_stack_add_named(EgStack *stack, EgWidget *child, const char *name);
+void eg_stack_add_titled(EgStack *stack, EgWidget *child, const char *name, const char *title);
+void eg_stack_remove(EgStack *stack, EgWidget *child);
+
+void eg_stack_set_visible_child_name(EgStack *stack, const char *name);
+const char *eg_stack_get_visible_child_name(EgStack *stack);
+
+void eg_stack_set_transition_type(EgStack *stack, EgStackTransition transition);
+void eg_stack_set_transition_duration(EgStack *stack, unsigned int duration);
+
+EgWidget *eg_stack_as_widget(EgStack *stack);
+```
+
+Tipos de transição: `EG_STACK_TRANSITION_NONE`, `EG_STACK_TRANSITION_CROSSFADE`, `EG_STACK_TRANSITION_SLIDE_LEFT`, `EG_STACK_TRANSITION_SLIDE_RIGHT`, etc.
+
+### StackSwitcher (EgStackSwitcher)
+
+Botões para alternar páginas do Stack.
+
+```c
+EgStackSwitcher *eg_stack_switcher_new(void);
+void eg_stack_switcher_free(EgStackSwitcher *switcher);
+void eg_stack_switcher_set_stack(EgStackSwitcher *switcher, EgStack *stack);
+EgWidget *eg_stack_switcher_as_widget(EgStackSwitcher *switcher);
+```
+
+**Exemplo:**
+```c
+EgStack *stack = eg_stack_new();
+eg_stack_set_transition_type(stack, EG_STACK_TRANSITION_SLIDE_LEFT_RIGHT);
+
+eg_stack_add_titled(stack, page1, "page1", "Página 1");
+eg_stack_add_titled(stack, page2, "page2", "Página 2");
+
+EgStackSwitcher *switcher = eg_stack_switcher_new();
+eg_stack_switcher_set_stack(switcher, stack);
+```
+
+---
+
+### Notebook (EgNotebook)
+
+Container com abas (tabs).
+
+```c
+EgNotebook *eg_notebook_new(void);
+void eg_notebook_free(EgNotebook *notebook);
+
+int eg_notebook_append_page(EgNotebook *notebook, EgWidget *child, const char *label);
+int eg_notebook_prepend_page(EgNotebook *notebook, EgWidget *child, const char *label);
+int eg_notebook_insert_page(EgNotebook *notebook, EgWidget *child, const char *label, int position);
+void eg_notebook_remove_page(EgNotebook *notebook, int page_num);
+
+void eg_notebook_set_current_page(EgNotebook *notebook, int page_num);
+int eg_notebook_get_current_page(EgNotebook *notebook);
+int eg_notebook_get_n_pages(EgNotebook *notebook);
+
+void eg_notebook_set_tab_pos(EgNotebook *notebook, int position);
+```
+`position`: 0=left, 1=right, 2=top, 3=bottom
+
+```c
+void eg_notebook_set_scrollable(EgNotebook *notebook, bool scrollable);
+void eg_notebook_on_page_changed(EgNotebook *notebook, EgCallback callback, void *user_data);
+
+EgWidget *eg_notebook_as_widget(EgNotebook *notebook);
+```
+
+**Exemplo:**
+```c
+EgNotebook *notebook = eg_notebook_new();
+eg_notebook_append_page(notebook, content1, "Aba 1");
+eg_notebook_append_page(notebook, content2, "Aba 2");
+eg_notebook_set_current_page(notebook, 0);
+```
+
+---
+
+### Paned (EgPaned)
+
+Container dividido em dois painéis redimensionáveis.
+
+```c
+EgPaned *eg_paned_new(EgOrientation orientation);
+EgPaned *eg_paned_new_horizontal(void);
+EgPaned *eg_paned_new_vertical(void);
+void eg_paned_free(EgPaned *paned);
+
+void eg_paned_set_start_child(EgPaned *paned, EgWidget *child);
+void eg_paned_set_end_child(EgPaned *paned, EgWidget *child);
+
+void eg_paned_set_position(EgPaned *paned, int position);
+int eg_paned_get_position(EgPaned *paned);
+
+void eg_paned_set_wide_handle(EgPaned *paned, bool wide);
+
+EgWidget *eg_paned_as_widget(EgPaned *paned);
+```
+
+**Exemplo:**
+```c
+EgPaned *paned = eg_paned_new_horizontal();
+eg_paned_set_start_child(paned, left_panel);
+eg_paned_set_end_child(paned, right_panel);
+eg_paned_set_position(paned, 200); /* divisor em 200px */
+eg_paned_set_wide_handle(paned, true);
+```
+
+---
+
+### Frame (EgFrame)
+
+Container com borda e título opcional.
+
+```c
+EgFrame *eg_frame_new(const char *label);
+void eg_frame_free(EgFrame *frame);
+
+void eg_frame_set_child(EgFrame *frame, EgWidget *child);
+void eg_frame_set_label(EgFrame *frame, const char *label);
+const char *eg_frame_get_label(EgFrame *frame);
+void eg_frame_set_label_align(EgFrame *frame, float xalign);
+
+EgWidget *eg_frame_as_widget(EgFrame *frame);
+```
+
+**Exemplo:**
+```c
+EgFrame *frame = eg_frame_new("Configurações");
+eg_frame_set_child(frame, settings_box);
+```
+
+---
+
+### Expander (EgExpander)
+
+Container expansível/recolhível com título.
+
+```c
+EgExpander *eg_expander_new(const char *label);
+EgExpander *eg_expander_new_with_markup(const char *markup);
+void eg_expander_free(EgExpander *expander);
+
+void eg_expander_set_child(EgExpander *expander, EgWidget *child);
+void eg_expander_set_expanded(EgExpander *expander, bool expanded);
+bool eg_expander_get_expanded(EgExpander *expander);
+
+void eg_expander_set_label(EgExpander *expander, const char *label);
+
+EgWidget *eg_expander_as_widget(EgExpander *expander);
+```
+
+**Exemplo:**
+```c
+EgExpander *expander = eg_expander_new("Opções avançadas");
+eg_expander_set_child(expander, options_box);
+eg_expander_set_expanded(expander, false); /* começa recolhido */
+```
+
+---
+
 ## Diálogos
 
 Diálogos de mensagem usando `GtkAlertDialog` (GTK4).

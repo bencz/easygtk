@@ -54,7 +54,7 @@ eg_async_run(fetch_data_from_api, on_data_received, user_data);
 ### Gerenciamento de Memória
 - [x] Sistema de ref-counting opcional para widgets (eg_widget_ref, eg_widget_unref)
 - [x] Pool de alocação (EgMemoryPool) - **estrutura pronta, falta integrar aos widgets**
-- [ ] Destruição automática de filhos ao destruir container
+- [x] Destruição automática de filhos ao destruir container
 - [ ] Integrar EgMemoryPool na alocação de widgets pequenos (EgLabel, EgButton, etc.)
 
 #### Propósito do EgMemoryPool
@@ -96,13 +96,13 @@ void eg_button_free(EgButton *btn) {
 - [x] Eventos de teclado (key-press, key-release)
 - [x] Eventos de mouse (motion, enter, leave, scroll, click)
 - [x] Eventos de foco (focus-in, focus-out)
-- [x] Drag and drop - **parcialmente implementado**
+- [x] Drag and drop
   - [x] eg_widget_set_drag_source (básico)
   - [x] eg_widget_set_drop_target (básico)
-  - [ ] eg_widget_on_drag_begin - buscar DragSourceData existente
-  - [ ] eg_widget_on_drag_end - buscar DragSourceData existente
-  - [ ] eg_widget_remove_drag_source - remover controllers
-  - [ ] eg_widget_remove_drop_target - remover controllers
+  - [x] eg_widget_on_drag_begin - buscar DragSourceData existente
+  - [x] eg_widget_on_drag_end - buscar DragSourceData existente
+  - [x] eg_widget_remove_drag_source - remover controllers
+  - [x] eg_widget_remove_drop_target - remover controllers
 
 ### Utilitários Core
 - [x] Timers (eg_timeout_add, eg_idle_add)
@@ -119,8 +119,8 @@ void eg_button_free(EgButton *btn) {
 
 ### Data Binding (property.c)
 - [x] Binding básico entre properties
-- [ ] Transformação de valores no binding (transform callback)
-- [ ] Transformação reversa no binding bidirecional
+- [x] Transformação de valores no binding (transform callback)
+- [x] Transformação reversa no binding bidirecional
 
 ---
 
@@ -145,14 +145,14 @@ void eg_button_free(EgButton *btn) {
 - [x] eg_combo_box_get_active_text
 
 ### SpinButton
-- [ ] eg_spin_button_new(min, max, step)
-- [ ] eg_spin_button_get_value / set_value
-- [ ] eg_spin_button_on_value_changed
+- [x] eg_spin_button_new(min, max, step)
+- [x] eg_spin_button_get_value / set_value
+- [x] eg_spin_button_on_value_changed
 
 ### Scale (Slider)
-- [ ] eg_scale_new(orientation, min, max, step)
-- [ ] eg_scale_get_value / set_value
-- [ ] eg_scale_on_value_changed
+- [x] eg_scale_new(orientation, min, max, step)
+- [x] eg_scale_get_value / set_value
+- [x] eg_scale_on_value_changed
 
 ### ProgressBar
 - [x] eg_progress_bar_new()
@@ -162,10 +162,10 @@ void eg_button_free(EgButton *btn) {
 - [x] eg_progress_bar_set_show_text, set_inverted
 
 ### TextView (Multi-line)
-- [ ] eg_text_view_new()
-- [ ] eg_text_view_get_text / set_text
-- [ ] eg_text_view_set_editable
-- [ ] eg_text_view_on_changed
+- [x] eg_text_view_new()
+- [x] eg_text_view_get_text / set_text
+- [x] eg_text_view_set_editable
+- [x] eg_text_view_on_changed
 
 ---
 
@@ -178,33 +178,33 @@ void eg_button_free(EgButton *btn) {
 - [x] eg_scrolled_window_set_min/max_content_size
 
 ### Stack
-- [ ] eg_stack_new()
-- [ ] eg_stack_add_named(child, name)
-- [ ] eg_stack_set_visible_child_name
+- [x] eg_stack_new()
+- [x] eg_stack_add_named(child, name)
+- [x] eg_stack_set_visible_child_name
 
 ### StackSwitcher
-- [ ] eg_stack_switcher_new()
-- [ ] eg_stack_switcher_set_stack
+- [x] eg_stack_switcher_new()
+- [x] eg_stack_switcher_set_stack
 
 ### Notebook (Tabs)
-- [ ] eg_notebook_new()
-- [ ] eg_notebook_append_page(child, label)
-- [ ] eg_notebook_set_current_page
-- [ ] eg_notebook_on_page_changed
+- [x] eg_notebook_new()
+- [x] eg_notebook_append_page(child, label)
+- [x] eg_notebook_set_current_page
+- [x] eg_notebook_on_page_changed
 
 ### Paned (Split view)
-- [ ] eg_paned_new(orientation)
-- [ ] eg_paned_set_start_child / set_end_child
-- [ ] eg_paned_set_position
+- [x] eg_paned_new(orientation)
+- [x] eg_paned_set_start_child / set_end_child
+- [x] eg_paned_set_position
 
 ### Frame
-- [ ] eg_frame_new(label)
-- [ ] eg_frame_set_child
+- [x] eg_frame_new(label)
+- [x] eg_frame_set_child
 
 ### Expander
-- [ ] eg_expander_new(label)
-- [ ] eg_expander_set_child
-- [ ] eg_expander_set_expanded
+- [x] eg_expander_new(label)
+- [x] eg_expander_set_child
+- [x] eg_expander_set_expanded
 
 ---
 

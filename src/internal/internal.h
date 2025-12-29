@@ -118,6 +118,60 @@ struct EgScrolledWindow {
     EgWidget base;
 };
 
+/* Estrutura de spin button */
+struct EgSpinButton {
+    EgWidget base;
+    EgCallback on_value_changed;
+    void *value_changed_data;
+};
+
+/* Estrutura de scale */
+struct EgScale {
+    EgWidget base;
+    EgCallback on_value_changed;
+    void *value_changed_data;
+};
+
+/* Estrutura de text view */
+struct EgTextView {
+    EgWidget base;
+    GtkTextBuffer *buffer;
+    EgCallback on_changed;
+    void *changed_data;
+};
+
+/* Estrutura de stack */
+struct EgStack {
+    EgWidget base;
+};
+
+/* Estrutura de stack switcher */
+struct EgStackSwitcher {
+    EgWidget base;
+};
+
+/* Estrutura de notebook */
+struct EgNotebook {
+    EgWidget base;
+    EgCallback on_page_changed;
+    void *page_changed_data;
+};
+
+/* Estrutura de paned */
+struct EgPaned {
+    EgWidget base;
+};
+
+/* Estrutura de frame */
+struct EgFrame {
+    EgWidget base;
+};
+
+/* Estrutura de expander */
+struct EgExpander {
+    EgWidget base;
+};
+
 /* Estrutura para dados de callback */
 typedef struct {
     EgCallback callback;

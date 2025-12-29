@@ -32,6 +32,14 @@ set(EASYGTK_SOURCES
     src/widgets/progress_bar.c
     src/widgets/combo_box.c
     src/widgets/scrolled_window.c
+    src/widgets/spin_button.c
+    src/widgets/scale.c
+    src/widgets/text_view.c
+    src/widgets/stack.c
+    src/widgets/notebook.c
+    src/widgets/paned.c
+    src/widgets/frame.c
+    src/widgets/expander.c
     src/widgets/dialog.c
     src/core/events.c
     src/core/clipboard.c
@@ -103,6 +111,18 @@ if(BUILD_EXAMPLES)
     add_executable(events_example examples/events_example.c)
     target_link_libraries(events_example PRIVATE easygtk ${GTK4_LIBRARIES})
     target_include_directories(events_example PRIVATE ${GTK4_INCLUDE_DIRS})
+
+    add_executable(dnd_example examples/dnd_example.c)
+    target_link_libraries(dnd_example PRIVATE easygtk ${GTK4_LIBRARIES})
+    target_include_directories(dnd_example PRIVATE ${GTK4_INCLUDE_DIRS})
+
+    add_executable(input_widgets_example examples/input_widgets_example.c)
+    target_link_libraries(input_widgets_example PRIVATE easygtk ${GTK4_LIBRARIES})
+    target_include_directories(input_widgets_example PRIVATE ${GTK4_INCLUDE_DIRS})
+
+    add_executable(containers_example examples/containers_example.c)
+    target_link_libraries(containers_example PRIVATE easygtk ${GTK4_LIBRARIES})
+    target_include_directories(containers_example PRIVATE ${GTK4_INCLUDE_DIRS})
 endif()
 
 # Install

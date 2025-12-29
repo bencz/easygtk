@@ -15,6 +15,7 @@ typedef struct {
     void *begin_data;
     void *end_data;
     EgWidget *widget;
+    GtkDragSource *controller;
 } DragSourceData;
 
 /* Estrutura para dados do drop target */
@@ -22,7 +23,26 @@ typedef struct {
     EgDropCallback drop_callback;
     void *user_data;
     EgWidget *widget;
+    GtkDropTarget *controller;
 } DropTargetData;
+
+/* Chaves para armazenar dados no widget GTK via g_object_set_data */
+#define DRAG_SOURCE_DATA_KEY "eg-drag-source-data"
+#define DROP_TARGET_DATA_KEY "eg-drop-target-data"
+
+/* Callback para liberar DragSourceData */
+static void drag_source_data_destroy(gpointer data) {
+    if (data != NULL) {
+        eg_free(data);
+    }
+}
+
+/* Callback para liberar DropTargetData */
+static void drop_target_data_destroy(gpointer data) {
+    if (data != NULL) {
+        eg_free(data);
+    }
+}
 
 /* Converte EgDragAction para GdkDragAction */
 static GdkDragAction eg_to_gdk_drag_action(EgDragAction actions) {
@@ -96,6 +116,9 @@ void eg_widget_set_drag_source(EgWidget *widget, EgDragAction actions,
                                 EgDragPrepareCallback prepare_callback, void *user_data) {
     if (widget == NULL || widget->native == NULL) return;
     
+    /* Remove drag source existente se houver */
+    eg_widget_remove_drag_source(widget);
+    
     DragSourceData *data = EG_ALLOC(DragSourceData);
     if (data == NULL) return;
     
@@ -109,27 +132,45 @@ void eg_widget_set_drag_source(EgWidget *widget, EgDragAction actions,
     
     GtkDragSource *source = gtk_drag_source_new();
     gtk_drag_source_set_actions(source, eg_to_gdk_drag_action(actions));
+    data->controller = source;
     
     g_signal_connect(source, "prepare", G_CALLBACK(drag_prepare_callback), data);
     g_signal_connect(source, "drag-begin", G_CALLBACK(drag_begin_callback), data);
     g_signal_connect(source, "drag-end", G_CALLBACK(drag_end_callback), data);
     
     gtk_widget_add_controller(widget->native, GTK_EVENT_CONTROLLER(source));
+    
+    /* Armazena dados no widget GTK para acesso posterior */
+    g_object_set_data_full(G_OBJECT(widget->native), DRAG_SOURCE_DATA_KEY, 
+                           data, drag_source_data_destroy);
 }
 
 void eg_widget_on_drag_begin(EgWidget *widget, EgDragBeginCallback callback, void *user_data) {
-    (void)widget; (void)callback; (void)user_data;
-    /* TODO: Implementar busca do DragSourceData existente */
+    if (widget == NULL || widget->native == NULL || callback == NULL) return;
+    
+    DragSourceData *data = g_object_get_data(G_OBJECT(widget->native), DRAG_SOURCE_DATA_KEY);
+    if (data == NULL) return;
+    
+    data->begin_callback = callback;
+    data->begin_data = user_data;
 }
 
 void eg_widget_on_drag_end(EgWidget *widget, EgDragEndCallback callback, void *user_data) {
-    (void)widget; (void)callback; (void)user_data;
-    /* TODO: Implementar busca do DragSourceData existente */
+    if (widget == NULL || widget->native == NULL || callback == NULL) return;
+    
+    DragSourceData *data = g_object_get_data(G_OBJECT(widget->native), DRAG_SOURCE_DATA_KEY);
+    if (data == NULL) return;
+    
+    data->end_callback = callback;
+    data->end_data = user_data;
 }
 
 void eg_widget_set_drop_target(EgWidget *widget, EgDragAction actions,
                                 EgDropCallback drop_callback, void *user_data) {
     if (widget == NULL || widget->native == NULL) return;
+    
+    /* Remove drop target existente se houver */
+    eg_widget_remove_drop_target(widget);
     
     DropTargetData *data = EG_ALLOC(DropTargetData);
     if (data == NULL) return;
@@ -139,18 +180,43 @@ void eg_widget_set_drop_target(EgWidget *widget, EgDragAction actions,
     data->widget = widget;
     
     GtkDropTarget *target = gtk_drop_target_new(G_TYPE_STRING, eg_to_gdk_drag_action(actions));
+    data->controller = target;
     
     g_signal_connect(target, "drop", G_CALLBACK(gtk_drop_handler), data);
     
     gtk_widget_add_controller(widget->native, GTK_EVENT_CONTROLLER(target));
+    
+    /* Armazena dados no widget GTK para acesso posterior */
+    g_object_set_data_full(G_OBJECT(widget->native), DROP_TARGET_DATA_KEY,
+                           data, drop_target_data_destroy);
 }
 
 void eg_widget_remove_drag_source(EgWidget *widget) {
-    (void)widget;
-    /* TODO: Implementar remoção de controllers */
+    if (widget == NULL || widget->native == NULL) return;
+    
+    DragSourceData *data = g_object_get_data(G_OBJECT(widget->native), DRAG_SOURCE_DATA_KEY);
+    if (data == NULL) return;
+    
+    /* Remove o controller do widget */
+    if (data->controller != NULL) {
+        gtk_widget_remove_controller(widget->native, GTK_EVENT_CONTROLLER(data->controller));
+    }
+    
+    /* Remove os dados (o callback drag_source_data_destroy será chamado) */
+    g_object_set_data(G_OBJECT(widget->native), DRAG_SOURCE_DATA_KEY, NULL);
 }
 
 void eg_widget_remove_drop_target(EgWidget *widget) {
-    (void)widget;
-    /* TODO: Implementar remoção de controllers */
+    if (widget == NULL || widget->native == NULL) return;
+    
+    DropTargetData *data = g_object_get_data(G_OBJECT(widget->native), DROP_TARGET_DATA_KEY);
+    if (data == NULL) return;
+    
+    /* Remove o controller do widget */
+    if (data->controller != NULL) {
+        gtk_widget_remove_controller(widget->native, GTK_EVENT_CONTROLLER(data->controller));
+    }
+    
+    /* Remove os dados (o callback drop_target_data_destroy será chamado) */
+    g_object_set_data(G_OBJECT(widget->native), DROP_TARGET_DATA_KEY, NULL);
 }

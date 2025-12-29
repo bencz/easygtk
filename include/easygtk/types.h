@@ -30,6 +30,15 @@ typedef struct EgSwitch EgSwitch;
 typedef struct EgProgressBar EgProgressBar;
 typedef struct EgComboBox EgComboBox;
 typedef struct EgScrolledWindow EgScrolledWindow;
+typedef struct EgSpinButton EgSpinButton;
+typedef struct EgScale EgScale;
+typedef struct EgTextView EgTextView;
+typedef struct EgStack EgStack;
+typedef struct EgStackSwitcher EgStackSwitcher;
+typedef struct EgNotebook EgNotebook;
+typedef struct EgPaned EgPaned;
+typedef struct EgFrame EgFrame;
+typedef struct EgExpander EgExpander;
 
 /* Enumerações */
 typedef enum EgOrientation {
@@ -56,7 +65,16 @@ typedef enum EgWidgetType {
     EG_WIDGET_TYPE_SWITCH,
     EG_WIDGET_TYPE_PROGRESS_BAR,
     EG_WIDGET_TYPE_COMBO_BOX,
-    EG_WIDGET_TYPE_SCROLLED_WINDOW
+    EG_WIDGET_TYPE_SCROLLED_WINDOW,
+    EG_WIDGET_TYPE_SPIN_BUTTON,
+    EG_WIDGET_TYPE_SCALE,
+    EG_WIDGET_TYPE_TEXT_VIEW,
+    EG_WIDGET_TYPE_STACK,
+    EG_WIDGET_TYPE_STACK_SWITCHER,
+    EG_WIDGET_TYPE_NOTEBOOK,
+    EG_WIDGET_TYPE_PANED,
+    EG_WIDGET_TYPE_FRAME,
+    EG_WIDGET_TYPE_EXPANDER
 } EgWidgetType;
 
 /* Callbacks */

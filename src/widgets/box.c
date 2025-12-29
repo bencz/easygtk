@@ -71,6 +71,15 @@ static void child_list_free(EgChildList *list) {
 static void box_destroy(EgWidget *widget) {
     EgBox *box = (EgBox *)widget;
     if (box == NULL) return;
+    
+    /* Destruição automática de filhos */
+    for (size_t i = 0; i < box->children.count; i++) {
+        EgWidget *child = box->children.children[i];
+        if (child != NULL && child->vtable != NULL && child->vtable->destroy != NULL) {
+            child->vtable->destroy(child);
+        }
+    }
+    
     child_list_free(&box->children);
     eg_free(box);
 }
