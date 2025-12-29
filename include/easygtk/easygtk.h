@@ -27,6 +27,8 @@
 #include "combo_box.h"
 #include "scrolled_window.h"
 #include "dialog.h"
+#include "events.h"
+#include "clipboard.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -171,6 +173,47 @@ void eg_widget_set_tooltip(EgWidget *widget, const char *tooltip);
  * @param markup Texto com markup (NULL para remover)
  */
 void eg_widget_set_tooltip_markup(EgWidget *widget, const char *markup);
+
+/**
+ * Define o cursor do widget.
+ * 
+ * @param widget Ponteiro para o widget
+ * @param cursor_name Nome do cursor (ex: "pointer", "crosshair", "text", "wait", "help")
+ *                    NULL para cursor padrão
+ */
+void eg_widget_set_cursor(EgWidget *widget, const char *cursor_name);
+
+/**
+ * Define a opacidade do widget.
+ * 
+ * @param widget Ponteiro para o widget
+ * @param opacity Valor entre 0.0 (transparente) e 1.0 (opaco)
+ */
+void eg_widget_set_opacity(EgWidget *widget, double opacity);
+
+/**
+ * Obtém a opacidade do widget.
+ * 
+ * @param widget Ponteiro para o widget
+ * @return Valor entre 0.0 e 1.0
+ */
+double eg_widget_get_opacity(EgWidget *widget);
+
+/**
+ * Define o nome/ID do widget para lookup.
+ * 
+ * @param widget Ponteiro para o widget
+ * @param name Nome único do widget
+ */
+void eg_widget_set_name(EgWidget *widget, const char *name);
+
+/**
+ * Obtém o nome/ID do widget.
+ * 
+ * @param widget Ponteiro para o widget
+ * @return Nome do widget ou NULL
+ */
+const char *eg_widget_get_name(EgWidget *widget);
 
 /**
  * Obtém o ponteiro nativo GTK do widget.

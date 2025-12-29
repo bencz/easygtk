@@ -1107,8 +1107,164 @@ Classes GTK úteis: `"suggested-action"`, `"destructive-action"`, `"dim-label"`,
 void eg_widget_set_tooltip(EgWidget *widget, const char *tooltip);
 void eg_widget_set_tooltip_markup(EgWidget *widget, const char *markup);
 
+void eg_widget_set_cursor(EgWidget *widget, const char *cursor_name);
+```
+Cursores: `"pointer"`, `"crosshair"`, `"text"`, `"wait"`, `"help"`, `"grab"`, `"not-allowed"`, `NULL` para padrão.
+
+```c
+void eg_widget_set_opacity(EgWidget *widget, double opacity);
+double eg_widget_get_opacity(EgWidget *widget);
+```
+`opacity` entre 0.0 (transparente) e 1.0 (opaco).
+
+```c
+void eg_widget_set_name(EgWidget *widget, const char *name);
+const char *eg_widget_get_name(EgWidget *widget);
+```
+Nome/ID para identificação do widget.
+
+```c
 void *eg_widget_get_native(EgWidget *widget);
 void eg_widget_free(EgWidget *widget);
+```
+
+---
+
+## Sistema de Eventos
+
+Eventos de teclado, mouse e foco usando GtkEventController.
+
+### Tipos de Eventos
+
+```c
+typedef enum EgModifierType {
+    EG_MODIFIER_NONE = 0,
+    EG_MODIFIER_SHIFT = 1 << 0,
+    EG_MODIFIER_CTRL = 1 << 1,
+    EG_MODIFIER_ALT = 1 << 2,
+    EG_MODIFIER_SUPER = 1 << 3
+} EgModifierType;
+
+typedef struct EgKeyEvent {
+    uint32_t keyval;           /* Código da tecla */
+    uint32_t keycode;          /* Código físico */
+    EgModifierType modifiers;
+    bool is_press;
+} EgKeyEvent;
+
+typedef struct EgMouseEvent {
+    double x, y;
+    EgModifierType modifiers;
+} EgMouseEvent;
+
+typedef struct EgScrollEvent {
+    double x, y;
+    double delta_x, delta_y;
+    EgModifierType modifiers;
+} EgScrollEvent;
+
+typedef struct EgButtonEvent {
+    double x, y;
+    uint32_t button;           /* 1=esquerdo, 2=meio, 3=direito */
+    uint32_t n_press;          /* 1=simples, 2=duplo */
+    EgModifierType modifiers;
+} EgButtonEvent;
+```
+
+### Callbacks
+
+```c
+typedef bool (*EgKeyCallback)(EgWidget *widget, EgKeyEvent *event, void *user_data);
+typedef void (*EgMotionCallback)(EgWidget *widget, EgMouseEvent *event, void *user_data);
+typedef void (*EgScrollCallback)(EgWidget *widget, EgScrollEvent *event, void *user_data);
+typedef bool (*EgButtonCallback)(EgWidget *widget, EgButtonEvent *event, void *user_data);
+typedef void (*EgFocusCallback)(EgWidget *widget, void *user_data);
+typedef void (*EgCrossingCallback)(EgWidget *widget, double x, double y, void *user_data);
+```
+
+### Funções de Eventos
+
+```c
+void eg_widget_on_key_press(EgWidget *widget, EgKeyCallback callback, void *user_data);
+void eg_widget_on_key_release(EgWidget *widget, EgKeyCallback callback, void *user_data);
+
+void eg_widget_on_motion(EgWidget *widget, EgMotionCallback callback, void *user_data);
+void eg_widget_on_enter(EgWidget *widget, EgCrossingCallback callback, void *user_data);
+void eg_widget_on_leave(EgWidget *widget, EgCrossingCallback callback, void *user_data);
+void eg_widget_on_scroll(EgWidget *widget, EgScrollCallback callback, void *user_data);
+void eg_widget_on_click(EgWidget *widget, EgButtonCallback callback, void *user_data);
+
+void eg_widget_on_focus_in(EgWidget *widget, EgFocusCallback callback, void *user_data);
+void eg_widget_on_focus_out(EgWidget *widget, EgFocusCallback callback, void *user_data);
+
+void eg_widget_set_focusable(EgWidget *widget, bool focusable);
+bool eg_widget_get_focusable(EgWidget *widget);
+bool eg_widget_grab_focus(EgWidget *widget);
+bool eg_widget_has_focus(EgWidget *widget);
+```
+
+### Constantes de Teclas
+
+```c
+#define EG_KEY_Return     0xff0d
+#define EG_KEY_Escape     0xff1b
+#define EG_KEY_Tab        0xff09
+#define EG_KEY_BackSpace  0xff08
+#define EG_KEY_Delete     0xffff
+#define EG_KEY_Left       0xff51
+#define EG_KEY_Up         0xff52
+#define EG_KEY_Right      0xff53
+#define EG_KEY_Down       0xff54
+#define EG_KEY_F1         0xffbe  /* até F12 = 0xffc9 */
+#define EG_KEY_space      0x020
+```
+
+**Exemplo:**
+```c
+static bool on_key_press(EgWidget *widget, EgKeyEvent *event, void *user_data) {
+    (void)widget; (void)user_data;
+    
+    if (event->keyval == EG_KEY_Escape) {
+        printf("Escape pressionado!\n");
+    }
+    
+    if ((event->modifiers & EG_MODIFIER_CTRL) && event->keyval == 's') {
+        printf("Ctrl+S pressionado!\n");
+        return true; /* Bloqueia propagação */
+    }
+    
+    return false;
+}
+
+eg_widget_on_key_press(eg_window_as_widget(window), on_key_press, NULL);
+```
+
+---
+
+## Clipboard
+
+Sistema de área de transferência.
+
+```c
+typedef void (*EgClipboardTextCallback)(const char *text, void *user_data);
+
+void eg_clipboard_set_text(EgWidget *widget, const char *text);
+void eg_clipboard_get_text(EgWidget *widget, EgClipboardTextCallback callback, void *user_data);
+void eg_clipboard_clear(EgWidget *widget);
+```
+
+**Exemplo:**
+```c
+/* Copiar */
+eg_clipboard_set_text(eg_button_as_widget(btn), "Texto copiado");
+
+/* Colar (assíncrono) */
+static void on_paste(const char *text, void *user_data) {
+    if (text != NULL) {
+        printf("Colado: %s\n", text);
+    }
+}
+eg_clipboard_get_text(eg_button_as_widget(btn), on_paste, NULL);
 ```
 
 ---

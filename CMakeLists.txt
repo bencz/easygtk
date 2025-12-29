@@ -33,6 +33,8 @@ set(EASYGTK_SOURCES
     src/widgets/combo_box.c
     src/widgets/scrolled_window.c
     src/widgets/dialog.c
+    src/core/events.c
+    src/core/clipboard.c
 )
 
 # Create shared library
@@ -92,6 +94,10 @@ if(BUILD_EXAMPLES)
     add_executable(dialogs_example examples/dialogs_example.c)
     target_link_libraries(dialogs_example PRIVATE easygtk ${GTK4_LIBRARIES})
     target_include_directories(dialogs_example PRIVATE ${GTK4_INCLUDE_DIRS})
+
+    add_executable(events_example examples/events_example.c)
+    target_link_libraries(events_example PRIVATE easygtk ${GTK4_LIBRARIES})
+    target_include_directories(events_example PRIVATE ${GTK4_INCLUDE_DIRS})
 endif()
 
 # Install

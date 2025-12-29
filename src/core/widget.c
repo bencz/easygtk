@@ -191,6 +191,38 @@ void eg_widget_set_tooltip_markup(EgWidget *widget, const char *markup) {
     gtk_widget_set_tooltip_markup(widget->native, markup);
 }
 
+void eg_widget_set_cursor(EgWidget *widget, const char *cursor_name) {
+    if (widget == NULL || widget->native == NULL) return;
+    
+    if (cursor_name == NULL) {
+        gtk_widget_set_cursor(widget->native, NULL);
+    } else {
+        gtk_widget_set_cursor_from_name(widget->native, cursor_name);
+    }
+}
+
+void eg_widget_set_opacity(EgWidget *widget, double opacity) {
+    if (widget == NULL || widget->native == NULL) return;
+    if (opacity < 0.0) opacity = 0.0;
+    if (opacity > 1.0) opacity = 1.0;
+    gtk_widget_set_opacity(widget->native, opacity);
+}
+
+double eg_widget_get_opacity(EgWidget *widget) {
+    if (widget == NULL || widget->native == NULL) return 1.0;
+    return gtk_widget_get_opacity(widget->native);
+}
+
+void eg_widget_set_name(EgWidget *widget, const char *name) {
+    if (widget == NULL || widget->native == NULL) return;
+    gtk_widget_set_name(widget->native, name);
+}
+
+const char *eg_widget_get_name(EgWidget *widget) {
+    if (widget == NULL || widget->native == NULL) return NULL;
+    return gtk_widget_get_name(widget->native);
+}
+
 void *eg_widget_get_native(EgWidget *widget) {
     if (widget == NULL || widget->vtable == NULL) return NULL;
     return widget->vtable->get_native(widget);

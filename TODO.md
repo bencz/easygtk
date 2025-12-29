@@ -59,23 +59,23 @@ eg_async_run(fetch_data_from_api, on_data_received, user_data);
 ### Sistema de Eventos
 - [x] Suporte a múltiplos callbacks por evento (EgSignal)
 - [x] Desconectar callbacks (retornar handler ID)
-- [ ] Eventos de teclado (key-press, key-release)
-- [ ] Eventos de mouse (motion, enter, leave, scroll)
-- [ ] Eventos de foco (focus-in, focus-out)
+- [x] Eventos de teclado (key-press, key-release)
+- [x] Eventos de mouse (motion, enter, leave, scroll, click)
+- [x] Eventos de foco (focus-in, focus-out)
 - [ ] Drag and drop
 
 ### Utilitários Core
 - [x] Timers (eg_timeout_add, eg_idle_add)
-- [ ] Clipboard (copiar/colar)
+- [x] Clipboard (copiar/colar)
 - [x] Sistema de CSS (eg_css_load_from_file, eg_css_load_from_string)
 - [ ] Logging/debug helpers
 - [ ] Conversão de tipos helper (eg_widget_cast_to_button, etc.)
 
 ### Propriedades Genéricas de Widget
 - [x] Tooltip (eg_widget_set_tooltip, eg_widget_set_tooltip_markup)
-- [ ] Cursor customizado
-- [ ] Opacity
-- [ ] Nome/ID para lookup
+- [x] Cursor customizado (eg_widget_set_cursor)
+- [x] Opacity (eg_widget_set_opacity, eg_widget_get_opacity)
+- [x] Nome/ID para lookup (eg_widget_set_name, eg_widget_get_name)
 
 ---
 

@@ -166,6 +166,11 @@ int main(int argc, char *argv[]) {
 - **Timers**: `eg_timeout_add()`, `eg_idle_add()`
 - **CSS**: `eg_css_load_from_file()`, `eg_css_load_from_string()`
 - **Tooltip**: `eg_widget_set_tooltip()`, `eg_widget_set_tooltip_markup()`
+- **Eventos**: Teclado, mouse (motion, enter, leave, scroll, click), foco
+- **Clipboard**: `eg_clipboard_set_text()`, `eg_clipboard_get_text()`
+- **Cursor**: `eg_widget_set_cursor()`
+- **Opacity**: `eg_widget_set_opacity()`, `eg_widget_get_opacity()`
+- **Nome/ID**: `eg_widget_set_name()`, `eg_widget_get_name()`
 
 ## Exemplos
 
@@ -178,6 +183,7 @@ Após compilar, os exemplos estarão em `build/`:
 ./build/mvvm_example     # Demonstração MVVM
 ./build/widgets_example  # CheckButton, Switch, ProgressBar
 ./build/dialogs_example  # Diálogos, ComboBox, ScrolledWindow
+./build/events_example   # Eventos de teclado, mouse, foco, clipboard
 ```
 
 ## Licença
