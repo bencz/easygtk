@@ -44,6 +44,8 @@
 #include "header_bar.h"
 #include "popover_menu.h"
 #include "menu_button.h"
+#include "list_view.h"
+#include "column_view.h"
 #include "file_chooser.h"
 #include "color_chooser.h"
 #include "about_dialog.h"

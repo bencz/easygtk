@@ -180,6 +180,10 @@ int main(int argc, char *argv[]) {
 - **EgPopoverMenu**: Menu popup com itens, ícones e separadores
 - **EgMenuButton**: Botão que abre um menu popover
 
+### Listas e Tabelas
+- **EgListView**: Lista de itens com seleção simples/múltipla
+- **EgColumnView**: Tabela com múltiplas colunas
+
 ## Diálogos
 
 - **eg_dialog_info()**: Diálogo de informação
@@ -249,6 +253,7 @@ Após compilar, os exemplos estarão em `build/`:
 ./build/containers_example    # Stack, Notebook, Paned, Expander
 ./build/menu_example          # PopoverMenu, MenuButton
 ./build/menubar_example       # Barra de menu tradicional (File, Edit, View, Help)
+./build/listview_example      # ListView e ColumnView (tabela)
 ```
 
 **Destaque**: O `spa_example` demonstra uma aplicação completa estilo SPA (Single Page Application) com:

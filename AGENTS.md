@@ -22,15 +22,18 @@ Este documento contém a referência completa da API EasyGTK para uso por agente
    - [Box](#box-egbox)
    - [Grid](#grid-eggrid)
    - [ScrolledWindow](#scrolledwindow-egscrolledwindow)
-7. [Diálogos](#diálogos)
-8. [Sistema de Signals](#sistema-de-signals)
-9. [Properties Observáveis](#properties-observáveis)
-10. [ViewModel (MVVM)](#viewmodel-mvvm)
-11. [Timers](#timers)
-12. [CSS](#css)
-13. [Funções Genéricas de Widget](#funções-genéricas-de-widget)
-14. [Padrões de Uso](#padrões-de-uso)
-15. [Exemplos Completos](#exemplos-completos)
+7. [Listas e Tabelas](#listas-e-tabelas)
+   - [ListView](#listview-eglistview)
+   - [ColumnView](#columnview-egcolumnview)
+8. [Diálogos](#diálogos)
+9. [Sistema de Signals](#sistema-de-signals)
+10. [Properties Observáveis](#properties-observáveis)
+11. [ViewModel (MVVM)](#viewmodel-mvvm)
+12. [Timers](#timers)
+13. [CSS](#css)
+14. [Funções Genéricas de Widget](#funções-genéricas-de-widget)
+15. [Padrões de Uso](#padrões-de-uso)
+16. [Exemplos Completos](#exemplos-completos)
 
 ---
 
@@ -1481,6 +1484,145 @@ eg_menu_button_set_popover(menu_btn, menu);
 
 /* Adicionar à HeaderBar */
 eg_header_bar_pack_end(header, eg_menu_button_as_widget(menu_btn));
+```
+
+---
+
+## Listas e Tabelas
+
+### ListView (EgListView)
+
+Lista de itens com suporte a seleção simples, múltipla ou nenhuma.
+
+```c
+/* Modos de seleção */
+typedef enum EgSelectionMode {
+    EG_SELECTION_NONE = 0,      /* Sem seleção */
+    EG_SELECTION_SINGLE = 1,    /* Seleção única */
+    EG_SELECTION_MULTIPLE = 2   /* Seleção múltipla */
+} EgSelectionMode;
+
+/* Criação e destruição */
+EgListView *eg_list_view_new(EgSelectionMode mode);
+void eg_list_view_free(EgListView *list);
+
+/* Gerenciamento de itens */
+void eg_list_view_append(EgListView *list, const char *item);
+void eg_list_view_insert(EgListView *list, int position, const char *item);
+void eg_list_view_remove(EgListView *list, int position);
+void eg_list_view_clear(EgListView *list);
+
+/* Consulta */
+int eg_list_view_get_count(EgListView *list);
+const char *eg_list_view_get_item(EgListView *list, int position);
+
+/* Seleção */
+void eg_list_view_select(EgListView *list, int position);
+int eg_list_view_get_selected(EgListView *list);
+int eg_list_view_get_selected_count(EgListView *list);
+int *eg_list_view_get_all_selected(EgListView *list, int *count);
+
+/* Callbacks */
+void eg_list_view_on_selection_changed(EgListView *list, EgCallback callback, void *user_data);
+void eg_list_view_on_activate(EgListView *list, EgCallback callback, void *user_data);
+
+EgWidget *eg_list_view_as_widget(EgListView *list);
+```
+
+**Exemplo - Lista simples:**
+```c
+static void on_selection(EgWidget *widget, void *user_data) {
+    EgListView *list = (EgListView *)widget;
+    int selected = eg_list_view_get_selected(list);
+    if (selected >= 0) {
+        const char *item = eg_list_view_get_item(list, selected);
+        printf("Selecionado: %s\n", item);
+    }
+}
+
+EgListView *list = eg_list_view_new(EG_SELECTION_SINGLE);
+eg_list_view_append(list, "Item 1");
+eg_list_view_append(list, "Item 2");
+eg_list_view_append(list, "Item 3");
+eg_list_view_on_selection_changed(list, on_selection, NULL);
+```
+
+---
+
+### ColumnView (EgColumnView)
+
+Tabela com múltiplas colunas e suporte a seleção.
+
+```c
+/* Criação e destruição */
+EgColumnView *eg_column_view_new(EgSelectionMode mode);
+void eg_column_view_free(EgColumnView *view);
+
+/* Gerenciamento de colunas */
+void eg_column_view_add_column(EgColumnView *view, const char *title);
+int eg_column_view_get_column_count(EgColumnView *view);
+
+/* Gerenciamento de linhas */
+void eg_column_view_append_row(EgColumnView *view, ...);
+void eg_column_view_append_rowv(EgColumnView *view, const char **values, int count);
+void eg_column_view_remove_row(EgColumnView *view, int row);
+void eg_column_view_clear(EgColumnView *view);
+
+/* Acesso a células */
+void eg_column_view_set_cell(EgColumnView *view, int row, int column, const char *value);
+const char *eg_column_view_get_cell(EgColumnView *view, int row, int column);
+
+/* Consulta */
+int eg_column_view_get_row_count(EgColumnView *view);
+
+/* Seleção */
+void eg_column_view_select_row(EgColumnView *view, int row);
+int eg_column_view_get_selected_row(EgColumnView *view);
+int eg_column_view_get_selected_count(EgColumnView *view);
+int *eg_column_view_get_selected_rows(EgColumnView *view, int *count);
+
+/* Callbacks */
+void eg_column_view_on_selection_changed(EgColumnView *view, EgCallback callback, void *user_data);
+void eg_column_view_on_row_activated(EgColumnView *view, EgCallback callback, void *user_data);
+
+EgWidget *eg_column_view_as_widget(EgColumnView *view);
+```
+
+**Exemplo - Tabela de dados:**
+```c
+static void on_row_selected(EgWidget *widget, void *user_data) {
+    EgColumnView *table = (EgColumnView *)widget;
+    int row = eg_column_view_get_selected_row(table);
+    if (row >= 0) {
+        const char *name = eg_column_view_get_cell(table, row, 1);
+        printf("Selecionado: %s\n", name);
+    }
+}
+
+/* Criar tabela */
+EgColumnView *table = eg_column_view_new(EG_SELECTION_SINGLE);
+
+/* Adicionar colunas */
+eg_column_view_add_column(table, "ID");
+eg_column_view_add_column(table, "Nome");
+eg_column_view_add_column(table, "Email");
+
+/* Adicionar linhas */
+eg_column_view_append_row(table, "1", "Alice", "alice@email.com");
+eg_column_view_append_row(table, "2", "Bob", "bob@email.com");
+eg_column_view_append_row(table, "3", "Carol", "carol@email.com");
+
+/* Usando array de valores */
+const char *values[] = {"4", "David", "david@email.com"};
+eg_column_view_append_rowv(table, values, 3);
+
+/* Callback de seleção */
+eg_column_view_on_selection_changed(table, on_row_selected, NULL);
+
+/* Colocar em ScrolledWindow para scroll */
+EgScrolledWindow *scroll = eg_scrolled_window_new();
+eg_scrolled_window_set_child(scroll, eg_column_view_as_widget(table));
+eg_scrolled_window_set_min_content_size(scroll, 400, 200);
 ```
 
 ---

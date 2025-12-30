@@ -214,6 +214,36 @@ struct EgMenuButton {
     EgWidget base;
 };
 
+/* Estrutura de list store (modelo de dados) */
+struct EgListStore {
+    GListStore *native;
+    GType item_type;
+};
+
+/* Estrutura de list view */
+struct EgListView {
+    EgWidget base;
+    EgListStore *store;
+    GtkSelectionModel *selection_model;
+    EgSelectionMode selection_mode;
+    EgCallback on_selection_changed;
+    void *selection_changed_data;
+    EgCallback on_activate;
+    void *activate_data;
+};
+
+/* Estrutura de column view */
+struct EgColumnView {
+    EgWidget base;
+    EgListStore *store;
+    GtkSelectionModel *selection_model;
+    EgSelectionMode selection_mode;
+    EgCallback on_selection_changed;
+    void *selection_changed_data;
+    EgCallback on_activate;
+    void *activate_data;
+};
+
 /* Estrutura para dados de callback */
 typedef struct {
     EgCallback callback;

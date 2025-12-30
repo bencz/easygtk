@@ -47,6 +47,9 @@ typedef struct EgLevelBar EgLevelBar;
 typedef struct EgHeaderBar EgHeaderBar;
 typedef struct EgPopoverMenu EgPopoverMenu;
 typedef struct EgMenuButton EgMenuButton;
+typedef struct EgListView EgListView;
+typedef struct EgColumnView EgColumnView;
+typedef struct EgListStore EgListStore;
 
 /* Enumerações */
 typedef enum EgOrientation {
@@ -90,8 +93,17 @@ typedef enum EgWidgetType {
     EG_WIDGET_TYPE_LEVEL_BAR,
     EG_WIDGET_TYPE_HEADER_BAR,
     EG_WIDGET_TYPE_POPOVER_MENU,
-    EG_WIDGET_TYPE_MENU_BUTTON
+    EG_WIDGET_TYPE_MENU_BUTTON,
+    EG_WIDGET_TYPE_LIST_VIEW,
+    EG_WIDGET_TYPE_COLUMN_VIEW
 } EgWidgetType;
+
+/* Modo de seleção para ListView/ColumnView */
+typedef enum EgSelectionMode {
+    EG_SELECTION_NONE = 0,
+    EG_SELECTION_SINGLE = 1,
+    EG_SELECTION_MULTIPLE = 2
+} EgSelectionMode;
 
 /* Callbacks */
 typedef void (*EgCallback)(EgWidget *widget, void *user_data);

@@ -335,17 +335,29 @@ void eg_button_free(EgButton *btn) {
 
 ---
 
-## ListView / TreeView (Avançado)
+## ListView / ColumnView (Avançado)
 
 ### ListView
-- [ ] eg_list_view_new()
-- [ ] Modelo de dados simples
-- [ ] Seleção simples/múltipla
-- [ ] on_selection_changed
+- [x] eg_list_view_new()
+- [x] eg_list_view_append / insert / remove / clear
+- [x] eg_list_view_get_count / get_item
+- [x] Modelo de dados simples (GtkStringList)
+- [x] Seleção simples/múltipla/nenhuma (EgSelectionMode)
+- [x] eg_list_view_select / get_selected / get_selected_count / get_all_selected
+- [x] on_selection_changed
+- [x] on_activate (double-click)
 
 ### ColumnView (Tabela)
-- [ ] eg_column_view_new()
-- [ ] eg_column_view_add_column
+- [x] eg_column_view_new()
+- [x] eg_column_view_add_column
+- [x] eg_column_view_append_row / append_rowv
+- [x] eg_column_view_set_cell / get_cell
+- [x] eg_column_view_remove_row / clear
+- [x] eg_column_view_get_row_count / get_column_count
+- [x] Seleção simples/múltipla/nenhuma (EgSelectionMode)
+- [x] eg_column_view_select_row / get_selected_row / get_selected_rows / get_selected_count
+- [x] on_selection_changed
+- [x] on_row_activated (double-click)
 
 ---
 
@@ -353,4 +365,4 @@ void eg_button_free(EgButton *btn) {
 
 1. **Alta**: ~~Timers~~, ~~CSS~~, ~~CheckButton~~, ~~Switch~~, ~~MessageDialog~~
 2. **Média**: ~~ScrolledWindow~~, ~~ComboBox~~, ~~ProgressBar~~, ~~FileChooser~~, ~~ColorChooser~~
-3. **Baixa**: ~~Menus~~, ListView, ~~Notebook~~, ~~HeaderBar~~, ~~Image~~, ~~Spinner~~, ~~LevelBar~~
+3. **Baixa**: ~~Menus~~, ~~ListView~~, ~~ColumnView~~, ~~Notebook~~, ~~HeaderBar~~, ~~Image~~, ~~Spinner~~, ~~LevelBar~~
