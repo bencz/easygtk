@@ -1526,10 +1526,17 @@ int *eg_list_view_get_all_selected(EgListView *list, int *count);
 void eg_list_view_on_selection_changed(EgListView *list, EgCallback callback, void *user_data);
 void eg_list_view_on_activate(EgListView *list, EgCallback callback, void *user_data);
 
+/* Ordenação */
+void eg_list_view_sort_ascending(EgListView *list);
+void eg_list_view_sort_descending(EgListView *list);
+void eg_list_view_sort_custom(EgListView *list, EgListViewCompareFunc compare, void *user_data);
+void eg_list_view_set_auto_sort(EgListView *list, bool ascending);
+void eg_list_view_disable_auto_sort(EgListView *list);
+
 EgWidget *eg_list_view_as_widget(EgListView *list);
 ```
 
-**Exemplo - Lista simples:**
+**Exemplo - Lista simples com ordenação:**
 ```c
 static void on_selection(EgWidget *widget, void *user_data) {
     EgListView *list = (EgListView *)widget;
@@ -1541,10 +1548,19 @@ static void on_selection(EgWidget *widget, void *user_data) {
 }
 
 EgListView *list = eg_list_view_new(EG_SELECTION_SINGLE);
-eg_list_view_append(list, "Item 1");
-eg_list_view_append(list, "Item 2");
-eg_list_view_append(list, "Item 3");
+eg_list_view_append(list, "Banana");
+eg_list_view_append(list, "Maçã");
+eg_list_view_append(list, "Laranja");
 eg_list_view_on_selection_changed(list, on_selection, NULL);
+
+/* Ordenar em ordem alfabética */
+eg_list_view_sort_ascending(list);
+
+/* Ordenação customizada (ex: por tamanho do texto) */
+int compare_by_length(const char *a, const char *b, void *user_data) {
+    return (int)strlen(a) - (int)strlen(b);
+}
+eg_list_view_sort_custom(list, compare_by_length, NULL);
 ```
 
 ---
@@ -1585,10 +1601,17 @@ int *eg_column_view_get_selected_rows(EgColumnView *view, int *count);
 void eg_column_view_on_selection_changed(EgColumnView *view, EgCallback callback, void *user_data);
 void eg_column_view_on_row_activated(EgColumnView *view, EgCallback callback, void *user_data);
 
+/* Ordenação */
+void eg_column_view_sort_by_column(EgColumnView *view, unsigned int column, bool ascending);
+void eg_column_view_sort_custom(EgColumnView *view, unsigned int column,
+                                 EgColumnViewCompareFunc compare, void *user_data);
+void eg_column_view_set_auto_sort_column(EgColumnView *view, int column, bool ascending);
+void eg_column_view_set_column_sortable(EgColumnView *view, int column_id, bool sortable);
+
 EgWidget *eg_column_view_as_widget(EgColumnView *view);
 ```
 
-**Exemplo - Tabela de dados:**
+**Exemplo - Tabela de dados com ordenação:**
 ```c
 static void on_row_selected(EgWidget *widget, void *user_data) {
     EgColumnView *table = (EgColumnView *)widget;

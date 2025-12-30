@@ -182,6 +182,55 @@ void eg_list_view_set_single_click_activate(EgListView *list_view, bool single_c
  */
 void eg_list_view_scroll_to(EgListView *list_view, unsigned int position);
 
+/* ============================================
+ * Ordenação
+ * ============================================ */
+
+/**
+ * Tipo da função de comparação para ordenação.
+ * Retorna < 0 se a < b, 0 se a == b, > 0 se a > b.
+ */
+typedef int (*EgListViewCompareFunc)(const char *a, const char *b, void *user_data);
+
+/**
+ * Ordena a lista em ordem alfabética ascendente.
+ *
+ * @param list_view Ponteiro para a lista
+ */
+void eg_list_view_sort_ascending(EgListView *list_view);
+
+/**
+ * Ordena a lista em ordem alfabética descendente.
+ *
+ * @param list_view Ponteiro para a lista
+ */
+void eg_list_view_sort_descending(EgListView *list_view);
+
+/**
+ * Ordena a lista usando uma função de comparação customizada.
+ *
+ * @param list_view Ponteiro para a lista
+ * @param compare_func Função de comparação
+ * @param user_data Dados do usuário passados à função de comparação
+ */
+void eg_list_view_sort_custom(EgListView *list_view, EgListViewCompareFunc compare_func, void *user_data);
+
+/**
+ * Habilita ordenação automática ao adicionar itens.
+ * Quando habilitada, a lista mantém os itens sempre ordenados.
+ *
+ * @param list_view Ponteiro para a lista
+ * @param ascending true para ordem ascendente, false para descendente
+ */
+void eg_list_view_set_auto_sort(EgListView *list_view, bool ascending);
+
+/**
+ * Desabilita ordenação automática.
+ *
+ * @param list_view Ponteiro para a lista
+ */
+void eg_list_view_disable_auto_sort(EgListView *list_view);
+
 /**
  * Converte para EgWidget.
  *

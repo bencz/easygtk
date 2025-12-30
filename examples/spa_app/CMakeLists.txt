@@ -65,6 +65,7 @@ set(SOURCES
     src/main.c
     src/database.c
     src/app_state.c
+    src/users_viewmodel.c
     src/page_login.c
     src/page_dashboard.c
     src/page_users.c

@@ -218,6 +218,41 @@ void eg_window_set_decorated(EgWindow *window, bool decorated);
  */
 bool eg_window_get_decorated(EgWindow *window);
 
+/**
+ * Define a janela pai (transient for).
+ * A janela filha será mantida acima da pai e será fechada quando a pai for fechada.
+ *
+ * @param window Ponteiro para a janela filha
+ * @param parent Ponteiro para a janela pai
+ */
+void eg_window_set_transient_for(EgWindow *window, EgWindow *parent);
+
+/**
+ * Define se a janela é modal.
+ * Uma janela modal bloqueia interação com outras janelas da aplicação.
+ *
+ * @param window Ponteiro para a janela
+ * @param modal true para tornar modal
+ */
+void eg_window_set_modal(EgWindow *window, bool modal);
+
+/**
+ * Verifica se a janela é modal.
+ *
+ * @param window Ponteiro para a janela
+ * @return true se modal
+ */
+bool eg_window_get_modal(EgWindow *window);
+
+/**
+ * Define se a janela deve ser destruída quando fechada.
+ * Por padrão as janelas são apenas ocultadas.
+ *
+ * @param window Ponteiro para a janela
+ * @param destroy_on_close true para destruir ao fechar
+ */
+void eg_window_set_destroy_on_close(EgWindow *window, bool destroy_on_close);
+
 #ifdef __cplusplus
 }
 #endif

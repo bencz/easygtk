@@ -101,6 +101,9 @@ static void column_view_destroy(EgWidget *widget) {
     EgColumnView *cv = (EgColumnView *)widget;
     if (cv == NULL) return;
 
+    if (cv->sort_model) {
+        g_object_unref(cv->sort_model);
+    }
     if (cv->store) {
         if (cv->store->native) {
             g_object_unref(cv->store->native);
@@ -163,10 +166,12 @@ static void setup_column_item(GtkListItemFactory *factory, GtkListItem *list_ite
 
     GtkWidget *label = gtk_label_new(NULL);
     gtk_label_set_xalign(GTK_LABEL(label), 0.0f);
+    gtk_label_set_ellipsize(GTK_LABEL(label), PANGO_ELLIPSIZE_END);
+    gtk_widget_set_hexpand(label, TRUE);
     gtk_widget_set_margin_start(label, 8);
     gtk_widget_set_margin_end(label, 8);
-    gtk_widget_set_margin_top(label, 4);
-    gtk_widget_set_margin_bottom(label, 4);
+    gtk_widget_set_margin_top(label, 6);
+    gtk_widget_set_margin_bottom(label, 6);
     gtk_list_item_set_child(list_item, label);
 }
 
@@ -213,19 +218,28 @@ EgColumnView *eg_column_view_new(EgSelectionMode selection_mode) {
     cv->store->native = g_list_store_new(EG_TYPE_ROW_DATA);
     cv->store->item_type = EG_TYPE_ROW_DATA;
 
-    /* Cria selection model */
-    cv->selection_mode = selection_mode;
-    cv->selection_model = cv_create_selection_model(G_LIST_MODEL(cv->store->native), selection_mode);
-
-    /* Cria o ColumnView */
-    GtkWidget *column_view = gtk_column_view_new(cv->selection_model);
+    /* Cria o ColumnView primeiro (sem model) para obter o sorter */
+    GtkWidget *column_view = gtk_column_view_new(NULL);
     if (column_view == NULL) {
-        g_object_unref(cv->selection_model);
         g_object_unref(cv->store->native);
         eg_free(cv->store);
         eg_free(cv);
         return NULL;
     }
+
+    /* Cria GtkSortListModel que conecta o store ao sorter do column view */
+    GtkSorter *cv_sorter = gtk_column_view_get_sorter(GTK_COLUMN_VIEW(column_view));
+    cv->sort_model = gtk_sort_list_model_new(G_LIST_MODEL(cv->store->native), cv_sorter);
+    if (cv_sorter) {
+        g_object_ref(cv_sorter);  /* sort_list_model takes ownership, we need to keep ref */
+    }
+
+    /* Cria selection model a partir do sort model */
+    cv->selection_mode = selection_mode;
+    cv->selection_model = cv_create_selection_model(G_LIST_MODEL(cv->sort_model), selection_mode);
+
+    /* Define o model no column view */
+    gtk_column_view_set_model(GTK_COLUMN_VIEW(column_view), cv->selection_model);
 
     eg_widget_init(&cv->base, EG_WIDGET_TYPE_COLUMN_VIEW, column_view, &eg_column_view_vtable);
 
@@ -233,6 +247,12 @@ EgColumnView *eg_column_view_new(EgSelectionMode selection_mode) {
     cv->selection_changed_data = NULL;
     cv->on_activate = NULL;
     cv->activate_data = NULL;
+
+    /* Ordenação */
+    cv->sort_column = -1;
+    cv->sort_ascending = true;
+    cv->custom_compare = NULL;
+    cv->custom_compare_data = NULL;
 
     return cv;
 }
@@ -488,4 +508,165 @@ EgWidget *eg_column_view_as_widget(EgColumnView *column_view) {
 void *eg_column_view_get_native(EgColumnView *column_view) {
     if (column_view == NULL) return NULL;
     return column_view->base.native;
+}
+
+/* ============================================
+ * Ordenação
+ * ============================================ */
+
+/* Estrutura para contexto de ordenação */
+typedef struct {
+    unsigned int column;
+    bool ascending;
+    EgColumnViewCompareFunc compare_func;
+    void *user_data;
+} ColumnSortContext;
+
+/* Comparação padrão (strcmp) */
+static int cv_default_compare(const char *a, const char *b, void *user_data) {
+    (void)user_data;
+    if (a == NULL && b == NULL) return 0;
+    if (a == NULL) return -1;
+    if (b == NULL) return 1;
+    return strcmp(a, b);
+}
+
+/* Função auxiliar para ordenar as linhas */
+static void sort_column_view_rows(EgColumnView *column_view, unsigned int column, bool ascending,
+                                   EgColumnViewCompareFunc compare_func, void *user_data) {
+    if (column_view == NULL || column_view->store == NULL) return;
+
+    GListStore *store = column_view->store->native;
+    guint n = g_list_model_get_n_items(G_LIST_MODEL(store));
+    if (n <= 1) return;
+
+    /* Coleta todas as linhas */
+    EgRowData **rows = (EgRowData **)malloc(n * sizeof(EgRowData *));
+    if (rows == NULL) return;
+
+    for (guint i = 0; i < n; i++) {
+        rows[i] = EG_ROW_DATA(g_list_model_get_item(G_LIST_MODEL(store), i));
+    }
+
+    /* Bubble sort para ordenação com compare_func customizada */
+    EgColumnViewCompareFunc cmp = compare_func ? compare_func : cv_default_compare;
+
+    for (guint i = 0; i < n - 1; i++) {
+        for (guint j = 0; j < n - i - 1; j++) {
+            const char *val_a = eg_row_data_get_value(rows[j], (int)column);
+            const char *val_b = eg_row_data_get_value(rows[j + 1], (int)column);
+
+            int result = cmp(val_a, val_b, user_data);
+
+            if ((ascending && result > 0) || (!ascending && result < 0)) {
+                EgRowData *temp = rows[j];
+                rows[j] = rows[j + 1];
+                rows[j + 1] = temp;
+            }
+        }
+    }
+
+    /* Remove todas as linhas e reinsere ordenadas */
+    g_list_store_remove_all(store);
+
+    for (guint i = 0; i < n; i++) {
+        g_list_store_append(store, rows[i]);
+        g_object_unref(rows[i]);
+    }
+
+    free(rows);
+}
+
+void eg_column_view_sort_by_column(EgColumnView *column_view, unsigned int column, bool ascending) {
+    sort_column_view_rows(column_view, column, ascending, NULL, NULL);
+}
+
+void eg_column_view_sort_custom(EgColumnView *column_view, unsigned int column,
+                                 EgColumnViewCompareFunc compare_func, void *user_data) {
+    if (compare_func == NULL) return;
+    sort_column_view_rows(column_view, column, true, compare_func, user_data);
+}
+
+void eg_column_view_set_auto_sort_column(EgColumnView *column_view, int column, bool ascending) {
+    if (column_view == NULL) return;
+    column_view->sort_column = column;
+    column_view->sort_ascending = ascending;
+
+    if (column >= 0) {
+        /* Ordena imediatamente */
+        sort_column_view_rows(column_view, (unsigned int)column, ascending, NULL, NULL);
+    }
+}
+
+/* ============================================
+ * Sorter customizado para ordenação por clique
+ * ============================================ */
+
+#define EG_TYPE_COLUMN_SORTER (eg_column_sorter_get_type())
+G_DECLARE_FINAL_TYPE(EgColumnSorter, eg_column_sorter, EG, COLUMN_SORTER, GtkSorter)
+
+struct _EgColumnSorter {
+    GtkSorter parent_instance;
+    int column_index;
+};
+
+G_DEFINE_TYPE(EgColumnSorter, eg_column_sorter, GTK_TYPE_SORTER)
+
+static GtkOrdering eg_column_sorter_compare(GtkSorter *sorter, gpointer item1, gpointer item2) {
+    EgColumnSorter *self = EG_COLUMN_SORTER(sorter);
+
+    EgRowData *row1 = EG_ROW_DATA(item1);
+    EgRowData *row2 = EG_ROW_DATA(item2);
+
+    const char *val1 = eg_row_data_get_value(row1, self->column_index);
+    const char *val2 = eg_row_data_get_value(row2, self->column_index);
+
+    if (val1 == NULL && val2 == NULL) return GTK_ORDERING_EQUAL;
+    if (val1 == NULL) return GTK_ORDERING_SMALLER;
+    if (val2 == NULL) return GTK_ORDERING_LARGER;
+
+    int result = strcmp(val1, val2);
+    if (result < 0) return GTK_ORDERING_SMALLER;
+    if (result > 0) return GTK_ORDERING_LARGER;
+    return GTK_ORDERING_EQUAL;
+}
+
+static GtkSorterOrder eg_column_sorter_get_order(GtkSorter *sorter) {
+    (void)sorter;
+    return GTK_SORTER_ORDER_PARTIAL;
+}
+
+static void eg_column_sorter_class_init(EgColumnSorterClass *klass) {
+    GtkSorterClass *sorter_class = GTK_SORTER_CLASS(klass);
+    sorter_class->compare = eg_column_sorter_compare;
+    sorter_class->get_order = eg_column_sorter_get_order;
+}
+
+static void eg_column_sorter_init(EgColumnSorter *self) {
+    self->column_index = 0;
+}
+
+static GtkSorter *eg_column_sorter_new(int column_index) {
+    EgColumnSorter *sorter = g_object_new(EG_TYPE_COLUMN_SORTER, NULL);
+    sorter->column_index = column_index;
+    return GTK_SORTER(sorter);
+}
+
+void eg_column_view_set_column_sortable(EgColumnView *column_view, int column_id, bool sortable) {
+    if (column_view == NULL || column_view->base.native == NULL) return;
+
+    GListModel *columns = gtk_column_view_get_columns(GTK_COLUMN_VIEW(column_view->base.native));
+    GtkColumnViewColumn *column = GTK_COLUMN_VIEW_COLUMN(g_list_model_get_item(columns, column_id));
+
+    if (column) {
+        if (sortable) {
+            /* Cria um sorter customizado para esta coluna */
+            GtkSorter *sorter = eg_column_sorter_new(column_id);
+            gtk_column_view_column_set_sorter(column, sorter);
+            g_object_unref(sorter);
+        } else {
+            gtk_column_view_column_set_sorter(column, NULL);
+        }
+        g_object_unref(column);
+    }
 }

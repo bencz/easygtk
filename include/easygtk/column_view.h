@@ -226,6 +226,56 @@ void eg_column_view_set_show_row_separators(EgColumnView *column_view, bool show
  */
 void eg_column_view_set_show_column_separators(EgColumnView *column_view, bool show);
 
+/* ============================================
+ * Ordenação
+ * ============================================ */
+
+/**
+ * Tipo da função de comparação para ordenação de colunas.
+ * Retorna < 0 se a < b, 0 se a == b, > 0 se a > b.
+ * Os parâmetros são os valores das células na coluna sendo ordenada.
+ */
+typedef int (*EgColumnViewCompareFunc)(const char *a, const char *b, void *user_data);
+
+/**
+ * Ordena a tabela pela coluna especificada em ordem ascendente.
+ *
+ * @param column_view Ponteiro para a tabela
+ * @param column Índice da coluna para ordenar
+ */
+void eg_column_view_sort_by_column(EgColumnView *column_view, unsigned int column, bool ascending);
+
+/**
+ * Ordena a tabela usando uma função de comparação customizada.
+ *
+ * @param column_view Ponteiro para a tabela
+ * @param column Índice da coluna para ordenar
+ * @param compare_func Função de comparação
+ * @param user_data Dados do usuário passados à função de comparação
+ */
+void eg_column_view_sort_custom(EgColumnView *column_view, unsigned int column,
+                                 EgColumnViewCompareFunc compare_func, void *user_data);
+
+/**
+ * Habilita ordenação automática por uma coluna específica.
+ * Quando habilitada, a tabela mantém as linhas ordenadas ao inserir/editar.
+ *
+ * @param column_view Ponteiro para a tabela
+ * @param column Índice da coluna para ordenação (-1 para desabilitar)
+ * @param ascending true para ordem ascendente, false para descendente
+ */
+void eg_column_view_set_auto_sort_column(EgColumnView *column_view, int column, bool ascending);
+
+/**
+ * Habilita a ordenação clicável nas colunas.
+ * Quando habilitada, clicar no header da coluna ordena por ela.
+ *
+ * @param column_view Ponteiro para a tabela
+ * @param column_id ID da coluna
+ * @param sortable true para permitir ordenação por clique
+ */
+void eg_column_view_set_column_sortable(EgColumnView *column_view, int column_id, bool sortable);
+
 /**
  * Converte para EgWidget.
  *

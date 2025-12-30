@@ -164,6 +164,14 @@ EgListView *eg_list_view_new(EgSelectionMode selection_mode) {
     lv->on_activate = NULL;
     lv->activate_data = NULL;
 
+    /* Ordenação */
+    lv->sorter = NULL;
+    lv->sort_model = NULL;
+    lv->auto_sort_enabled = false;
+    lv->auto_sort_ascending = true;
+    lv->custom_compare = NULL;
+    lv->custom_compare_data = NULL;
+
     return lv;
 }
 
@@ -362,4 +370,126 @@ EgWidget *eg_list_view_as_widget(EgListView *list_view) {
 void *eg_list_view_get_native(EgListView *list_view) {
     if (list_view == NULL) return NULL;
     return list_view->base.native;
+}
+
+/* ============================================
+ * Ordenação
+ * ============================================ */
+
+/* Estrutura auxiliar para QuickSort */
+typedef struct {
+    char **items;
+    int count;
+    EgListViewCompareFunc compare;
+    void *user_data;
+    bool ascending;
+} SortContext;
+
+/* Comparação padrão (strcmp) */
+static int default_compare(const char *a, const char *b, void *user_data) {
+    (void)user_data;
+    if (a == NULL && b == NULL) return 0;
+    if (a == NULL) return -1;
+    if (b == NULL) return 1;
+    return strcmp(a, b);
+}
+
+/* Função de comparação para qsort */
+static int qsort_compare(const void *a, const void *b) {
+    const char *str_a = *(const char **)a;
+    const char *str_b = *(const char **)b;
+    return default_compare(str_a, str_b, NULL);
+}
+
+static int qsort_compare_desc(const void *a, const void *b) {
+    return -qsort_compare(a, b);
+}
+
+/* Função auxiliar para ordenar a lista */
+static void sort_list_items(EgListView *list_view, bool ascending,
+                            EgListViewCompareFunc compare_func, void *user_data) {
+    if (list_view == NULL || list_view->selection_model == NULL) return;
+
+    /* Obtem modelo */
+    GListModel *model = NULL;
+    if (GTK_IS_SINGLE_SELECTION(list_view->selection_model)) {
+        model = gtk_single_selection_get_model(GTK_SINGLE_SELECTION(list_view->selection_model));
+    } else if (GTK_IS_MULTI_SELECTION(list_view->selection_model)) {
+        model = gtk_multi_selection_get_model(GTK_MULTI_SELECTION(list_view->selection_model));
+    } else if (GTK_IS_NO_SELECTION(list_view->selection_model)) {
+        model = gtk_no_selection_get_model(GTK_NO_SELECTION(list_view->selection_model));
+    }
+
+    if (!GTK_IS_STRING_LIST(model)) return;
+
+    GtkStringList *string_list = GTK_STRING_LIST(model);
+    guint n = g_list_model_get_n_items(G_LIST_MODEL(string_list));
+    if (n <= 1) return;
+
+    /* Copia todos os itens para array */
+    char **items = (char **)malloc(n * sizeof(char *));
+    if (items == NULL) return;
+
+    for (guint i = 0; i < n; i++) {
+        GtkStringObject *obj = GTK_STRING_OBJECT(g_list_model_get_item(G_LIST_MODEL(string_list), i));
+        items[i] = g_strdup(gtk_string_object_get_string(obj));
+        g_object_unref(obj);
+    }
+
+    /* Ordena usando qsort (para simplicidade, não usa compare_func customizada no qsort) */
+    if (compare_func == NULL) {
+        if (ascending) {
+            qsort(items, n, sizeof(char *), qsort_compare);
+        } else {
+            qsort(items, n, sizeof(char *), qsort_compare_desc);
+        }
+    } else {
+        /* Para função customizada, usamos bubble sort para manter user_data acessível */
+        for (guint i = 0; i < n - 1; i++) {
+            for (guint j = 0; j < n - i - 1; j++) {
+                int cmp = compare_func(items[j], items[j + 1], user_data);
+                if ((ascending && cmp > 0) || (!ascending && cmp < 0)) {
+                    char *temp = items[j];
+                    items[j] = items[j + 1];
+                    items[j + 1] = temp;
+                }
+            }
+        }
+    }
+
+    /* Limpa e repopula a lista */
+    gtk_string_list_splice(string_list, 0, n, NULL);
+
+    for (guint i = 0; i < n; i++) {
+        gtk_string_list_append(string_list, items[i]);
+        g_free(items[i]);
+    }
+
+    free(items);
+}
+
+void eg_list_view_sort_ascending(EgListView *list_view) {
+    sort_list_items(list_view, true, NULL, NULL);
+}
+
+void eg_list_view_sort_descending(EgListView *list_view) {
+    sort_list_items(list_view, false, NULL, NULL);
+}
+
+void eg_list_view_sort_custom(EgListView *list_view, EgListViewCompareFunc compare_func, void *user_data) {
+    if (compare_func == NULL) return;
+    sort_list_items(list_view, true, compare_func, user_data);
+}
+
+void eg_list_view_set_auto_sort(EgListView *list_view, bool ascending) {
+    if (list_view == NULL) return;
+    list_view->auto_sort_enabled = true;
+    list_view->auto_sort_ascending = ascending;
+    /* Ordena imediatamente */
+    sort_list_items(list_view, ascending, NULL, NULL);
+}
+
+void eg_list_view_disable_auto_sort(EgListView *list_view) {
+    if (list_view == NULL) return;
+    list_view->auto_sort_enabled = false;
 }

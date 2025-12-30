@@ -257,3 +257,27 @@ bool eg_window_get_decorated(EgWindow *window) {
     if (window == NULL || window->base.native == NULL) return true;
     return gtk_window_get_decorated(GTK_WINDOW(window->base.native));
 }
+
+void eg_window_set_transient_for(EgWindow *window, EgWindow *parent) {
+    if (window == NULL || window->base.native == NULL) return;
+    GtkWindow *parent_window = NULL;
+    if (parent != NULL && parent->base.native != NULL) {
+        parent_window = GTK_WINDOW(parent->base.native);
+    }
+    gtk_window_set_transient_for(GTK_WINDOW(window->base.native), parent_window);
+}
+
+void eg_window_set_modal(EgWindow *window, bool modal) {
+    if (window == NULL || window->base.native == NULL) return;
+    gtk_window_set_modal(GTK_WINDOW(window->base.native), modal);
+}
+
+bool eg_window_get_modal(EgWindow *window) {
+    if (window == NULL || window->base.native == NULL) return false;
+    return gtk_window_get_modal(GTK_WINDOW(window->base.native));
+}
+
+void eg_window_set_destroy_on_close(EgWindow *window, bool destroy_on_close) {
+    if (window == NULL || window->base.native == NULL) return;
+    gtk_window_set_destroy_with_parent(GTK_WINDOW(window->base.native), destroy_on_close);
+}

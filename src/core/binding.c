@@ -11,7 +11,10 @@
 #include <easygtk/spin_button.h>
 #include <easygtk/scale.h>
 #include <easygtk/button.h>
+#include <easygtk/list_view.h>
+#include <easygtk/column_view.h>
 #include <stdio.h>
+#include <string.h>
 
 /* ============================================
  * Entry <-> String Property (Two-Way)
@@ -448,6 +451,236 @@ bool eg_bind_button_command(EgButton *button, EgViewModel *vm, const char *comma
 
     /* Sincroniza estado inicial */
     button_command_on_can_execute_changed(NULL, NULL, data);
+
+    return true;
+}
+
+/* ============================================
+ * ListView Selection Binding
+ * ============================================ */
+
+typedef struct {
+    EgListView *list_view;
+    EgListViewSelectionCallback callback;
+    void *user_data;
+} ListViewSelectionBindingData;
+
+static void list_view_selection_changed_wrapper(EgWidget *widget, void *user_data) {
+    ListViewSelectionBindingData *data = (ListViewSelectionBindingData *)user_data;
+    EgListView *list_view = (EgListView *)widget;
+
+    int selected = eg_list_view_get_selected(list_view);
+    const char *text = NULL;
+    if (selected >= 0) {
+        text = eg_list_view_get_item(list_view, (unsigned int)selected);
+    }
+
+    if (data->callback) {
+        data->callback(list_view, selected, text, data->user_data);
+    }
+}
+
+bool eg_bind_list_view_selection(EgListView *list_view,
+                                  EgListViewSelectionCallback callback,
+                                  void *user_data) {
+    if (list_view == NULL || callback == NULL) return false;
+
+    ListViewSelectionBindingData *data = EG_ALLOC(ListViewSelectionBindingData);
+    if (data == NULL) return false;
+
+    data->list_view = list_view;
+    data->callback = callback;
+    data->user_data = user_data;
+
+    eg_list_view_on_selection_changed(list_view, list_view_selection_changed_wrapper, data);
+
+    return true;
+}
+
+/* ============================================
+ * ListView Items Binding (ViewModel -> ListView)
+ * ============================================ */
+
+typedef struct {
+    EgListView *list_view;
+    EgProperty *items_property;
+    EgProperty *selected_property;
+    EgViewModel *vm;
+} ListViewItemsBindingData;
+
+static void list_view_items_on_property_changed(EgProperty *property, void *user_data) {
+    (void)property;
+    ListViewItemsBindingData *data = (ListViewItemsBindingData *)user_data;
+
+    /* Para simplificar, assumimos que items_property é do tipo STRING
+       e contém itens separados por '\n' */
+    const char *items_str = eg_property_get_string(data->items_property);
+    if (items_str == NULL) {
+        eg_list_view_clear(data->list_view);
+        return;
+    }
+
+    /* Limpa e repopula */
+    eg_list_view_clear(data->list_view);
+
+    /* Parse simples por linhas */
+    const char *start = items_str;
+    const char *end;
+    char buffer[256];
+
+    while (*start) {
+        end = start;
+        while (*end && *end != '\n') end++;
+
+        size_t len = (size_t)(end - start);
+        if (len > 0 && len < sizeof(buffer)) {
+            memcpy(buffer, start, len);
+            buffer[len] = '\0';
+            eg_list_view_append(data->list_view, buffer);
+        }
+
+        if (*end == '\n') end++;
+        start = end;
+    }
+}
+
+static void list_view_items_selection_changed(EgWidget *widget, void *user_data) {
+    ListViewItemsBindingData *data = (ListViewItemsBindingData *)user_data;
+    EgListView *list_view = (EgListView *)widget;
+
+    if (data->selected_property) {
+        int selected = eg_list_view_get_selected(list_view);
+        eg_property_set_int(data->selected_property, selected);
+    }
+}
+
+bool eg_bind_list_view_items(EgListView *list_view, EgViewModel *vm,
+                              const char *items_property_name,
+                              const char *selected_property_name) {
+    if (list_view == NULL || vm == NULL || items_property_name == NULL) return false;
+
+    EgProperty *items_property = eg_view_model_get_property(vm, items_property_name);
+    if (items_property == NULL) return false;
+
+    EgProperty *selected_property = NULL;
+    if (selected_property_name != NULL) {
+        selected_property = eg_view_model_get_property(vm, selected_property_name);
+    }
+
+    ListViewItemsBindingData *data = EG_ALLOC(ListViewItemsBindingData);
+    if (data == NULL) return false;
+
+    data->list_view = list_view;
+    data->items_property = items_property;
+    data->selected_property = selected_property;
+    data->vm = vm;
+
+    /* Property -> Widget */
+    eg_property_on_changed(items_property, list_view_items_on_property_changed, data);
+
+    /* Selection -> Property */
+    if (selected_property) {
+        eg_list_view_on_selection_changed(list_view, list_view_items_selection_changed, data);
+    }
+
+    /* Sincroniza valor inicial */
+    list_view_items_on_property_changed(items_property, data);
+
+    return true;
+}
+
+/* ============================================
+ * ColumnView Selection Binding
+ * ============================================ */
+
+typedef struct {
+    EgColumnView *column_view;
+    EgColumnViewSelectionCallback callback;
+    void *user_data;
+} ColumnViewSelectionBindingData;
+
+static void column_view_selection_changed_wrapper(EgWidget *widget, void *user_data) {
+    ColumnViewSelectionBindingData *data = (ColumnViewSelectionBindingData *)user_data;
+    EgColumnView *column_view = (EgColumnView *)widget;
+
+    int selected = eg_column_view_get_selected_row(column_view);
+
+    if (data->callback) {
+        data->callback(column_view, selected, data->user_data);
+    }
+}
+
+bool eg_bind_column_view_selection(EgColumnView *column_view,
+                                    EgColumnViewSelectionCallback callback,
+                                    void *user_data) {
+    if (column_view == NULL || callback == NULL) return false;
+
+    ColumnViewSelectionBindingData *data = EG_ALLOC(ColumnViewSelectionBindingData);
+    if (data == NULL) return false;
+
+    data->column_view = column_view;
+    data->callback = callback;
+    data->user_data = user_data;
+
+    eg_column_view_on_selection_changed(column_view, column_view_selection_changed_wrapper, data);
+
+    return true;
+}
+
+/* ============================================
+ * ColumnView Rows Binding (ViewModel -> ColumnView)
+ * ============================================ */
+
+typedef struct {
+    EgColumnView *column_view;
+    EgProperty *rows_property;
+    EgProperty *selected_property;
+    EgViewModel *vm;
+} ColumnViewRowsBindingData;
+
+static void column_view_rows_selection_changed(EgWidget *widget, void *user_data) {
+    ColumnViewRowsBindingData *data = (ColumnViewRowsBindingData *)user_data;
+    EgColumnView *column_view = (EgColumnView *)widget;
+
+    if (data->selected_property) {
+        int selected = eg_column_view_get_selected_row(column_view);
+        eg_property_set_int(data->selected_property, selected);
+    }
+}
+
+bool eg_bind_column_view_rows(EgColumnView *column_view, EgViewModel *vm,
+                               const char *rows_property_name,
+                               const char *selected_property_name) {
+    if (column_view == NULL || vm == NULL) return false;
+
+    EgProperty *rows_property = NULL;
+    if (rows_property_name != NULL) {
+        rows_property = eg_view_model_get_property(vm, rows_property_name);
+    }
+
+    EgProperty *selected_property = NULL;
+    if (selected_property_name != NULL) {
+        selected_property = eg_view_model_get_property(vm, selected_property_name);
+    }
+
+    if (rows_property == NULL && selected_property == NULL) return false;
+
+    ColumnViewRowsBindingData *data = EG_ALLOC(ColumnViewRowsBindingData);
+    if (data == NULL) return false;
+
+    data->column_view = column_view;
+    data->rows_property = rows_property;
+    data->selected_property = selected_property;
+    data->vm = vm;
+
+    /* Selection -> Property */
+    if (selected_property) {
+        eg_column_view_on_selection_changed(column_view, column_view_rows_selection_changed, data);
+    }
+
+    /* Note: O binding completo de rows requer uma estrutura de dados mais complexa.
+       Para uma implementação completa, seria necessário um tipo EG_PROPERTY_TYPE_TABLE
+       ou similar. Por ora, focamos no binding de seleção que é o mais usado. */
 
     return true;
 }

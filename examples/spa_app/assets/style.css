@@ -770,3 +770,177 @@ headerbar {
     background-color: #40a02b;
     color: #ffffff;
 }
+
+/* ============================================
+ * ListView & ColumnView Widgets
+ * ============================================ */
+
+/* ListView base */
+listview {
+    background-color: #1e1e2e;
+    color: #cdd6f4;
+}
+
+listview > row {
+    background-color: transparent;
+    padding: 8px 12px;
+    border-bottom: 1px solid #313244;
+}
+
+listview > row:hover {
+    background-color: #313244;
+}
+
+listview > row:selected {
+    background-color: #89b4fa;
+    color: #1e1e2e;
+}
+
+listview > row:selected:hover {
+    background-color: #74c7ec;
+}
+
+/* ColumnView base */
+columnview {
+    background-color: #1e1e2e;
+    color: #cdd6f4;
+}
+
+/* ColumnView header row */
+columnview > header > button {
+    background-color: #2d2d44;
+    color: #cdd6f4;
+    border: none;
+    border-bottom: 2px solid #3d3d5c;
+    padding: 6px 12px;
+    font-weight: bold;
+    min-height: 32px;
+}
+
+columnview > header > button:hover {
+    background-color: #313244;
+}
+
+columnview > header > button:active {
+    background-color: #45475a;
+}
+
+/* Sort indicator in header */
+columnview > header > button image {
+    color: #89b4fa;
+    min-width: 16px;
+    min-height: 16px;
+}
+
+/* ColumnView rows (listview inside columnview) */
+columnview listview {
+    background-color: #1e1e2e;
+}
+
+columnview listview > row {
+    background-color: transparent;
+}
+
+columnview listview > row:hover {
+    background-color: #262637;
+}
+
+columnview listview > row:selected {
+    background-color: #89b4fa;
+    color: #1e1e2e;
+}
+
+columnview listview > row:selected:hover {
+    background-color: #74c7ec;
+}
+
+/* Cell styling */
+columnview listview > row > cell {
+    padding: 0;
+}
+
+/* Labels inside cells */
+columnview listview > row > cell > label {
+    padding: 6px 8px;
+}
+
+/* Light theme overrides */
+.light-theme listview {
+    background-color: #ffffff;
+    color: #4c4f69;
+}
+
+.light-theme listview > row {
+    border-bottom: 1px solid #ccd0da;
+}
+
+.light-theme listview > row:hover {
+    background-color: #e6e9ef;
+}
+
+.light-theme listview > row:selected {
+    background-color: #1e66f5;
+    color: #ffffff;
+}
+
+.light-theme listview > row:selected:hover {
+    background-color: #2d74f5;
+}
+
+.light-theme columnview {
+    background-color: #ffffff;
+    color: #4c4f69;
+}
+
+.light-theme columnview > header > button {
+    background-color: #e6e9ef;
+    color: #4c4f69;
+    border: none;
+    border-bottom: 2px solid #bcc0cc;
+}
+
+.light-theme columnview > header > button:hover {
+    background-color: #dce0e8;
+}
+
+.light-theme columnview > header > button:active {
+    background-color: #ccd0da;
+}
+
+.light-theme columnview > header > button image {
+    color: #1e66f5;
+}
+
+.light-theme columnview listview {
+    background-color: #ffffff;
+}
+
+.light-theme columnview listview > row {
+    background-color: transparent;
+}
+
+.light-theme columnview listview > row:hover {
+    background-color: #e6e9ef;
+}
+
+.light-theme columnview listview > row:selected {
+    background-color: #1e66f5;
+    color: #ffffff;
+}
+
+.light-theme columnview listview > row:selected:hover {
+    background-color: #2d74f5;
+}
+
+.light-theme columnview listview > row > cell {
+    padding: 0;
+}
+
+.light-theme columnview listview > row > cell > label {
+    padding: 6px 8px;
+}
+
+.light-theme columnview > header > button {
+    padding: 6px 8px;
+    min-height: 32px;
+}

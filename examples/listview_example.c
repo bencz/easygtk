@@ -130,6 +130,44 @@ static void on_clear_all(EgWidget *widget, void *user_data) {
     eg_label_set_text(status_label, "Todas as listas foram limpas");
 }
 
+/* ================== Ordenação ================== */
+
+static void on_sort_list_asc(EgWidget *widget, void *user_data) {
+    (void)widget;
+    (void)user_data;
+    eg_list_view_sort_ascending(list_view);
+    eg_label_set_text(status_label, "ListView ordenada A-Z");
+}
+
+static void on_sort_list_desc(EgWidget *widget, void *user_data) {
+    (void)widget;
+    (void)user_data;
+    eg_list_view_sort_descending(list_view);
+    eg_label_set_text(status_label, "ListView ordenada Z-A");
+}
+
+static void on_sort_table_by_name(EgWidget *widget, void *user_data) {
+    (void)widget;
+    static bool ascending = true;
+    eg_column_view_sort_by_column(column_view, 1, ascending);
+    char buffer[64];
+    snprintf(buffer, sizeof(buffer), "ColumnView ordenada por Nome (%s)", ascending ? "A-Z" : "Z-A");
+    eg_label_set_text(status_label, buffer);
+    ascending = !ascending;
+    (void)user_data;
+}
+
+static void on_sort_table_by_email(EgWidget *widget, void *user_data) {
+    (void)widget;
+    static bool ascending = true;
+    eg_column_view_sort_by_column(column_view, 2, ascending);
+    char buffer[64];
+    snprintf(buffer, sizeof(buffer), "ColumnView ordenada por Email (%s)", ascending ? "A-Z" : "Z-A");
+    eg_label_set_text(status_label, buffer);
+    ascending = !ascending;
+    (void)user_data;
+}
+
 /* ================== Criação da UI ================== */
 
 static EgWidget *create_list_view_section(void) {
@@ -163,7 +201,7 @@ static EgWidget *create_list_view_section(void) {
 
     eg_box_append(box, eg_scrolled_window_as_widget(scroll));
 
-    /* Botões */
+    /* Botões de ação */
     EgBox *btn_box = eg_box_new_horizontal(5);
 
     EgButton *btn_add = eg_button_new("Adicionar");
@@ -176,6 +214,22 @@ static EgWidget *create_list_view_section(void) {
     eg_box_append(btn_box, eg_button_as_widget(btn_remove));
 
     eg_box_append(box, eg_box_as_widget(btn_box));
+
+    /* Botões de ordenação */
+    EgBox *sort_box = eg_box_new_horizontal(5);
+
+    EgLabel *sort_label = eg_label_new("Ordenar:");
+    eg_box_append(sort_box, eg_label_as_widget(sort_label));
+
+    EgButton *btn_sort_asc = eg_button_new("A-Z");
+    eg_button_on_click(btn_sort_asc, on_sort_list_asc, NULL);
+    eg_box_append(sort_box, eg_button_as_widget(btn_sort_asc));
+
+    EgButton *btn_sort_desc = eg_button_new("Z-A");
+    eg_button_on_click(btn_sort_desc, on_sort_list_desc, NULL);
+    eg_box_append(sort_box, eg_button_as_widget(btn_sort_desc));
+
+    eg_box_append(box, eg_box_as_widget(sort_box));
 
     eg_frame_set_child(frame, eg_box_as_widget(box));
 
@@ -191,12 +245,23 @@ static EgWidget *create_column_view_section(void) {
     /* Tabela */
     column_view = eg_column_view_new(EG_SELECTION_SINGLE);
 
-    /* Adiciona colunas */
-    eg_column_view_add_column_with_width(column_view, "ID", 0, 60);
+    /* Adiciona colunas - todas com expand para alinhamento correto */
+    int id_col = eg_column_view_add_column(column_view, "ID", 0);
     int name_col = eg_column_view_add_column(column_view, "Nome", 1);
+    int email_col = eg_column_view_add_column(column_view, "Email", 2);
+    int status_col = eg_column_view_add_column(column_view, "Status", 3);
+
+    /* Todas as colunas expandem proporcionalmente */
+    eg_column_view_set_column_expand(column_view, id_col, true);
     eg_column_view_set_column_expand(column_view, name_col, true);
-    eg_column_view_add_column(column_view, "Email", 2);
-    eg_column_view_add_column_with_width(column_view, "Status", 3, 80);
+    eg_column_view_set_column_expand(column_view, email_col, true);
+    eg_column_view_set_column_expand(column_view, status_col, true);
+
+    /* Habilita ordenação por clique no header */
+    eg_column_view_set_column_sortable(column_view, id_col, true);
+    eg_column_view_set_column_sortable(column_view, name_col, true);
+    eg_column_view_set_column_sortable(column_view, email_col, true);
+    eg_column_view_set_column_sortable(column_view, status_col, true);
 
     /* Adiciona dados */
     eg_column_view_append_rowv(column_view, "1", "Ana Silva", "ana@email.com", "Ativo", NULL);
@@ -218,7 +283,7 @@ static EgWidget *create_column_view_section(void) {
 
     eg_box_append(box, eg_scrolled_window_as_widget(scroll));
 
-    /* Botões */
+    /* Botões de ação */
     EgBox *btn_box = eg_box_new_horizontal(5);
 
     EgButton *btn_add = eg_button_new("Adicionar Linha");
@@ -231,6 +296,22 @@ static EgWidget *create_column_view_section(void) {
     eg_box_append(btn_box, eg_button_as_widget(btn_remove));
 
     eg_box_append(box, eg_box_as_widget(btn_box));
+
+    /* Botões de ordenação */
+    EgBox *sort_box = eg_box_new_horizontal(5);
+
+    EgLabel *sort_label = eg_label_new("Ordenar por:");
+    eg_box_append(sort_box, eg_label_as_widget(sort_label));
+
+    EgButton *btn_sort_name = eg_button_new("Nome");
+    eg_button_on_click(btn_sort_name, on_sort_table_by_name, NULL);
+    eg_box_append(sort_box, eg_button_as_widget(btn_sort_name));
+
+    EgButton *btn_sort_email = eg_button_new("Email");
+    eg_button_on_click(btn_sort_email, on_sort_table_by_email, NULL);
+    eg_box_append(sort_box, eg_button_as_widget(btn_sort_email));
+
+    eg_box_append(box, eg_box_as_widget(sort_box));
 
     eg_frame_set_child(frame, eg_box_as_widget(box));
 
@@ -256,7 +337,7 @@ static void on_activate(EgWidget *widget, void *user_data) {
     /* Descrição */
     EgLabel *desc = eg_label_new(
         "ListView para listas simples (strings) e ColumnView para tabelas com multiplas colunas.\n"
-        "Clique em um item para selecionar, duplo clique para ativar."
+        "Clique em um item para selecionar, duplo clique para ativar. Use os botões de ordenação!"
     );
     eg_label_set_wrap(desc, true);
     eg_widget_add_css_class(eg_label_as_widget(desc), "dim-label");

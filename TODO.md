@@ -346,6 +346,9 @@ void eg_button_free(EgButton *btn) {
 - [x] eg_list_view_select / get_selected / get_selected_count / get_all_selected
 - [x] on_selection_changed
 - [x] on_activate (double-click)
+- [x] eg_list_view_sort_ascending / sort_descending
+- [x] eg_list_view_sort_custom (função de comparação customizada)
+- [x] eg_list_view_set_auto_sort / disable_auto_sort
 
 ### ColumnView (Tabela)
 - [x] eg_column_view_new()
@@ -358,6 +361,31 @@ void eg_button_free(EgButton *btn) {
 - [x] eg_column_view_select_row / get_selected_row / get_selected_rows / get_selected_count
 - [x] on_selection_changed
 - [x] on_row_activated (double-click)
+- [x] eg_column_view_sort_by_column (ordenação por coluna)
+- [x] eg_column_view_sort_custom (função de comparação customizada)
+- [x] eg_column_view_set_column_sortable (click-to-sort com GtkSorter)
+- [x] eg_column_view_set_auto_sort_column
+
+### Binding MVVM para Listas
+- [x] eg_bind_list_view_items (binding de itens via property)
+- [x] eg_bind_list_view_selection (callback de seleção para MVVM)
+- [x] eg_bind_column_view_rows (binding de linhas)
+- [x] eg_bind_column_view_selection (callback de seleção para MVVM)
+
+---
+
+## TreeView (Árvore Hierárquica) - A Implementar
+
+### EgTreeView
+- [ ] eg_tree_view_new()
+- [ ] Modelo de dados hierárquico (nós com filhos)
+- [ ] eg_tree_view_add_root / add_child
+- [ ] eg_tree_view_expand / collapse / expand_all / collapse_all
+- [ ] eg_tree_view_get_selected_path
+- [ ] on_selection_changed
+- [ ] on_row_expanded / on_row_collapsed
+- [ ] Suporte a múltiplas colunas na árvore
+- [ ] Ícones para nós (folder, file, etc.)
 
 ---
 
@@ -366,3 +394,4 @@ void eg_button_free(EgButton *btn) {
 1. **Alta**: ~~Timers~~, ~~CSS~~, ~~CheckButton~~, ~~Switch~~, ~~MessageDialog~~
 2. **Média**: ~~ScrolledWindow~~, ~~ComboBox~~, ~~ProgressBar~~, ~~FileChooser~~, ~~ColorChooser~~
 3. **Baixa**: ~~Menus~~, ~~ListView~~, ~~ColumnView~~, ~~Notebook~~, ~~HeaderBar~~, ~~Image~~, ~~Spinner~~, ~~LevelBar~~
+4. **Futura**: TreeView (árvore hierárquica)

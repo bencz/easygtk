@@ -220,6 +220,10 @@ struct EgListStore {
     GType item_type;
 };
 
+/* Forward declaration para funções de comparação */
+typedef int (*EgListViewCompareFunc)(const char *a, const char *b, void *user_data);
+typedef int (*EgColumnViewCompareFunc)(const char *a, const char *b, void *user_data);
+
 /* Estrutura de list view */
 struct EgListView {
     EgWidget base;
@@ -230,18 +234,31 @@ struct EgListView {
     void *selection_changed_data;
     EgCallback on_activate;
     void *activate_data;
+    /* Ordenação */
+    GtkSorter *sorter;
+    GtkSortListModel *sort_model;
+    bool auto_sort_enabled;
+    bool auto_sort_ascending;
+    EgListViewCompareFunc custom_compare;
+    void *custom_compare_data;
 };
 
 /* Estrutura de column view */
 struct EgColumnView {
     EgWidget base;
     EgListStore *store;
+    GtkSortListModel *sort_model;
     GtkSelectionModel *selection_model;
     EgSelectionMode selection_mode;
     EgCallback on_selection_changed;
     void *selection_changed_data;
     EgCallback on_activate;
     void *activate_data;
+    /* Ordenação */
+    int sort_column;
+    bool sort_ascending;
+    EgColumnViewCompareFunc custom_compare;
+    void *custom_compare_data;
 };
 
 /* Estrutura para dados de callback */
