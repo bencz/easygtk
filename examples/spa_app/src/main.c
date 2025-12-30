@@ -1,6 +1,7 @@
 /**
  * SPA App - Main Application
  * Modern Single Page Application with sidebar navigation
+ * Features custom titlebar with window controls
  */
 
 #include <easygtk/easygtk.h>
@@ -8,6 +9,22 @@
 #include "../include/app_state.h"
 #include "../include/pages.h"
 #include <stdio.h>
+
+/* Window control callbacks */
+static void on_minimize_click(EgWidget *widget, void *data) {
+    (void)widget; (void)data;
+    eg_window_minimize(g_app_state->main_window);
+}
+
+static void on_maximize_click(EgWidget *widget, void *data) {
+    (void)widget; (void)data;
+    eg_window_toggle_maximize(g_app_state->main_window);
+}
+
+static void on_close_click(EgWidget *widget, void *data) {
+    (void)widget; (void)data;
+    eg_window_close(g_app_state->main_window);
+}
 
 /* Navigation button callbacks (EgCallback signature) */
 static void on_dashboard_click(EgWidget *widget, void *data) {
@@ -28,6 +45,56 @@ static void on_products_click(EgWidget *widget, void *data) {
 static void on_settings_click(EgWidget *widget, void *data) {
     (void)widget; (void)data;
     app_state_navigate_to(PAGE_SETTINGS);
+}
+
+static EgWidget *create_custom_titlebar(void) {
+    EgHeaderBar *header = eg_header_bar_new();
+
+    /* Hide default window buttons - we'll add our own */
+    eg_header_bar_set_show_title_buttons(header, false);
+
+    /* Title widget */
+    EgBox *title_box = eg_box_new_vertical(2);
+    eg_widget_set_valign(eg_box_as_widget(title_box), EG_ALIGN_CENTER);
+
+    EgLabel *title = eg_label_new("SPA Dashboard");
+    eg_widget_add_css_class(eg_label_as_widget(title), "titlebar-title");
+    eg_box_append(title_box, eg_label_as_widget(title));
+
+    EgLabel *subtitle = eg_label_new("Management System");
+    eg_widget_add_css_class(eg_label_as_widget(subtitle), "titlebar-subtitle");
+    eg_box_append(title_box, eg_label_as_widget(subtitle));
+
+    eg_header_bar_set_title_widget(header, eg_box_as_widget(title_box));
+
+    /* Window control buttons (right side) */
+    EgBox *controls = eg_box_new_horizontal(4);
+    eg_widget_set_valign(eg_box_as_widget(controls), EG_ALIGN_CENTER);
+
+    /* Minimize button */
+    EgButton *btn_min = eg_button_new("—");
+    eg_widget_add_css_class(eg_button_as_widget(btn_min), "window-button");
+    eg_widget_add_css_class(eg_button_as_widget(btn_min), "window-button-minimize");
+    eg_button_on_click(btn_min, on_minimize_click, NULL);
+    eg_box_append(controls, eg_button_as_widget(btn_min));
+
+    /* Maximize button */
+    EgButton *btn_max = eg_button_new("□");
+    eg_widget_add_css_class(eg_button_as_widget(btn_max), "window-button");
+    eg_widget_add_css_class(eg_button_as_widget(btn_max), "window-button-maximize");
+    eg_button_on_click(btn_max, on_maximize_click, NULL);
+    eg_box_append(controls, eg_button_as_widget(btn_max));
+
+    /* Close button */
+    EgButton *btn_close = eg_button_new("✕");
+    eg_widget_add_css_class(eg_button_as_widget(btn_close), "window-button");
+    eg_widget_add_css_class(eg_button_as_widget(btn_close), "window-button-close");
+    eg_button_on_click(btn_close, on_close_click, NULL);
+    eg_box_append(controls, eg_button_as_widget(btn_close));
+
+    eg_header_bar_pack_end(header, eg_box_as_widget(controls));
+
+    return eg_header_bar_as_widget(header);
 }
 
 static EgWidget *create_sidebar(void) {
@@ -142,6 +209,9 @@ static void on_activate(EgWidget *widget, void *user_data) {
     /* Create window */
     EgWindow *window = eg_window_new(app, "SPA Dashboard", 1200, 700);
     g_app_state->main_window = window;
+
+    /* Set custom titlebar */
+    eg_window_set_titlebar(window, create_custom_titlebar());
 
     /* Main stack (login vs app) */
     g_app_state->main_stack = eg_stack_new();

@@ -220,6 +220,13 @@ int main(int argc, char *argv[]) {
 - **Type Casting**: `eg_widget_cast_to_*()`, `eg_widget_is_type()`, `eg_widget_is_container()`
 - **Ref-counting**: `eg_widget_ref()`, `eg_widget_unref()`
 
+### Window Controls (Custom Titlebar)
+- **HeaderBar**: `eg_header_bar_new()`, `eg_header_bar_set_title_widget()`, `eg_header_bar_pack_start/end()`
+- **Custom Titlebar**: `eg_window_set_titlebar()` - Use custom HeaderBar instead of system decorations
+- **Window Control**: `eg_window_minimize()`, `eg_window_maximize()`, `eg_window_toggle_maximize()`
+- **Fullscreen**: `eg_window_fullscreen()`, `eg_window_unfullscreen()`, `eg_window_is_fullscreen()`
+- **Decoration**: `eg_window_set_decorated()` - Enable/disable system window decorations
+
 ## Exemplos
 
 Após compilar, os exemplos estarão em `build/`:

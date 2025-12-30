@@ -415,6 +415,67 @@ void *eg_window_get_native(EgWindow *window);
 ```
 Conversões de tipo.
 
+### Controle de Janela
+
+```c
+void eg_window_close(EgWindow *window);
+```
+Fecha a janela programaticamente.
+
+```c
+void eg_window_minimize(EgWindow *window);
+```
+Minimiza a janela.
+
+```c
+void eg_window_maximize(EgWindow *window);
+void eg_window_unmaximize(EgWindow *window);
+bool eg_window_is_maximized(EgWindow *window);
+void eg_window_toggle_maximize(EgWindow *window);
+```
+Controle de maximização. `toggle_maximize` alterna entre maximizado/normal.
+
+```c
+void eg_window_fullscreen(EgWindow *window);
+void eg_window_unfullscreen(EgWindow *window);
+bool eg_window_is_fullscreen(EgWindow *window);
+```
+Controle de modo tela cheia.
+
+```c
+void eg_window_set_decorated(EgWindow *window, bool decorated);
+bool eg_window_get_decorated(EgWindow *window);
+```
+Controla decorações do gerenciador de janelas (barra de título do sistema).
+Use `decorated=false` junto com `eg_window_set_titlebar()` para criar janelas com titlebar customizada.
+
+**Exemplo - Titlebar Customizada:**
+```c
+static void on_close_click(EgWidget *w, void *data) {
+    EgWindow *window = (EgWindow *)data;
+    eg_window_close(window);
+}
+
+static void on_maximize_click(EgWidget *w, void *data) {
+    EgWindow *window = (EgWindow *)data;
+    eg_window_toggle_maximize(window);
+}
+
+EgHeaderBar *header = eg_header_bar_new();
+eg_header_bar_set_show_title_buttons(header, false);  /* Esconde botões padrão */
+
+EgBox *controls = eg_box_new_horizontal(4);
+EgButton *btn_max = eg_button_new("□");
+EgButton *btn_close = eg_button_new("✕");
+eg_button_on_click(btn_max, on_maximize_click, window);
+eg_button_on_click(btn_close, on_close_click, window);
+eg_box_append(controls, eg_button_as_widget(btn_max));
+eg_box_append(controls, eg_button_as_widget(btn_close));
+
+eg_header_bar_pack_end(header, eg_box_as_widget(controls));
+eg_window_set_titlebar(window, eg_header_bar_as_widget(header));
+```
+
 ---
 
 ## Widgets Básicos

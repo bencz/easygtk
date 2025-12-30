@@ -677,3 +677,96 @@ scrollbar slider:hover {
 .light-theme .settings-description {
     color: #6c6f85;
 }
+
+/* ============================================
+ * Custom HeaderBar / Titlebar
+ * ============================================ */
+
+headerbar {
+    background: linear-gradient(180deg, #2d2d44 0%, #1e1e2e 100%);
+    border-bottom: 1px solid #3d3d5c;
+    padding: 0 8px;
+    min-height: 40px;
+}
+
+.light-theme headerbar {
+    background: linear-gradient(180deg, #e6e9ef 0%, #dce0e8 100%);
+    border-bottom: 1px solid #bcc0cc;
+}
+
+.titlebar-title {
+    color: #cdd6f4;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.light-theme .titlebar-title {
+    color: #4c4f69;
+}
+
+.titlebar-subtitle {
+    color: #7f849c;
+    font-size: 11px;
+}
+
+.light-theme .titlebar-subtitle {
+    color: #6c6f85;
+}
+
+/* Window control buttons */
+.window-button {
+    background: transparent;
+    border: none;
+    border-radius: 50%;
+    min-width: 28px;
+    min-height: 28px;
+    padding: 0;
+    margin: 0 2px;
+    color: #bac2de;
+    font-size: 14px;
+}
+
+.window-button:hover {
+    background-color: #313244;
+}
+
+.light-theme .window-button {
+    color: #5c5f77;
+}
+
+.light-theme .window-button:hover {
+    background-color: #ccd0da;
+}
+
+/* Close button special styling */
+.window-button-close:hover {
+    background-color: #f38ba8;
+    color: #1e1e2e;
+}
+
+.light-theme .window-button-close:hover {
+    background-color: #d20f39;
+    color: #ffffff;
+}
+
+/* Minimize button */
+.window-button-minimize:hover {
+    background-color: #f9e2af;
+    color: #1e1e2e;
+}
+
+.light-theme .window-button-minimize:hover {
+    background-color: #df8e1d;
+    color: #ffffff;
+}
+
+/* Maximize button */
+.window-button-maximize:hover {
+    background-color: #a6e3a1;
+    color: #1e1e2e;
+}
+
+.light-theme .window-button-maximize:hover {
+    background-color: #40a02b;
+    color: #ffffff;
+}

@@ -203,3 +203,57 @@ void *eg_window_get_native(EgWindow *window) {
     if (window == NULL) return NULL;
     return window->base.native;
 }
+
+void eg_window_minimize(EgWindow *window) {
+    if (window == NULL || window->base.native == NULL) return;
+    gtk_window_minimize(GTK_WINDOW(window->base.native));
+}
+
+void eg_window_maximize(EgWindow *window) {
+    if (window == NULL || window->base.native == NULL) return;
+    gtk_window_maximize(GTK_WINDOW(window->base.native));
+}
+
+void eg_window_unmaximize(EgWindow *window) {
+    if (window == NULL || window->base.native == NULL) return;
+    gtk_window_unmaximize(GTK_WINDOW(window->base.native));
+}
+
+bool eg_window_is_maximized(EgWindow *window) {
+    if (window == NULL || window->base.native == NULL) return false;
+    return gtk_window_is_maximized(GTK_WINDOW(window->base.native));
+}
+
+void eg_window_toggle_maximize(EgWindow *window) {
+    if (window == NULL || window->base.native == NULL) return;
+    if (gtk_window_is_maximized(GTK_WINDOW(window->base.native))) {
+        gtk_window_unmaximize(GTK_WINDOW(window->base.native));
+    } else {
+        gtk_window_maximize(GTK_WINDOW(window->base.native));
+    }
+}
+
+void eg_window_fullscreen(EgWindow *window) {
+    if (window == NULL || window->base.native == NULL) return;
+    gtk_window_fullscreen(GTK_WINDOW(window->base.native));
+}
+
+void eg_window_unfullscreen(EgWindow *window) {
+    if (window == NULL || window->base.native == NULL) return;
+    gtk_window_unfullscreen(GTK_WINDOW(window->base.native));
+}
+
+bool eg_window_is_fullscreen(EgWindow *window) {
+    if (window == NULL || window->base.native == NULL) return false;
+    return gtk_window_is_fullscreen(GTK_WINDOW(window->base.native));
+}
+
+void eg_window_set_decorated(EgWindow *window, bool decorated) {
+    if (window == NULL || window->base.native == NULL) return;
+    gtk_window_set_decorated(GTK_WINDOW(window->base.native), decorated);
+}
+
+bool eg_window_get_decorated(EgWindow *window) {
+    if (window == NULL || window->base.native == NULL) return true;
+    return gtk_window_get_decorated(GTK_WINDOW(window->base.native));
+}

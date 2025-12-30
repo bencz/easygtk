@@ -303,6 +303,15 @@ void eg_button_free(EgButton *btn) {
 - [x] eg_header_bar_set_show_title_buttons
 - [x] eg_header_bar_set_decoration_layout
 
+### Window Controls (Custom Titlebar Support)
+- [x] eg_window_minimize
+- [x] eg_window_maximize / eg_window_unmaximize
+- [x] eg_window_toggle_maximize
+- [x] eg_window_is_maximized
+- [x] eg_window_fullscreen / eg_window_unfullscreen
+- [x] eg_window_is_fullscreen
+- [x] eg_window_set_decorated / eg_window_get_decorated
+
 ### PopoverMenu
 - [ ] eg_popover_menu_new()
 - [ ] eg_popover_menu_add_item

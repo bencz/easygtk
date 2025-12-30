@@ -137,11 +137,86 @@ EgWidget *eg_window_as_widget(EgWindow *window);
 
 /**
  * Obtém o ponteiro nativo GTK.
- * 
+ *
  * @param window Ponteiro para a janela
  * @return Ponteiro para GtkWindow
  */
 void *eg_window_get_native(EgWindow *window);
+
+/**
+ * Minimiza a janela.
+ *
+ * @param window Ponteiro para a janela
+ */
+void eg_window_minimize(EgWindow *window);
+
+/**
+ * Maximiza a janela.
+ *
+ * @param window Ponteiro para a janela
+ */
+void eg_window_maximize(EgWindow *window);
+
+/**
+ * Restaura a janela do estado maximizado.
+ *
+ * @param window Ponteiro para a janela
+ */
+void eg_window_unmaximize(EgWindow *window);
+
+/**
+ * Verifica se a janela está maximizada.
+ *
+ * @param window Ponteiro para a janela
+ * @return true se maximizada
+ */
+bool eg_window_is_maximized(EgWindow *window);
+
+/**
+ * Alterna entre maximizado e restaurado.
+ *
+ * @param window Ponteiro para a janela
+ */
+void eg_window_toggle_maximize(EgWindow *window);
+
+/**
+ * Coloca a janela em modo fullscreen.
+ *
+ * @param window Ponteiro para a janela
+ */
+void eg_window_fullscreen(EgWindow *window);
+
+/**
+ * Remove a janela do modo fullscreen.
+ *
+ * @param window Ponteiro para a janela
+ */
+void eg_window_unfullscreen(EgWindow *window);
+
+/**
+ * Verifica se a janela está em fullscreen.
+ *
+ * @param window Ponteiro para a janela
+ * @return true se fullscreen
+ */
+bool eg_window_is_fullscreen(EgWindow *window);
+
+/**
+ * Define se a janela deve ter decoração do sistema (borda nativa).
+ * Use false para criar uma janela completamente customizada.
+ *
+ * @param window Ponteiro para a janela
+ * @param decorated true para usar decoração do sistema
+ */
+void eg_window_set_decorated(EgWindow *window, bool decorated);
+
+/**
+ * Verifica se a janela tem decoração do sistema.
+ *
+ * @param window Ponteiro para a janela
+ * @return true se decorada
+ */
+bool eg_window_get_decorated(EgWindow *window);
 
 #ifdef __cplusplus
 }
