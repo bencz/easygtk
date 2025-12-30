@@ -26,10 +26,39 @@ if(NOT SQLITE3_FOUND)
     endif()
 endif()
 
-# EasyGTK
-set(EASYGTK_DIR "${CMAKE_CURRENT_SOURCE_DIR}/..")
-include_directories(${EASYGTK_DIR}/include)
-link_directories(${EASYGTK_DIR}/build)
+# EasyGTK - Try to find in parent project first, fallback to system
+set(EASYGTK_PARENT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../..")
+if(EXISTS "${EASYGTK_PARENT_DIR}/include/easygtk/easygtk.h" AND EXISTS "${EASYGTK_PARENT_DIR}/build/libeasygtk.so")
+    # Found in parent project (development mode)
+    set(EASYGTK_FOUND TRUE)
+    set(EASYGTK_INCLUDE_DIRS "${EASYGTK_PARENT_DIR}/include")
+    set(EASYGTK_LIBRARY_DIRS "${EASYGTK_PARENT_DIR}/build")
+    set(EASYGTK_LIBRARIES "easygtk")
+    message(STATUS "EasyGTK found in parent project: ${EASYGTK_PARENT_DIR}")
+else()
+    # Try pkg-config
+    pkg_check_modules(EASYGTK easygtk)
+    if(NOT EASYGTK_FOUND)
+        # Manual search in system paths
+        find_path(EASYGTK_INCLUDE_DIR easygtk/easygtk.h)
+        find_library(EASYGTK_LIBRARY easygtk)
+        if(EASYGTK_INCLUDE_DIR AND EASYGTK_LIBRARY)
+            set(EASYGTK_FOUND TRUE)
+            set(EASYGTK_INCLUDE_DIRS ${EASYGTK_INCLUDE_DIR})
+            set(EASYGTK_LIBRARIES ${EASYGTK_LIBRARY})
+            message(STATUS "EasyGTK found in system: ${EASYGTK_LIBRARY}")
+        else()
+            message(FATAL_ERROR "EasyGTK not found. Build the main project first or install easygtk.")
+        endif()
+    else()
+        message(STATUS "EasyGTK found via pkg-config")
+    endif()
+endif()
+
+include_directories(${EASYGTK_INCLUDE_DIRS})
+if(EASYGTK_LIBRARY_DIRS)
+    link_directories(${EASYGTK_LIBRARY_DIRS})
+endif()
 
 # Sources
 set(SOURCES
@@ -53,7 +82,7 @@ target_include_directories(spa_dashboard PRIVATE
 )
 
 target_link_libraries(spa_dashboard PRIVATE
-    easygtk
+    ${EASYGTK_LIBRARIES}
     ${GTK4_LIBRARIES}
     ${SQLITE3_LIBRARIES}
 )
