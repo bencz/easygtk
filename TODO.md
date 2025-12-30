@@ -25,12 +25,79 @@
   - [x] eg_bind_widget_sensitive (one-way)
   - [x] eg_bind_button_command (command binding)
 
+### MVVM Avançado - A Implementar
+
+#### Refatoração: Binding via VTable (Prioridade Alta)
+Atualmente temos funções específicas por widget (`eg_bind_entry_text`, `eg_bind_label_text`, etc.).
+Isso não escala bem e dificulta extensibilidade.
+
+**Proposta**: Usar a vtable dos widgets para declarar capacidades de binding.
+
+```c
+/* Cada widget declara na sua vtable como fazer binding */
+typedef struct EgWidgetVTable {
+    /* ... campos existentes ... */
+
+    /* Binding capabilities */
+    bool (*bind_value)(EgWidget *widget, EgProperty *prop, EgBindingMode mode);
+    bool (*bind_command)(EgWidget *widget, EgCommand *cmd);
+    EgPropertyType supported_binding_type;  /* STRING, INT, BOOL, etc. */
+} EgWidgetVTable;
+
+/* API genérica e limpa */
+eg_bind(widget, vm, "property_name");           /* Usa vtable para descobrir como bindar */
+eg_bind_command(widget, vm, "command_name");    /* Genérico para qualquer widget */
+
+/* Exemplos de uso - mesma função para todos os widgets */
+eg_bind(entry, vm, "username");      /* Entry sabe que é two-way string */
+eg_bind(label, vm, "counter");       /* Label sabe que é one-way, formata int */
+eg_bind(check, vm, "is_active");     /* CheckButton sabe que é two-way bool */
+eg_bind(scale, vm, "volume");        /* Scale sabe que é two-way double */
+```
+
+**Benefícios:**
+- Uma única função `eg_bind()` ao invés de N funções específicas
+- Novos widgets automaticamente suportam binding se implementarem vtable
+- Widgets customizados do usuário podem ter binding sem modificar o core
+- Código mais limpo e consistente
+
+**Implementação:**
+- [ ] Adicionar campos de binding na EgWidgetVTable
+- [ ] Implementar `eg_bind(widget, vm, property_name)` genérico
+- [ ] Migrar widgets existentes para usar vtable
+- [ ] Deprecar funções `eg_bind_<widget>_*` antigas
+- [ ] Documentar como criar widgets com binding customizado
+
+---
+
+#### Outras Melhorias MVVM
+- [ ] Validação reativa com feedback visual automático
+  - [ ] Entry fica com classe CSS "error" automaticamente
+  - [ ] Mensagens de erro bindadas a labels
+  - [ ] eg_bind_validation(widget, vm, prop, error_label)
+- [ ] CSS class binding
+  - [ ] eg_bind_css_class(widget, vm, "class-name", "bool_property")
+- [ ] Converters reutilizáveis
+  - [ ] Registro global de converters nomeados
+  - [ ] eg_converter_register("currency", format_currency, parse_currency)
+  - [ ] eg_bind_with_converter(widget, vm, prop, "currency")
+- [ ] Bindings condicionais sem callbacks manuais
+  - [ ] eg_bind_visible_when(widget, vm, "condition_property")
+  - [ ] eg_bind_sensitive_when(widget, vm, "condition_property")
+- [ ] ViewModel scopes (parent/child)
+  - [ ] eg_view_model_new_child(parent_vm)
+  - [ ] Propagação controlada de properties
+  - [ ] Herança de commands
+- [ ] Namespacing de properties
+  - [ ] Suporte a "user.name", "settings.theme" no binding
+  - [ ] Composição de ViewModels sem explosão de nomes
+
 ### Sistema de Signals Avançado (Lock-free)
 - [ ] Signal queue lock-free (atomic operations)
 - [ ] Async callbacks com continuations
 - [ ] eg_async_run(task, callback) - executa em thread, callback no main
 - [ ] eg_await pattern para operações assíncronas
-- [ ] Cancellation tokens
+- [ ] Cancellation tokens integrados ao ViewModel lifecycle
 
 ### Event Loop Customizado
 - [ ] Integração com io_uring (Linux) para I/O async
@@ -141,6 +208,16 @@ void eg_button_free(EgButton *btn) {
 - [x] Transformação de valores no binding (transform callback)
 - [x] Transformação reversa no binding bidirecional
 
+### Debug e DX (Developer Experience) - A Implementar
+- [ ] Modo debug para binding e MVVM
+  - [ ] Logs opcionais mostrando property changes e bindings disparados
+  - [ ] eg_debug_enable_binding_logs(bool)
+- [ ] Introspection leve
+  - [ ] eg_view_model_dump(vm) - dump de todas properties e valores
+  - [ ] eg_widget_dump_tree(widget) - dump da hierarquia de widgets
+- [ ] Assertions amigáveis
+  - [ ] Mensagens claras para property inexistente, tipo incompatível, widget inválido
+
 ---
 
 ## Widgets de Input
@@ -186,6 +263,33 @@ void eg_button_free(EgButton *btn) {
 - [x] eg_text_view_set_editable
 - [x] eg_text_view_on_changed
 
+### SearchEntry - A Implementar
+- [ ] eg_search_entry_new()
+- [ ] eg_search_entry_get_text / set_text
+- [ ] eg_search_entry_on_search_changed (debounced)
+- [ ] eg_search_entry_on_activate (Enter pressionado)
+- [ ] eg_search_entry_set_placeholder
+- [ ] Ícone de busca e botão de limpar integrados
+
+### PasswordEntry - A Implementar
+- [ ] eg_password_entry_new()
+- [ ] eg_password_entry_get_text / set_text
+- [ ] eg_password_entry_set_show_peek_icon (toggle visibilidade)
+- [ ] Integração com validação MVVM
+
+### DatePicker - A Implementar
+- [ ] eg_date_picker_new()
+- [ ] eg_date_picker_get_date / set_date
+- [ ] eg_date_picker_on_date_changed
+- [ ] eg_date_picker_set_format
+- [ ] Calendário popup para seleção
+
+### TimePicker - A Implementar
+- [ ] eg_time_picker_new()
+- [ ] eg_time_picker_get_time / set_time
+- [ ] eg_time_picker_on_time_changed
+- [ ] eg_time_picker_set_24h_format
+
 ---
 
 ## Containers
@@ -224,6 +328,31 @@ void eg_button_free(EgButton *btn) {
 - [x] eg_expander_new(label)
 - [x] eg_expander_set_child
 - [x] eg_expander_set_expanded
+
+### Overlay - A Implementar
+- [ ] eg_overlay_new()
+- [ ] eg_overlay_set_child (widget principal)
+- [ ] eg_overlay_add_overlay (widget sobreposto)
+- [ ] eg_overlay_remove_overlay
+- [ ] Suporte a posicionamento (halign, valign, margin)
+- [ ] Útil para loading states, badges, notificações
+
+### Revealer - A Implementar
+- [ ] eg_revealer_new()
+- [ ] eg_revealer_set_child
+- [ ] eg_revealer_set_reveal_child / get_reveal_child
+- [ ] eg_revealer_set_transition_type (slide, crossfade, etc.)
+- [ ] eg_revealer_set_transition_duration
+- [ ] Binding MVVM para reveal state
+
+### FlowBox - A Implementar
+- [ ] eg_flow_box_new()
+- [ ] eg_flow_box_append / insert / remove
+- [ ] eg_flow_box_set_selection_mode
+- [ ] eg_flow_box_set_max_children_per_line
+- [ ] eg_flow_box_set_column_spacing / row_spacing
+- [ ] on_child_activated
+- [ ] Útil para galerias, grids responsivos, cards
 
 ---
 
@@ -293,6 +422,36 @@ void eg_button_free(EgButton *btn) {
 
 ---
 
+## Feedback e Notificações - A Implementar
+
+### Toast / Snackbar
+- [ ] eg_toast_new(message)
+- [ ] eg_toast_set_timeout(ms)
+- [ ] eg_toast_set_button(label, callback) - ação opcional (ex: "Undo")
+- [ ] eg_toast_show(parent_window)
+- [ ] eg_toast_dismiss()
+- [ ] Empilhamento automático de múltiplos toasts
+- [ ] Posicionamento configurável (bottom, top)
+
+### InfoBar
+- [ ] eg_info_bar_new()
+- [ ] eg_info_bar_set_message_type (info, warning, error, question)
+- [ ] eg_info_bar_set_message(text)
+- [ ] eg_info_bar_add_button(label, response_id)
+- [ ] eg_info_bar_set_revealed / get_revealed
+- [ ] on_response callback
+- [ ] Binding MVVM para visibilidade e mensagem
+
+### LoadingOverlay - A Implementar
+- [ ] eg_loading_overlay_new()
+- [ ] eg_loading_overlay_set_child (widget a sobrepor)
+- [ ] eg_loading_overlay_set_loading(bool)
+- [ ] eg_loading_overlay_set_message(text)
+- [ ] Binding MVVM com property "is_busy"
+- [ ] Spinner + overlay semi-transparente
+
+---
+
 ## Menus e Ações
 
 ### HeaderBar
@@ -311,6 +470,9 @@ void eg_button_free(EgButton *btn) {
 - [x] eg_window_fullscreen / eg_window_unfullscreen
 - [x] eg_window_is_fullscreen
 - [x] eg_window_set_decorated / eg_window_get_decorated
+- [x] eg_window_set_transient_for
+- [x] eg_window_set_modal / eg_window_get_modal
+- [x] eg_window_set_destroy_on_close
 
 ### PopoverMenu
 - [x] eg_popover_menu_new()
@@ -332,6 +494,28 @@ void eg_button_free(EgButton *btn) {
 - [x] eg_menu_button_set_direction()
 - [x] eg_menu_button_set_has_frame()
 - [x] eg_menu_button_popup / popdown
+
+---
+
+## Navegação - A Implementar
+
+### Sidebar / NavigationView
+- [ ] eg_sidebar_new()
+- [ ] eg_sidebar_add_item(icon, label, page_name)
+- [ ] eg_sidebar_add_separator()
+- [ ] eg_sidebar_add_section(title)
+- [ ] eg_sidebar_set_selected(page_name)
+- [ ] eg_sidebar_on_selection_changed
+- [ ] Integração com Stack para navegação SPA
+- [ ] Binding MVVM para página ativa
+
+### Breadcrumbs
+- [ ] eg_breadcrumbs_new()
+- [ ] eg_breadcrumbs_push(label, data)
+- [ ] eg_breadcrumbs_pop()
+- [ ] eg_breadcrumbs_clear()
+- [ ] eg_breadcrumbs_on_item_clicked
+- [ ] Útil com TreeView para navegação hierárquica
 
 ---
 
@@ -372,6 +556,11 @@ void eg_button_free(EgButton *btn) {
 - [x] eg_bind_column_view_rows (binding de linhas)
 - [x] eg_bind_column_view_selection (callback de seleção para MVVM)
 
+### Melhorias Futuras para Listas
+- [ ] Virtualização explícita e documentada
+- [ ] Binding incremental (atualizar apenas itens afetados)
+- [ ] eg_list_view_update_item(index, new_value) sem rebuild
+
 ---
 
 ## TreeView (Árvore Hierárquica) - A Implementar
@@ -386,12 +575,65 @@ void eg_button_free(EgButton *btn) {
 - [ ] on_row_expanded / on_row_collapsed
 - [ ] Suporte a múltiplas colunas na árvore
 - [ ] Ícones para nós (folder, file, etc.)
+- [ ] Binding MVVM desde o início
 
 ---
 
-## Prioridades Sugeridas
+## Form Helpers - A Implementar
 
-1. **Alta**: ~~Timers~~, ~~CSS~~, ~~CheckButton~~, ~~Switch~~, ~~MessageDialog~~
-2. **Média**: ~~ScrolledWindow~~, ~~ComboBox~~, ~~ProgressBar~~, ~~FileChooser~~, ~~ColorChooser~~
-3. **Baixa**: ~~Menus~~, ~~ListView~~, ~~ColumnView~~, ~~Notebook~~, ~~HeaderBar~~, ~~Image~~, ~~Spinner~~, ~~LevelBar~~
-4. **Futura**: TreeView (árvore hierárquica)
+### EgFormGroup
+- [ ] eg_form_group_new(label)
+- [ ] eg_form_group_add_field(widget, label, error_label)
+- [ ] eg_form_group_set_orientation (vertical, horizontal)
+- [ ] Layout automático de label + widget + erro
+- [ ] Integração com validação MVVM
+
+### Focus Management
+- [ ] eg_widget_grab_focus_on_show
+- [ ] eg_form_focus_next() - avança para próximo campo
+- [ ] eg_entry_on_activate (Enter) para avançar foco
+- [ ] eg_form_set_default_button (Enter no último campo aciona)
+
+---
+
+## Prioridades - Roadmap
+
+### Fase 1: Widgets de Alta Demanda
+1. SearchEntry
+2. Overlay
+3. Revealer
+4. Toast/Snackbar
+5. InfoBar
+
+### Fase 2: Infraestrutura MVVM
+1. Validação reativa com feedback visual
+2. CSS class binding
+3. Form helpers
+4. ViewModel scopes
+
+### Fase 3: Async
+1. eg_async_run
+2. Cancellation tokens
+3. Property thread-safety
+
+### Fase 4: Widgets Estruturais
+1. Sidebar/NavigationView
+2. TreeView
+3. DatePicker/TimePicker
+4. FlowBox
+
+### Fase 5: Avançado
+1. Converters reutilizáveis
+2. Debug/introspection tools
+3. Memory pool integration
+
+---
+
+## Histórico de Conclusões
+
+- **v0.1**: Core widgets (Button, Label, Entry, Box, Grid, Window)
+- **v0.2**: Timers, CSS, CheckButton, Switch, MessageDialog
+- **v0.3**: ScrolledWindow, ComboBox, ProgressBar, FileChooser, ColorChooser
+- **v0.4**: Menus, ListView, ColumnView, Notebook, HeaderBar, Image, Spinner, LevelBar
+- **v0.5**: MVVM completo (ViewModel, Model, Property, Command, Binding declarativo)
+- **v0.6**: Click-to-sort em ColumnView, window modal/transient, ListView/ColumnView bindings

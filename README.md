@@ -13,28 +13,6 @@ Uma biblioteca C99 para simplificar o desenvolvimento de interfaces gráficas co
 - **Reatividade**: Sistema de binding bidirecional automático
 - **Gerenciamento de Memória**: Sistema simplificado de ciclo de vida dos widgets
 
-## Estrutura do Projeto
-
-```
-easygtk/
-├── include/easygtk/    # Headers públicos
-│   ├── easygtk.h       # Header principal
-│   ├── types.h         # Tipos e enums
-│   ├── signal.h        # Sistema de signals
-│   ├── property.h      # Properties observáveis e computed properties
-│   ├── model.h         # Model (camada de dados)
-│   ├── viewmodel.h     # ViewModel + Commands
-│   ├── binding.h       # Data binding declarativo
-│   ├── timer.h         # Timers e idle callbacks
-│   ├── css.h           # Carregamento de CSS
-│   └── *.h             # Widgets (window, button, label, etc.)
-├── src/
-│   ├── internal/       # Headers internos e vtables
-│   ├── core/           # Core da biblioteca
-│   └── widgets/        # Implementação dos widgets
-└── examples/           # Exemplos de uso
-```
-
 ## Compilação
 
 ```bash
