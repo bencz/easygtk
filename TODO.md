@@ -8,13 +8,22 @@
 - [x] Observable properties (eg_property_new, eg_property_bind)
 - [x] Binding bidirecional entre widgets e modelo
 - [x] Notificação automática de mudanças
-- [ ] Computed properties (derivadas de outras)
+- [x] Computed properties (derivadas de outras) - eg_property_set_computed
 
 ### Padrão MVVM/MVC
 - [x] EgViewModel base com vtable
-- [ ] EgModel para dados
+- [x] EgModel para dados com validação
 - [x] Sistema de commands (ICommand pattern)
-- [ ] Binding declarativo widget <-> viewmodel
+- [x] Binding declarativo widget <-> viewmodel
+  - [x] eg_bind_entry_text (two-way)
+  - [x] eg_bind_label_text (one-way, suporta int/double/bool/string)
+  - [x] eg_bind_check_button_active (two-way)
+  - [x] eg_bind_switch_active (two-way)
+  - [x] eg_bind_spin_button_value (two-way)
+  - [x] eg_bind_scale_value (two-way)
+  - [x] eg_bind_widget_visible (one-way)
+  - [x] eg_bind_widget_sensitive (one-way)
+  - [x] eg_bind_button_command (command binding)
 
 ### Sistema de Signals Avançado (Lock-free)
 - [ ] Signal queue lock-free (atomic operations)
@@ -29,23 +38,33 @@
 - [ ] Futures/Promises em C
 - [ ] eg_task_new(), eg_task_then(), eg_task_await()
 
-### Exemplo de uso futuro (conceitual):
+### Exemplo de uso (implementado em spa_example.c):
 ```c
 // ViewModel com propriedades observáveis
 EgViewModel *vm = eg_view_model_new();
-eg_view_model_add_property(vm, "counter", EG_TYPE_INT, 0);
-eg_view_model_add_property(vm, "label_text", EG_TYPE_STRING, "Count: 0");
+eg_view_model_add_property(vm, eg_property_new_int("counter", 0));
+eg_view_model_add_property(vm, eg_property_new_string("username", ""));
 
 // Computed property
-eg_view_model_add_computed(vm, "label_text", compute_label, "counter");
+EgProperty *total = eg_property_new_int("total", 0);
+EgProperty *deps[] = {counter_prop};
+eg_property_set_computed(total, compute_total, deps, 1, NULL);
 
-// Binding automático
-eg_bind(entry, "text", vm, "username", EG_BIND_TWO_WAY);
-eg_bind(label, "text", vm, "label_text", EG_BIND_ONE_WAY);
+// Binding declarativo automático
+eg_bind_entry_text(entry, vm, "username");         // Two-way
+eg_bind_label_text(label, vm, "counter");          // One-way
+eg_bind_button_command(button, vm, "increment");   // Command binding
 
-// Async sem bloquear UI
-eg_async_run(fetch_data_from_api, on_data_received, user_data);
+// Model para dados
+EgModel *user_model = eg_model_new();
+eg_model_add_property(user_model, eg_property_new_string("name", ""));
+eg_model_add_property(user_model, eg_property_new_string("email", ""));
+if (eg_model_validate(user_model)) {
+    // Salvar...
+}
 ```
+
+**Status**: Sistema MVVM completo e funcional! Veja `examples/spa_example.c` e `examples/SPA_README.md`.
 
 ---
 

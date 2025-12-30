@@ -20,7 +20,9 @@ set(EASYGTK_SOURCES
     src/core/property.c
     src/core/timer.c
     src/core/css.c
+    src/core/model.c
     src/core/viewmodel.c
+    src/core/binding.c
     src/widgets/window.c
     src/widgets/button.c
     src/widgets/label.c
@@ -136,6 +138,10 @@ if(BUILD_EXAMPLES)
     add_executable(new_widgets_example examples/new_widgets_example.c)
     target_link_libraries(new_widgets_example PRIVATE easygtk ${GTK4_LIBRARIES})
     target_include_directories(new_widgets_example PRIVATE ${GTK4_INCLUDE_DIRS})
+
+    add_executable(spa_example examples/spa_example.c)
+    target_link_libraries(spa_example PRIVATE easygtk ${GTK4_LIBRARIES})
+    target_include_directories(spa_example PRIVATE ${GTK4_INCLUDE_DIRS})
 endif()
 
 # Install

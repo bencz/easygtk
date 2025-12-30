@@ -1716,49 +1716,122 @@ bool eg_view_model_add_command(EgViewModel *vm, EgCommand *command);
 EgCommand *eg_view_model_get_command(EgViewModel *vm, const char *name);
 ```
 
-**Exemplo MVVM Completo:**
+### Model (Camada de Dados)
+
+```c
+EgModel *eg_model_new(void);
+void eg_model_free(EgModel *model);
+
+bool eg_model_add_property(EgModel *model, EgProperty *property);
+EgProperty *eg_model_get_property(EgModel *model, const char *name);
+
+// Atalhos para tipos
+bool eg_model_set_int(EgModel *model, const char *name, int value);
+int eg_model_get_int(EgModel *model, const char *name);
+bool eg_model_set_string(EgModel *model, const char *name, const char *value);
+const char *eg_model_get_string(EgModel *model, const char *name);
+bool eg_model_set_bool(EgModel *model, const char *name, bool value);
+bool eg_model_get_bool(EgModel *model, const char *name);
+bool eg_model_set_double(EgModel *model, const char *name, double value);
+double eg_model_get_double(EgModel *model, const char *name);
+
+// Validação
+bool eg_model_validate(EgModel *model);
+```
+
+### Computed Properties
+
+Properties calculadas automaticamente quando suas dependências mudam:
+
+```c
+typedef void (*EgPropertyComputeFunc)(EgProperty *computed_property, void *user_data);
+
+bool eg_property_set_computed(
+    EgProperty *computed_property,
+    EgPropertyComputeFunc compute_func,
+    EgProperty **dependencies,
+    size_t dependency_count,
+    void *user_data
+);
+```
+
+**Exemplo:**
+```c
+static void compute_total(EgProperty *computed, void *user_data) {
+    // Calcula total baseado em outras properties
+    int total = 0;
+    // ... cálculo ...
+    eg_property_set_int(computed, total);
+}
+
+// Setup
+EgProperty *total_prop = eg_property_new_int("total", 0);
+EgProperty *deps[] = {qty_prop, price_prop};
+eg_property_set_computed(total_prop, compute_total, deps, 2, NULL);
+```
+
+### Data Binding Declarativo
+
+Liga widgets automaticamente a properties do ViewModel:
+
+```c
+// Two-way bindings
+bool eg_bind_entry_text(EgEntry *entry, EgViewModel *vm, const char *property_name);
+bool eg_bind_check_button_active(EgCheckButton *cb, EgViewModel *vm, const char *property_name);
+bool eg_bind_switch_active(EgSwitch *sw, EgViewModel *vm, const char *property_name);
+bool eg_bind_spin_button_value(EgSpinButton *sb, EgViewModel *vm, const char *property_name);
+bool eg_bind_scale_value(EgScale *scale, EgViewModel *vm, const char *property_name);
+
+// One-way bindings
+bool eg_bind_label_text(EgLabel *label, EgViewModel *vm, const char *property_name);
+bool eg_bind_widget_visible(EgWidget *widget, EgViewModel *vm, const char *property_name);
+bool eg_bind_widget_sensitive(EgWidget *widget, EgViewModel *vm, const char *property_name);
+
+// Command binding
+bool eg_bind_button_command(EgButton *button, EgViewModel *vm, const char *command_name);
+```
+
+**Exemplo MVVM Completo com Binding:**
 ```c
 static EgViewModel *vm = NULL;
 
-// Command execute
 static void cmd_increment(EgCommand *cmd, void *param, void *data) {
-    (void)cmd; (void)param; (void)data;
     int val = eg_view_model_get_int(vm, "counter");
     eg_view_model_set_int(vm, "counter", val + 1);
 }
 
-// Callback quando property muda
-static void on_counter_changed(EgProperty *prop, void *user_data) {
-    EgLabel *label = (EgLabel *)user_data;
-    char buf[32];
-    snprintf(buf, sizeof(buf), "Count: %d", eg_property_get_int(prop));
-    eg_label_set_text(label, buf);
+static bool cmd_reset_can_execute(EgCommand *cmd, void *param, void *data) {
+    return eg_view_model_get_int(vm, "counter") > 0;
 }
 
-// Wrapper para callback de botão
-static void on_btn_click(EgWidget *widget, void *user_data) {
-    (void)widget; (void)user_data;
-    cmd_increment(NULL, NULL, NULL);
+static void cmd_reset(EgCommand *cmd, void *param, void *data) {
+    eg_view_model_set_int(vm, "counter", 0);
 }
 
-void setup_mvvm(EgLabel *label, EgButton *button) {
+void setup_mvvm_with_binding(EgLabel *label, EgButton *btn_inc, EgButton *btn_reset) {
     vm = eg_view_model_new();
-    
+
     // Adicionar property
-    EgProperty *counter = eg_property_new_int("counter", 0);
-    eg_view_model_add_property(vm, counter);
-    
-    // Adicionar command
-    EgCommand *cmd = eg_command_new("increment", cmd_increment, NULL, NULL);
-    eg_view_model_add_command(vm, cmd);
-    
-    // Conectar property ao label
-    eg_property_on_changed(counter, on_counter_changed, label);
-    
-    // Conectar botão ao command
-    eg_button_on_click(button, on_btn_click, NULL);
+    eg_view_model_add_property(vm, eg_property_new_int("counter", 0));
+
+    // Adicionar commands
+    eg_view_model_add_command(vm,
+        eg_command_new("increment", cmd_increment, NULL, NULL));
+    eg_view_model_add_command(vm,
+        eg_command_new("reset", cmd_reset, cmd_reset_can_execute, NULL));
+
+    // Data binding declarativo (automático!)
+    eg_bind_label_text(label, vm, "counter");           // Label atualiza automaticamente
+    eg_bind_button_command(btn_inc, vm, "increment");   // Botão executa command
+    eg_bind_button_command(btn_reset, vm, "reset");     // Auto-disable quando counter = 0
 }
 ```
+
+**Vantagens do Binding Declarativo:**
+- Sem código manual de sincronização
+- Atualização bidirecional automática
+- Commands com can_execute atualizam sensibilidade do botão automaticamente
+- Label converte tipos automaticamente (int, double, bool, string)
 
 ---
 

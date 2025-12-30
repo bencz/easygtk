@@ -41,6 +41,9 @@ typedef void (*EgPropertyChangedCallback)(EgProperty *property, void *user_data)
 /* Callback para transformação de valor em bindings */
 typedef bool (*EgBindingTransform)(const void *source_value, void *target_value, void *user_data);
 
+/* Callback para computed properties - recalcula valor baseado em outras properties */
+typedef void (*EgPropertyComputeFunc)(EgProperty *computed_property, void *user_data);
+
 /* ============================================
  * Criação de Properties
  * ============================================ */
@@ -168,6 +171,29 @@ EgBinding *eg_property_bind_transform(
  * Remove o binding.
  */
 void eg_binding_unbind(EgBinding *binding);
+
+/* ============================================
+ * Computed Properties
+ * ============================================ */
+
+/**
+ * Define uma property como computada (derivada de outras).
+ * O compute_func será chamado sempre que qualquer dependência mudar.
+ *
+ * @param computed_property Property que será computada
+ * @param compute_func Função que recalcula o valor
+ * @param dependencies Array de properties das quais depende
+ * @param dependency_count Número de dependências
+ * @param user_data Dados do usuário
+ * @return true se configurou com sucesso
+ */
+bool eg_property_set_computed(
+    EgProperty *computed_property,
+    EgPropertyComputeFunc compute_func,
+    EgProperty **dependencies,
+    size_t dependency_count,
+    void *user_data
+);
 
 #ifdef __cplusplus
 }

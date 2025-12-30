@@ -106,6 +106,16 @@ bool eg_view_model_set_bool(EgViewModel *vm, const char *name, bool value);
 bool eg_view_model_get_bool(EgViewModel *vm, const char *name);
 
 /**
+ * Atalho: define valor double de uma property.
+ */
+bool eg_view_model_set_double(EgViewModel *vm, const char *name, double value);
+
+/**
+ * Atalho: obtém valor double de uma property.
+ */
+double eg_view_model_get_double(EgViewModel *vm, const char *name);
+
+/**
  * Obtém dados customizados do ViewModel.
  * Útil para ViewModels derivados.
  */

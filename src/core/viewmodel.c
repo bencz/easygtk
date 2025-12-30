@@ -167,6 +167,18 @@ bool eg_view_model_get_bool(EgViewModel *vm, const char *name) {
     return eg_property_get_bool(prop);
 }
 
+bool eg_view_model_set_double(EgViewModel *vm, const char *name, double value) {
+    EgProperty *prop = eg_view_model_get_property(vm, name);
+    if (prop == NULL) return false;
+    eg_property_set_double(prop, value);
+    return true;
+}
+
+double eg_view_model_get_double(EgViewModel *vm, const char *name) {
+    EgProperty *prop = eg_view_model_get_property(vm, name);
+    return eg_property_get_double(prop);
+}
+
 void *eg_view_model_get_data(EgViewModel *vm) {
     if (vm == NULL) return NULL;
     /* Para ViewModels derivados, os dados extras ficam após a struct base */

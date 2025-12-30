@@ -21,6 +21,13 @@ struct EgProperty {
     EgPropertyType type;
     EgPropertyValue value;
     EgSignal *changed_signal;
+
+    /* Computed property */
+    bool is_computed;
+    EgPropertyComputeFunc compute_func;
+    void *compute_user_data;
+    EgHandlerId *dependency_handlers;  /* Array de handler IDs */
+    size_t dependency_count;
 };
 
 /* Estrutura do binding */
@@ -47,17 +54,22 @@ static void binding_target_changed(void *sender, void *event_data, void *user_da
 static EgProperty *property_new_base(const char *name, EgPropertyType type) {
     EgProperty *prop = EG_ALLOC(EgProperty);
     if (prop == NULL) return NULL;
-    
+
     prop->name = eg_strdup(name);
     prop->type = type;
     prop->changed_signal = eg_signal_new(name);
-    
+    prop->is_computed = false;
+    prop->compute_func = NULL;
+    prop->compute_user_data = NULL;
+    prop->dependency_handlers = NULL;
+    prop->dependency_count = 0;
+
     if (prop->changed_signal == NULL) {
         eg_free(prop->name);
         eg_free(prop);
         return NULL;
     }
-    
+
     return prop;
 }
 
@@ -103,11 +115,16 @@ EgProperty *eg_property_new_pointer(const char *name, void *initial_value) {
 
 void eg_property_free(EgProperty *property) {
     if (property == NULL) return;
-    
+
     if (property->type == EG_PROPERTY_TYPE_STRING) {
         eg_free(property->value.string_value);
     }
-    
+
+    /* Libera computed property handlers */
+    if (property->dependency_handlers != NULL) {
+        eg_free(property->dependency_handlers);
+    }
+
     eg_signal_free(property->changed_signal);
     eg_free(property->name);
     eg_free(property);
@@ -438,14 +455,65 @@ EgBinding *eg_property_bind_transform(
 
 void eg_binding_unbind(EgBinding *binding) {
     if (binding == NULL) return;
-    
+
     if (binding->source_handler != 0) {
         eg_signal_disconnect(binding->source->changed_signal, binding->source_handler);
     }
-    
+
     if (binding->target_handler != 0) {
         eg_signal_disconnect(binding->target->changed_signal, binding->target_handler);
     }
-    
+
     eg_free(binding);
+}
+
+/* ============================================
+ * Computed Properties
+ * ============================================ */
+
+/* Callback quando uma dependência muda - recalcula a property computada */
+static void computed_dependency_changed(EgProperty *dependency, void *user_data) {
+    (void)dependency;
+    EgProperty *computed = (EgProperty *)user_data;
+
+    if (computed != NULL && computed->compute_func != NULL) {
+        /* Chama função de computação */
+        computed->compute_func(computed, computed->compute_user_data);
+    }
+}
+
+bool eg_property_set_computed(
+    EgProperty *computed_property,
+    EgPropertyComputeFunc compute_func,
+    EgProperty **dependencies,
+    size_t dependency_count,
+    void *user_data
+) {
+    if (computed_property == NULL || compute_func == NULL) return false;
+    if (dependencies == NULL || dependency_count == 0) return false;
+
+    /* Aloca array de handler IDs */
+    EgHandlerId *handlers = (EgHandlerId *)eg_alloc(sizeof(EgHandlerId) * dependency_count);
+    if (handlers == NULL) return false;
+
+    /* Conecta cada dependência */
+    for (size_t i = 0; i < dependency_count; i++) {
+        if (dependencies[i] == NULL) {
+            eg_free(handlers);
+            return false;
+        }
+        handlers[i] = eg_property_on_changed(dependencies[i], computed_dependency_changed, computed_property);
+    }
+
+    /* Configura computed property */
+    computed_property->is_computed = true;
+    computed_property->compute_func = compute_func;
+    computed_property->compute_user_data = user_data;
+    computed_property->dependency_handlers = handlers;
+    computed_property->dependency_count = dependency_count;
+
+    /* Calcula valor inicial */
+    compute_func(computed_property, user_data);
+
+    return true;
 }
