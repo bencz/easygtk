@@ -99,6 +99,16 @@ void eg_label_set_valign(EgLabel *label, EgAlign align) {
     gtk_widget_set_valign(label->base.native, eg_align_to_gtk(align));
 }
 
+void eg_label_set_xalign(EgLabel *label, float xalign) {
+    if (label == NULL || label->base.native == NULL) return;
+    gtk_label_set_xalign(GTK_LABEL(label->base.native), xalign);
+}
+
+void eg_label_set_yalign(EgLabel *label, float yalign) {
+    if (label == NULL || label->base.native == NULL) return;
+    gtk_label_set_yalign(GTK_LABEL(label->base.native), yalign);
+}
+
 void eg_label_set_selectable(EgLabel *label, bool selectable) {
     if (label == NULL || label->base.native == NULL) return;
     gtk_label_set_selectable(GTK_LABEL(label->base.native), selectable);

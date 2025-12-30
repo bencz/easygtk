@@ -26,6 +26,10 @@ typedef struct {
     User *logged_user;
     AppPage current_page;
 
+    /* Application references */
+    EgApp *app;
+    EgWindow *main_window;
+
     /* Widgets */
     EgStack *main_stack;
     EgStack *content_stack;
@@ -33,6 +37,7 @@ typedef struct {
 
     /* Flags */
     bool is_authenticated;
+    bool is_dark_theme;
 } AppState;
 
 /* Global state instance */
@@ -54,5 +59,9 @@ AppPage app_state_get_current_page(void);
 /* Current user */
 User *app_state_get_current_user(void);
 const char *app_state_get_username(void);
+
+/* Theme */
+void app_state_toggle_theme(void);
+bool app_state_is_dark_theme(void);
 
 #endif /* SPA_APP_STATE_H */

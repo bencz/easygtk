@@ -241,7 +241,7 @@ button {
 
 button:disabled {
     opacity: 0.5;
-    cursor: not-allowed;
+    /* GTK4 doesn't support cursor property - handled by widget */
 }
 
 /* ============================================
@@ -374,9 +374,7 @@ scrollbar slider:hover {
  * Utility Classes
  * ============================================ */
 
-.text-center {
-    text-align: center;
-}
+/* GTK4: text-align not supported in CSS, use widget halign property instead */
 
 .text-muted {
     color: #7f849c;
@@ -405,3 +403,277 @@ scrollbar slider:hover {
 .p-1 { padding: 8px; }
 .p-2 { padding: 16px; }
 .p-3 { padding: 24px; }
+
+/* ============================================
+ * Badges
+ * ============================================ */
+
+.badge-success {
+    background-color: rgba(166, 227, 161, 0.2);
+    color: #a6e3a1;
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.badge-danger {
+    background-color: rgba(243, 139, 168, 0.2);
+    color: #f38ba8;
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.badge-warning {
+    background-color: rgba(249, 226, 175, 0.2);
+    color: #f9e2af;
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.badge-info {
+    background-color: rgba(137, 180, 250, 0.2);
+    color: #89b4fa;
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+/* ============================================
+ * Small Buttons
+ * ============================================ */
+
+.btn-small {
+    padding: 6px 12px;
+    font-size: 12px;
+    min-height: 28px;
+    border-radius: 6px;
+}
+
+/* ============================================
+ * Light Theme
+ * ============================================ */
+
+.light-theme {
+    background-color: #eff1f5;
+}
+
+.light-theme .sidebar {
+    background: linear-gradient(180deg, #e6e9ef 0%, #dce0e8 100%);
+    border-right: 1px solid #bcc0cc;
+}
+
+.light-theme .sidebar-header {
+    background-color: #e6e9ef;
+    border-bottom: 1px solid #bcc0cc;
+}
+
+.light-theme .sidebar-title {
+    color: #4c4f69;
+}
+
+.light-theme .sidebar-subtitle {
+    color: #6c6f85;
+}
+
+.light-theme .nav-button {
+    color: #5c5f77;
+}
+
+.light-theme .nav-button:hover {
+    background-color: #ccd0da;
+    color: #4c4f69;
+}
+
+.light-theme .nav-button.active {
+    background-color: #1e66f5;
+    color: #eff1f5;
+}
+
+.light-theme .main-content {
+    background-color: #eff1f5;
+}
+
+.light-theme .page-header {
+    background: linear-gradient(135deg, #e6e9ef 0%, #dce0e8 100%);
+    border-bottom: 1px solid #bcc0cc;
+}
+
+.light-theme .page-title {
+    color: #4c4f69;
+}
+
+.light-theme .page-subtitle {
+    color: #6c6f85;
+}
+
+.light-theme .card {
+    background-color: #ffffff;
+    border: 1px solid #ccd0da;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.light-theme .card-header {
+    color: #4c4f69;
+}
+
+.light-theme .card-body {
+    color: #5c5f77;
+}
+
+.light-theme .stat-card {
+    background: linear-gradient(135deg, #e6e9ef 0%, #dce0e8 100%);
+    border: 1px solid #bcc0cc;
+}
+
+.light-theme .stat-value {
+    color: #1e66f5;
+}
+
+.light-theme .stat-label {
+    color: #6c6f85;
+}
+
+.light-theme entry {
+    background-color: #ffffff;
+    color: #4c4f69;
+    border: 1px solid #bcc0cc;
+}
+
+.light-theme entry:focus {
+    border-color: #1e66f5;
+    box-shadow: 0 0 0 2px rgba(30, 102, 245, 0.2);
+}
+
+.light-theme entry:disabled {
+    background-color: #e6e9ef;
+    color: #9ca0b0;
+}
+
+.light-theme .form-label {
+    color: #5c5f77;
+}
+
+.light-theme .list-item {
+    background-color: #ffffff;
+    border: 1px solid #ccd0da;
+}
+
+.light-theme .list-item:hover {
+    background-color: #e6e9ef;
+    border-color: #bcc0cc;
+}
+
+.light-theme .list-item-title {
+    color: #4c4f69;
+}
+
+.light-theme .list-item-subtitle {
+    color: #6c6f85;
+}
+
+.light-theme .login-container {
+    background: linear-gradient(135deg, #eff1f5 0%, #e6e9ef 100%);
+}
+
+.light-theme .login-box {
+    background-color: #ffffff;
+    border: 1px solid #bcc0cc;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+.light-theme .login-title {
+    color: #4c4f69;
+}
+
+.light-theme .login-subtitle {
+    color: #6c6f85;
+}
+
+.light-theme .text-muted {
+    color: #6c6f85;
+}
+
+.light-theme .text-primary {
+    color: #1e66f5;
+}
+
+.light-theme checkbutton {
+    color: #4c4f69;
+}
+
+.light-theme checkbutton:checked {
+    color: #1e66f5;
+}
+
+.light-theme switch {
+    background-color: #ccd0da;
+}
+
+.light-theme switch:checked {
+    background-color: #1e66f5;
+}
+
+.light-theme scrollbar {
+    background-color: #e6e9ef;
+}
+
+.light-theme scrollbar slider {
+    background-color: #bcc0cc;
+}
+
+.light-theme scrollbar slider:hover {
+    background-color: #9ca0b0;
+}
+
+/* Settings section styling */
+.settings-section {
+    background-color: #1e1e2e;
+    border: 1px solid #313244;
+    border-radius: 12px;
+    padding: 20px;
+    margin: 12px 0;
+}
+
+.light-theme .settings-section {
+    background-color: #ffffff;
+    border: 1px solid #ccd0da;
+}
+
+.settings-title {
+    color: #cdd6f4;
+    font-size: 16px;
+    font-weight: bold;
+    margin-bottom: 16px;
+}
+
+.light-theme .settings-title {
+    color: #4c4f69;
+}
+
+.settings-row {
+    padding: 8px 0;
+}
+
+.settings-label {
+    color: #bac2de;
+    font-size: 14px;
+}
+
+.light-theme .settings-label {
+    color: #5c5f77;
+}
+
+.settings-description {
+    color: #7f849c;
+    font-size: 12px;
+}
+
+.light-theme .settings-description {
+    color: #6c6f85;
+}

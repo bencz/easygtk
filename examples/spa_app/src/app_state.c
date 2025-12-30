@@ -30,6 +30,7 @@ AppState *app_state_new(void) {
     state->logged_user = NULL;
     state->current_page = PAGE_LOGIN;
     state->is_authenticated = false;
+    state->is_dark_theme = true; /* Default to dark theme */
 
     /* Store global reference */
     g_app_state = state;
@@ -182,4 +183,22 @@ User *app_state_get_current_user(void) {
 const char *app_state_get_username(void) {
     if (!g_app_state || !g_app_state->logged_user) return "";
     return g_app_state->logged_user->username;
+}
+
+void app_state_toggle_theme(void) {
+    if (!g_app_state || !g_app_state->main_window) return;
+
+    g_app_state->is_dark_theme = !g_app_state->is_dark_theme;
+
+    EgWidget *window_widget = eg_window_as_widget(g_app_state->main_window);
+
+    if (g_app_state->is_dark_theme) {
+        eg_widget_remove_css_class(window_widget, "light-theme");
+    } else {
+        eg_widget_add_css_class(window_widget, "light-theme");
+    }
+}
+
+bool app_state_is_dark_theme(void) {
+    return g_app_state ? g_app_state->is_dark_theme : true;
 }

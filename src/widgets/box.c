@@ -189,6 +189,21 @@ void eg_box_set_homogeneous(EgBox *box, bool homogeneous) {
     gtk_box_set_homogeneous(GTK_BOX(box->base.native), homogeneous);
 }
 
+void eg_box_clear(EgBox *box) {
+    if (box == NULL || box->base.native == NULL) return;
+
+    GtkWidget *native = GTK_WIDGET(box->base.native);
+    GtkWidget *child;
+
+    /* Remove all children from the native GTK box */
+    while ((child = gtk_widget_get_first_child(native)) != NULL) {
+        gtk_box_remove(GTK_BOX(native), child);
+    }
+
+    /* Clear the internal children list */
+    box->children.count = 0;
+}
+
 EgWidget *eg_box_as_widget(EgBox *box) {
     return (EgWidget *)box;
 }

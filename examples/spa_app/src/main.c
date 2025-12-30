@@ -136,8 +136,12 @@ static void on_activate(EgWidget *widget, void *user_data) {
     /* Initialize app state */
     app_state_new();
 
+    /* Store app reference */
+    g_app_state->app = app;
+
     /* Create window */
     EgWindow *window = eg_window_new(app, "SPA Dashboard", 1200, 700);
+    g_app_state->main_window = window;
 
     /* Main stack (login vs app) */
     g_app_state->main_stack = eg_stack_new();

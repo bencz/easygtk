@@ -54,7 +54,7 @@ void eg_label_set_markup(EgLabel *label, const char *markup);
 
 /**
  * Define o alinhamento horizontal do texto.
- * 
+ *
  * @param label Ponteiro para a label
  * @param align Alinhamento
  */
@@ -62,11 +62,27 @@ void eg_label_set_halign(EgLabel *label, EgAlign align);
 
 /**
  * Define o alinhamento vertical do texto.
- * 
+ *
  * @param label Ponteiro para a label
  * @param align Alinhamento
  */
 void eg_label_set_valign(EgLabel *label, EgAlign align);
+
+/**
+ * Define o alinhamento X do texto (0.0 = esquerda, 0.5 = centro, 1.0 = direita).
+ *
+ * @param label Ponteiro para a label
+ * @param xalign Valor de 0.0 a 1.0
+ */
+void eg_label_set_xalign(EgLabel *label, float xalign);
+
+/**
+ * Define o alinhamento Y do texto (0.0 = topo, 0.5 = centro, 1.0 = base).
+ *
+ * @param label Ponteiro para a label
+ * @param yalign Valor de 0.0 a 1.0
+ */
+void eg_label_set_yalign(EgLabel *label, float yalign);
 
 /**
  * Define se o texto pode ser selecionado.

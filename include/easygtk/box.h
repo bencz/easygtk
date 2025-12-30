@@ -94,8 +94,15 @@ int eg_box_get_spacing(EgBox *box);
 void eg_box_set_homogeneous(EgBox *box, bool homogeneous);
 
 /**
+ * Remove todos os widgets filhos do box.
+ *
+ * @param box Ponteiro para o box
+ */
+void eg_box_clear(EgBox *box);
+
+/**
  * Obtém o widget base do box.
- * 
+ *
  * @param box Ponteiro para o box
  * @return Ponteiro para EgWidget
  */

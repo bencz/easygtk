@@ -191,10 +191,14 @@ eg_bind_button_command(button, view_model, "logout");
 
 ## 🔧 Extensões Possíveis
 
+### Features Implementadas
+- [x] CRUD completo para usuários (criar, editar, deletar)
+- [x] CRUD completo para produtos
+- [x] Sistema de busca em tempo real
+- [x] Alteração de senha de usuários
+- [x] Tema claro/escuro toggle
+
 ### Features a Adicionar
-- [ ] CRUD completo para usuários (criar, editar, deletar)
-- [ ] CRUD completo para produtos
-- [ ] Sistema de busca em tempo real
 - [ ] Paginação de listas
 - [ ] Validações de formulário avançadas
 - [ ] Upload de imagens de produtos
@@ -209,7 +213,6 @@ eg_bind_button_command(button, view_model, "logout");
 - [ ] Migrations do banco de dados
 - [ ] Testes unitários
 - [ ] Internacionalização (i18n)
-- [ ] Tema claro/escuro toggle
 - [ ] Backup automático do DB
 
 ## 📝 Licença

@@ -41,6 +41,7 @@ User *db_user_authenticate(const char *username, const char *password);
 User *db_user_get_by_id(int user_id);
 User **db_user_list_all(int *count);
 bool db_user_update(int user_id, const char *email, bool is_active);
+bool db_user_change_password(int user_id, const char *new_password);
 bool db_user_delete(int user_id);
 void db_user_free(User *user);
 void db_user_list_free(User **users, int count);

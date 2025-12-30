@@ -242,6 +242,25 @@ bool db_user_update(int user_id, const char *email, bool is_active) {
     return rc == SQLITE_DONE;
 }
 
+bool db_user_change_password(int user_id, const char *new_password) {
+    char password_hash[256];
+    hash_password(new_password, password_hash, sizeof(password_hash));
+
+    const char *sql = "UPDATE users SET password_hash = ? WHERE id = ?;";
+    sqlite3_stmt *stmt;
+
+    int rc = sqlite3_prepare_v2(g_db, sql, -1, &stmt, NULL);
+    if (rc != SQLITE_OK) return false;
+
+    sqlite3_bind_text(stmt, 1, password_hash, -1, SQLITE_STATIC);
+    sqlite3_bind_int(stmt, 2, user_id);
+
+    rc = sqlite3_step(stmt);
+    sqlite3_finalize(stmt);
+
+    return rc == SQLITE_DONE;
+}
+
 bool db_user_delete(int user_id) {
     const char *sql = "DELETE FROM users WHERE id = ?;";
     sqlite3_stmt *stmt;
