@@ -313,12 +313,25 @@ void eg_button_free(EgButton *btn) {
 - [x] eg_window_set_decorated / eg_window_get_decorated
 
 ### PopoverMenu
-- [ ] eg_popover_menu_new()
-- [ ] eg_popover_menu_add_item
+- [x] eg_popover_menu_new()
+- [x] eg_popover_menu_free()
+- [x] eg_popover_menu_add_item()
+- [x] eg_popover_menu_add_item_with_icon()
+- [x] eg_popover_menu_add_separator()
+- [x] eg_popover_menu_add_section()
+- [x] eg_popover_menu_set_item_enabled()
+- [x] eg_popover_menu_popup / popdown
 
 ### MenuButton
-- [ ] eg_menu_button_new()
-- [ ] eg_menu_button_set_popover
+- [x] eg_menu_button_new()
+- [x] eg_menu_button_new_with_label()
+- [x] eg_menu_button_new_with_icon()
+- [x] eg_menu_button_set_popover()
+- [x] eg_menu_button_set_label / get_label
+- [x] eg_menu_button_set_icon_name / get_icon_name
+- [x] eg_menu_button_set_direction()
+- [x] eg_menu_button_set_has_frame()
+- [x] eg_menu_button_popup / popdown
 
 ---
 
@@ -340,4 +353,4 @@ void eg_button_free(EgButton *btn) {
 
 1. **Alta**: ~~Timers~~, ~~CSS~~, ~~CheckButton~~, ~~Switch~~, ~~MessageDialog~~
 2. **Média**: ~~ScrolledWindow~~, ~~ComboBox~~, ~~ProgressBar~~, ~~FileChooser~~, ~~ColorChooser~~
-3. **Baixa**: Menus, ListView, ~~Notebook~~, ~~HeaderBar~~, ~~Image~~, ~~Spinner~~, ~~LevelBar~~
+3. **Baixa**: ~~Menus~~, ListView, ~~Notebook~~, ~~HeaderBar~~, ~~Image~~, ~~Spinner~~, ~~LevelBar~~

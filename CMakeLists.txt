@@ -48,6 +48,8 @@ set(EASYGTK_SOURCES
     src/widgets/spinner.c
     src/widgets/level_bar.c
     src/widgets/header_bar.c
+    src/widgets/popover_menu.c
+    src/widgets/menu_button.c
     src/widgets/file_chooser.c
     src/widgets/color_chooser.c
     src/widgets/about_dialog.c
@@ -142,6 +144,14 @@ if(BUILD_EXAMPLES)
     add_executable(spa_example examples/spa_example.c)
     target_link_libraries(spa_example PRIVATE easygtk ${GTK4_LIBRARIES})
     target_include_directories(spa_example PRIVATE ${GTK4_INCLUDE_DIRS})
+
+    add_executable(menu_example examples/menu_example.c)
+    target_link_libraries(menu_example PRIVATE easygtk ${GTK4_LIBRARIES})
+    target_include_directories(menu_example PRIVATE ${GTK4_INCLUDE_DIRS})
+
+    add_executable(menubar_example examples/menubar_example.c)
+    target_link_libraries(menubar_example PRIVATE easygtk ${GTK4_LIBRARIES})
+    target_include_directories(menubar_example PRIVATE ${GTK4_INCLUDE_DIRS})
 endif()
 
 # Install

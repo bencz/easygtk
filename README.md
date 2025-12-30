@@ -176,6 +176,10 @@ int main(int argc, char *argv[]) {
 - **EgFrame**: Container com borda e título
 - **EgExpander**: Container expansível/recolhível
 
+### Menus
+- **EgPopoverMenu**: Menu popup com itens, ícones e separadores
+- **EgMenuButton**: Botão que abre um menu popover
+
 ## Diálogos
 
 - **eg_dialog_info()**: Diálogo de informação
@@ -243,6 +247,8 @@ Após compilar, os exemplos estarão em `build/`:
 ./build/dnd_example           # Drag and Drop
 ./build/input_widgets_example # SpinButton, Scale, TextView, Frame
 ./build/containers_example    # Stack, Notebook, Paned, Expander
+./build/menu_example          # PopoverMenu, MenuButton
+./build/menubar_example       # Barra de menu tradicional (File, Edit, View, Help)
 ```
 
 **Destaque**: O `spa_example` demonstra uma aplicação completa estilo SPA (Single Page Application) com:

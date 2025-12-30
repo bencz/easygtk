@@ -202,6 +202,18 @@ struct EgHeaderBar {
     EgWidget base;
 };
 
+/* Estrutura de popover menu */
+struct EgPopoverMenu {
+    EgWidget base;
+    GMenu *menu;
+    GSimpleActionGroup *action_group;
+};
+
+/* Estrutura de menu button */
+struct EgMenuButton {
+    EgWidget base;
+};
+
 /* Estrutura para dados de callback */
 typedef struct {
     EgCallback callback;

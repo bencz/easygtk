@@ -45,6 +45,8 @@ typedef struct EgSeparator EgSeparator;
 typedef struct EgSpinner EgSpinner;
 typedef struct EgLevelBar EgLevelBar;
 typedef struct EgHeaderBar EgHeaderBar;
+typedef struct EgPopoverMenu EgPopoverMenu;
+typedef struct EgMenuButton EgMenuButton;
 
 /* Enumerações */
 typedef enum EgOrientation {
@@ -86,7 +88,9 @@ typedef enum EgWidgetType {
     EG_WIDGET_TYPE_SEPARATOR,
     EG_WIDGET_TYPE_SPINNER,
     EG_WIDGET_TYPE_LEVEL_BAR,
-    EG_WIDGET_TYPE_HEADER_BAR
+    EG_WIDGET_TYPE_HEADER_BAR,
+    EG_WIDGET_TYPE_POPOVER_MENU,
+    EG_WIDGET_TYPE_MENU_BUTTON
 } EgWidgetType;
 
 /* Callbacks */

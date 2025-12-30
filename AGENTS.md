@@ -1392,6 +1392,99 @@ eg_window_set_titlebar(window, eg_header_bar_as_widget(header));
 
 ---
 
+### PopoverMenu (EgPopoverMenu)
+
+Menu popup com itens, ícones, separadores e seções.
+
+```c
+/* Callback para ações do menu */
+typedef void (*EgMenuActionCallback)(const char *action_name, void *user_data);
+
+EgPopoverMenu *eg_popover_menu_new(void);
+void eg_popover_menu_free(EgPopoverMenu *menu);
+
+/* Adicionar itens */
+void eg_popover_menu_add_item(EgPopoverMenu *menu, const char *label,
+                               const char *action_name, EgMenuActionCallback callback,
+                               void *user_data);
+
+void eg_popover_menu_add_item_with_icon(EgPopoverMenu *menu, const char *label,
+                                         const char *icon_name, const char *action_name,
+                                         EgMenuActionCallback callback, void *user_data);
+
+void eg_popover_menu_add_separator(EgPopoverMenu *menu);
+void eg_popover_menu_add_section(EgPopoverMenu *menu, const char *title);
+
+/* Controle de itens */
+void eg_popover_menu_set_item_enabled(EgPopoverMenu *menu, const char *action_name,
+                                       bool enabled);
+
+/* Controle do popup */
+void eg_popover_menu_popup(EgPopoverMenu *menu);
+void eg_popover_menu_popdown(EgPopoverMenu *menu);
+
+EgWidget *eg_popover_menu_as_widget(EgPopoverMenu *menu);
+```
+
+---
+
+### MenuButton (EgMenuButton)
+
+Botão que exibe um menu popover quando clicado.
+
+```c
+EgMenuButton *eg_menu_button_new(void);
+EgMenuButton *eg_menu_button_new_with_label(const char *label);
+EgMenuButton *eg_menu_button_new_with_icon(const char *icon_name);
+void eg_menu_button_free(EgMenuButton *button);
+
+/* Associar menu */
+void eg_menu_button_set_popover(EgMenuButton *button, EgPopoverMenu *menu);
+
+/* Propriedades */
+void eg_menu_button_set_label(EgMenuButton *button, const char *label);
+const char *eg_menu_button_get_label(EgMenuButton *button);
+
+void eg_menu_button_set_icon_name(EgMenuButton *button, const char *icon_name);
+const char *eg_menu_button_get_icon_name(EgMenuButton *button);
+
+/* Direção da seta: 0=up, 1=down, 2=left, 3=right, 4=none */
+void eg_menu_button_set_direction(EgMenuButton *button, int direction);
+
+void eg_menu_button_set_has_frame(EgMenuButton *button, bool has_frame);
+bool eg_menu_button_get_has_frame(EgMenuButton *button);
+
+/* Controle programático */
+void eg_menu_button_popup(EgMenuButton *button);
+void eg_menu_button_popdown(EgMenuButton *button);
+
+EgWidget *eg_menu_button_as_widget(EgMenuButton *button);
+```
+
+**Exemplo - Menu na HeaderBar:**
+```c
+static void on_action(const char *action_name, void *user_data) {
+    printf("Acao: %s\n", action_name);
+}
+
+/* Criar menu */
+EgPopoverMenu *menu = eg_popover_menu_new();
+eg_popover_menu_add_item(menu, "Novo", "new", on_action, NULL);
+eg_popover_menu_add_item(menu, "Abrir", "open", on_action, NULL);
+eg_popover_menu_add_separator(menu);
+eg_popover_menu_add_item_with_icon(menu, "Copiar", "edit-copy-symbolic", "copy", on_action, NULL);
+eg_popover_menu_add_item_with_icon(menu, "Colar", "edit-paste-symbolic", "paste", on_action, NULL);
+
+/* Criar botão de menu */
+EgMenuButton *menu_btn = eg_menu_button_new_with_icon("open-menu-symbolic");
+eg_menu_button_set_popover(menu_btn, menu);
+
+/* Adicionar à HeaderBar */
+eg_header_bar_pack_end(header, eg_menu_button_as_widget(menu_btn));
+```
+
+---
+
 ## Diálogos
 
 Diálogos de mensagem usando `GtkAlertDialog` (GTK4).

@@ -42,6 +42,8 @@
 #include "spinner.h"
 #include "level_bar.h"
 #include "header_bar.h"
+#include "popover_menu.h"
+#include "menu_button.h"
 #include "file_chooser.h"
 #include "color_chooser.h"
 #include "about_dialog.h"
