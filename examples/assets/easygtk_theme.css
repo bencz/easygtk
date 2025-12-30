@@ -1,0 +1,326 @@
+/*
+ * EasyGTK Showcase Theme
+ * Inspirado no spa_app, porém simplificado para exemplos genéricos.
+ */
+
+window {
+    background-color: #f3f4f8;
+    font-family: "Atkinson Hyperlegible", "Cantarell", sans-serif;
+    color: #1f2430;
+}
+
+window.theme-dark {
+    background-color: #0f1018;
+    color: #f4f5fb;
+}
+
+.app-surface {
+    background: linear-gradient(145deg, #ffffff 0%, #f6f7fb 100%);
+    border-radius: 24px;
+    padding: 32px;
+    margin: 24px;
+    box-shadow: 0 20px 60px rgba(31, 36, 48, 0.12);
+}
+
+.app-surface.full-bleed {
+    border-radius: 0;
+    margin: 0;
+    box-shadow: none;
+}
+
+.theme-dark .app-surface {
+    background: linear-gradient(145deg, #161823 0%, #1f2130 100%);
+    box-shadow: 0 20px 60px rgba(4, 6, 12, 0.65);
+}
+
+.theme-dark .app-surface.full-bleed {
+    box-shadow: none;
+}
+
+.theme-switch {
+    min-width: 52px;
+    min-height: 20px;
+    border-radius: 999px;
+    background-color: rgba(31, 36, 48, 0.2);
+}
+
+.theme-switch:checked {
+    background-color: #6c63ff;
+}
+
+.window-button {
+    background: transparent;
+    border: none;
+    border-radius: 6px;
+    min-width: 24px;
+    min-height: 24px;
+    padding: 0;
+    margin: 0 2px;
+    color: #4a4d62;
+    font-size: 13px;
+}
+
+.theme-dark .window-button {
+    color: #bac2de;
+}
+
+.window-button:hover {
+    background-color: rgba(31, 36, 48, 0.08);
+}
+
+.theme-dark .window-button:hover {
+    background-color: rgba(255, 255, 255, 0.12);
+}
+
+.page-title {
+    font-size: 26px;
+    font-weight: 700;
+    color: #1f2430;
+}
+
+.theme-dark .page-title {
+    color: #f4f5fb;
+}
+
+.page-subtitle {
+    color: #6a738b;
+    font-size: 14px;
+}
+
+.stat-grid {
+    background: #ffffff;
+    border-radius: 20px;
+    padding: 20px;
+}
+
+.theme-dark .stat-grid {
+    background: #141622;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.stat-card {
+    border-radius: 18px;
+    border: 1px solid rgba(106, 115, 139, 0.15);
+    padding: 18px;
+    min-width: 140px;
+    background: #f9faff;
+}
+
+.theme-dark .stat-card {
+    border-color: rgba(255, 255, 255, 0.08);
+    background: #1b1d2c;
+}
+
+.stat-card-accent {
+    background: linear-gradient(135deg, #6c63ff 0%, #54c5f8 100%);
+    color: #ffffff;
+}
+
+.theme-dark .stat-card-accent {
+    box-shadow: 0 12px 40px rgba(84, 197, 248, 0.3);
+}
+.stat-title {
+    font-size: 14px;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    color: #6a738b;
+}
+
+.theme-dark .stat-title {
+    color: rgba(244, 245, 251, 0.75);
+}
+
+.stat-card-accent .stat-title {
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.stat-value {
+    font-size: 32px;
+    font-weight: 700;
+    margin-top: 4px;
+    color: #1f2430;
+}
+
+.theme-dark .stat-value {
+    color: #fefefe;
+}
+
+.stat-card-accent .stat-value {
+    color: #ffffff;
+}
+
+.accent-button {
+    background: linear-gradient(125deg, #ff9770 0%, #ff5c8d 100%);
+    border: none;
+    border-radius: 999px;
+    color: #ffffff;
+    font-weight: 600;
+    padding: 12px 28px;
+}
+
+.accent-button:hover {
+    background: linear-gradient(125deg, #ff5c8d 0%, #ff9770 100%);
+}
+
+.theme-dark .accent-button {
+    box-shadow: 0 10px 25px rgba(255, 92, 141, 0.25);
+}
+
+.badge {
+    background-color: rgba(31, 36, 48, 0.08);
+    border-radius: 999px;
+    padding: 4px 12px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #4a5166;
+}
+
+.theme-dark .badge {
+    background-color: rgba(255, 255, 255, 0.15);
+    color: #f4f5fb;
+}
+
+.timeline-item {
+    background-color: #ffffff;
+    border-radius: 14px;
+    padding: 14px 18px;
+    margin-bottom: 12px;
+    border: 1px solid rgba(106, 115, 139, 0.12);
+}
+
+.theme-dark .timeline-item {
+    background-color: #141622;
+    border-color: rgba(255, 255, 255, 0.06);
+}
+
+.timeline-item strong {
+    color: #1f2430;
+}
+
+.progress-card {
+    background: #ffffff;
+    border-radius: 18px;
+    padding: 20px;
+    border: 1px dashed rgba(84, 197, 248, 0.6);
+}
+
+.theme-dark .progress-card {
+    background: #151726;
+    border-color: rgba(84, 197, 248, 0.35);
+}
+
+/* Login demo */
+
+.login-surface {
+    background: radial-gradient(circle at top, rgba(108, 99, 255, 0.15), transparent 60%);
+    padding: 40px;
+}
+
+.login-card {
+    background: #ffffff;
+    border-radius: 28px;
+    padding: 36px;
+    box-shadow: 0 25px 70px rgba(31, 36, 48, 0.18);
+    min-width: 420px;
+}
+
+.theme-dark .login-card {
+    background: #121421;
+    box-shadow: 0 25px 80px rgba(0, 0, 0, 0.55);
+}
+
+.login-title {
+    font-size: 30px;
+    font-weight: 700;
+    color: #1f2430;
+}
+
+.theme-dark .login-title {
+    color: #fefefe;
+}
+
+.login-subtitle {
+    color: #6a738b;
+    font-size: 14px;
+    margin-bottom: 18px;
+}
+
+entry.form-entry {
+    border-radius: 12px;
+    padding: 12px 16px;
+    border: 1px solid rgba(106, 115, 139, 0.4);
+    background: #f9f9ff;
+}
+
+.theme-dark entry.form-entry {
+    border-color: rgba(255, 255, 255, 0.25);
+    background: rgba(18, 20, 33, 0.8);
+    color: #f4f5fb;
+}
+
+entry.form-entry:focus {
+    border-color: #6c63ff;
+    background: #ffffff;
+}
+
+.theme-dark entry.form-entry:focus {
+    background: #141627;
+}
+
+button.pill-button {
+    border-radius: 20px;
+    background-color: rgba(31, 36, 48, 0.08);
+    border: none;
+    color: #1f2430;
+    font-weight: 600;
+}
+
+.theme-dark button.pill-button {
+    background-color: rgba(255, 255, 255, 0.15);
+    color: #fefefe;
+}
+
+button.pill-button:hover {
+    background-color: rgba(31, 36, 48, 0.15);
+}
+
+.theme-dark button.pill-button:hover {
+    background-color: rgba(255, 255, 255, 0.25);
+}
+
+button.primary-cta {
+    background: linear-gradient(135deg, #6c63ff 0%, #54c5f8 100%);
+    border: none;
+    border-radius: 16px;
+    color: #ffffff;
+    font-weight: 700;
+    padding: 12px 0;
+}
+
+button.primary-cta:disabled {
+    opacity: 0.4;
+}
+
+.helper-text {
+    font-size: 12px;
+    color: #6a738b;
+}
+
+.success-text {
+    color: #0d8b70;
+    font-weight: 600;
+}
+
+.error-text {
+    color: #d64550;
+    font-weight: 600;
+}
+
+.tag-cloud {
+    margin-top: 12px;
+}
+
+.tag-cloud .badge {
+    background: rgba(108, 99, 255, 0.15);
+    color: #4f4bd9;
+}

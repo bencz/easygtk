@@ -158,6 +158,10 @@ if(BUILD_EXAMPLES)
     add_executable(listview_example examples/listview_example.c)
     target_link_libraries(listview_example PRIVATE easygtk ${GTK4_LIBRARIES})
     target_include_directories(listview_example PRIVATE ${GTK4_INCLUDE_DIRS})
+
+    add_executable(dashboard_example examples/dashboard_example.c)
+    target_link_libraries(dashboard_example PRIVATE easygtk ${GTK4_LIBRARIES})
+    target_include_directories(dashboard_example PRIVATE ${GTK4_INCLUDE_DIRS})
 endif()
 
 # Install
