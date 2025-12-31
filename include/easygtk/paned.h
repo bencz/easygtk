@@ -13,9 +13,6 @@
 extern "C" {
 #endif
 
-/* Tipo opaco */
-typedef struct EgPaned EgPaned;
-
 /**
  * Cria um novo paned.
  * 

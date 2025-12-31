@@ -13,9 +13,6 @@
 extern "C" {
 #endif
 
-/* Tipo opaco */
-typedef struct EgNotebook EgNotebook;
-
 /**
  * Cria um novo notebook.
  */

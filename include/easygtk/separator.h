@@ -13,9 +13,6 @@
 extern "C" {
 #endif
 
-/* Tipo opaco */
-typedef struct EgSeparator EgSeparator;
-
 /**
  * Cria um novo separador.
  * 

@@ -13,9 +13,6 @@
 extern "C" {
 #endif
 
-/* Tipo opaco */
-typedef struct EgExpander EgExpander;
-
 /**
  * Cria um novo expander.
  * 

@@ -14,9 +14,6 @@
 extern "C" {
 #endif
 
-/* Tipo opaco */
-typedef struct EgPicture EgPicture;
-
 /* Modo de ajuste do conteúdo */
 typedef enum EgContentFit {
     EG_CONTENT_FIT_FILL = 0,      /* Preenche todo o espaço (pode distorcer) */

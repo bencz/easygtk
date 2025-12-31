@@ -231,13 +231,6 @@ void eg_column_view_set_show_column_separators(EgColumnView *column_view, bool s
  * ============================================ */
 
 /**
- * Tipo da função de comparação para ordenação de colunas.
- * Retorna < 0 se a < b, 0 se a == b, > 0 se a > b.
- * Os parâmetros são os valores das células na coluna sendo ordenada.
- */
-typedef int (*EgColumnViewCompareFunc)(const char *a, const char *b, void *user_data);
-
-/**
  * Ordena a tabela pela coluna especificada em ordem ascendente.
  *
  * @param column_view Ponteiro para a tabela

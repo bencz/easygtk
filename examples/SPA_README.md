@@ -1,45 +1,45 @@
 # EasyGTK SPA Example
 
-Exemplo completo de uma **Single Page Application** usando EasyGTK com padrão MVVM.
+Complete example of a **Single Page Application** using EasyGTK with MVVM pattern.
 
-## Características
+## Features
 
-### Arquitetura MVVM Completa
-- **ViewModel Global**: Estado compartilhado entre todas as páginas
-- **Data Binding Declarativo**: Ligação automática entre UI e dados
-- **Computed Properties**: Propriedades calculadas automaticamente
-- **Commands**: Ações reutilizáveis com validação can_execute
+### Complete MVVM Architecture
+- **Global ViewModel**: Shared state between all pages
+- **Declarative Data Binding**: Automatic binding between UI and data
+- **Computed Properties**: Automatically calculated properties
+- **Commands**: Reusable actions with can_execute validation
 
-### Funcionalidades Implementadas
+### Implemented Features
 
 #### 1. Home Page
-- Exibe estatísticas calculadas automaticamente:
-  - Total de produtos em estoque (computed property)
-  - Valor total do inventário (computed property)
-- Navegação para outras páginas
-- Atualização reativa quando dados mudam
+- Displays automatically calculated statistics:
+  - Total products in stock (computed property)
+  - Total inventory value (computed property)
+- Navigation to other pages
+- Reactive updates when data changes
 
 #### 2. Products Page
-- Lista de produtos com informações
-- Botão **Refresh** que atualiza quantidades
-- Demonstra atualização reativa das computed properties
-- ScrolledWindow para listas longas
+- Product list with information
+- **Refresh** button that updates quantities
+- Demonstrates reactive update of computed properties
+- ScrolledWindow for long lists
 
 #### 3. Profile Page
-- Formulário com data binding two-way:
+- Form with two-way data binding:
   - Username (Entry)
   - Email (Entry)
-  - Notificações (CheckButton)
-- Botão **Save** com validação:
-  - Desabilitado quando username vazio
-  - Atualização automática do estado
-- Command binding para ações
+  - Notifications (CheckButton)
+- **Save** button with validation:
+  - Disabled when username is empty
+  - Automatic state update
+- Command binding for actions
 
-## Conceitos Demonstrados
+## Demonstrated Concepts
 
 ### 1. Computed Properties
 ```c
-/* Total de produtos calculado automaticamente */
+/* Total products calculated automatically */
 static void compute_total_products(EgProperty *computed, void *user_data) {
     int total = 0;
     for (int i = 0; i < product_count; i++) {
@@ -61,56 +61,56 @@ eg_bind(eg_label_as_widget(stat1_value), app_vm, "total_products");
 eg_bind_cmd(eg_button_as_widget(btn_save), app_vm, "save_profile");
 ```
 
-### 3. Commands com Validação
+### 3. Commands with Validation
 ```c
-/* Command com can_execute dinâmico */
+/* Command with dynamic can_execute */
 static bool cmd_save_profile_can_execute(EgCommand *cmd, void *param, void *user_data) {
     const char *username = eg_view_model_get_string(app_vm, "username");
     return username != NULL && username[0] != '\0';
 }
 
-/* Observa mudanças para atualizar can_execute */
+/* Observe changes to update can_execute */
 eg_property_on_changed(username_prop, on_username_changed_for_save, save_cmd);
 ```
 
-### 4. Navegação entre Páginas
+### 4. Navigation between Pages
 ```c
-/* Stack para páginas */
+/* Stack for pages */
 EgStack *page_stack = eg_stack_new();
 eg_stack_add_named(page_stack, create_home_page(), "home");
 eg_stack_add_named(page_stack, create_products_page(), "products");
 eg_stack_add_named(page_stack, create_profile_page(), "profile");
 
-/* Navegação via command */
+/* Navigation via command */
 static void cmd_navigate_products(EgCommand *cmd, void *param, void *user_data) {
     eg_stack_set_visible_child_name(page_stack, "products");
 }
 ```
 
-## Como Executar
+## How to Run
 
 ```bash
-# Compilar
+# Build
 cmake -B build -S .
 cmake --build build -j4
 
-# Executar
+# Run
 ./build/spa_example
 ```
 
-## Benefícios do Padrão MVVM
+## MVVM Pattern Benefits
 
-1. **Separação de Responsabilidades**: UI separada da lógica
-2. **Testabilidade**: ViewModel pode ser testado sem UI
-3. **Reatividade**: Mudanças se propagam automaticamente
-4. **Reutilização**: Commands e bindings são declarativos
-5. **Manutenibilidade**: Código organizado e desacoplado
+1. **Separation of Concerns**: UI separated from logic
+2. **Testability**: ViewModel can be tested without UI
+3. **Reactivity**: Changes propagate automatically
+4. **Reusability**: Commands and bindings are declarative
+5. **Maintainability**: Organized and decoupled code
 
-## Próximos Passos
+## Next Steps
 
-Possíveis melhorias:
-- Adicionar persistência de dados
-- Implementar navegação com histórico
-- Adicionar validações mais complexas
-- Implementar ListView para listas dinâmicas
-- Adicionar animações de transição
+Possible improvements:
+- Add data persistence
+- Implement navigation with history
+- Add more complex validations
+- Implement ListView for dynamic lists
+- Add transition animations

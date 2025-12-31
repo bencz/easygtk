@@ -13,9 +13,6 @@
 extern "C" {
 #endif
 
-/* Tipo opaco */
-typedef struct EgProgressBar EgProgressBar;
-
 /**
  * Cria uma nova barra de progresso.
  * 

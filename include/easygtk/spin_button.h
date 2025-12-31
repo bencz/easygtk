@@ -13,9 +13,6 @@
 extern "C" {
 #endif
 
-/* Tipo opaco */
-typedef struct EgSpinButton EgSpinButton;
-
 /**
  * Cria um novo spin button.
  * 

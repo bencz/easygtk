@@ -226,10 +226,6 @@ struct EgListStore {
     GType item_type;
 };
 
-/* Forward declaration para funções de comparação */
-typedef int (*EgListViewCompareFunc)(const char *a, const char *b, void *user_data);
-typedef int (*EgColumnViewCompareFunc)(const char *a, const char *b, void *user_data);
-
 /* Estrutura de list view */
 struct EgListView {
     EgWidget base;

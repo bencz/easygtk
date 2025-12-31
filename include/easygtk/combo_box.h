@@ -13,9 +13,6 @@
 extern "C" {
 #endif
 
-/* Tipo opaco */
-typedef struct EgComboBox EgComboBox;
-
 /**
  * Cria um novo combo box.
  * 

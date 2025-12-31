@@ -16,10 +16,6 @@
 extern "C" {
 #endif
 
-/* Tipos opacos */
-typedef struct EgViewModel EgViewModel;
-typedef struct EgCommand EgCommand;
-
 /* VTable para ViewModel - permite extensão */
 typedef struct EgViewModelVTable {
     const char *type_name;

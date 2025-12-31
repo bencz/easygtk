@@ -1,9 +1,9 @@
 /**
  * EasyGTK - Dashboard Example
  *
- * Demonstra uma tela de analytics com cartões de métricas, timeline e
- * atualização reativa usando ViewModel. O CSS é carregado de forma opcional
- * para estilização avançada, mas o exemplo funciona mesmo sem o arquivo.
+ * Demonstrates an analytics screen with metric cards, timeline and
+ * reactive updates using ViewModel. CSS is loaded optionally
+ * for advanced styling, but the example works even without the file.
  */
 
 #include <easygtk/easygtk.h>
@@ -26,7 +26,7 @@ static bool surface_full_bleed = false;
 static const int APP_SURFACE_MARGIN = 24;
 
 /* ------------------------------------------------------------- */
-/* Utilidades                                                    */
+/* Utilities                                                     */
 /* ------------------------------------------------------------- */
 
 static bool css_file_exists(const char *path) {
@@ -64,7 +64,7 @@ static void load_theme_css(void) {
     }
 
     fprintf(stderr,
-        "[dashboard_example] CSS opcional não encontrado. Rodando sem estilos customizados.\n");
+        "[dashboard_example] Optional CSS not found. Running without custom styles.\n");
 }
 
 static void update_dashboard_metrics(void) {
@@ -76,12 +76,12 @@ static void update_dashboard_metrics(void) {
     int new_signups = 80 + rand() % 70;
     int open_tickets = 12 + rand() % 25;
 
-    double revenue = 42.0 + (rand() % 1200) / 10.0; /* em milhares */
+    double revenue = 42.0 + (rand() % 1200) / 10.0; /* in thousands */
     double conversion = 2.5 + (rand() % 250) / 10.0;
     double progress = (rand() % 96) / 100.0; /* 0.00 - 0.95 */
 
     char revenue_str[32];
-    snprintf(revenue_str, sizeof(revenue_str), "R$ %.1f mi", revenue / 10.0);
+    snprintf(revenue_str, sizeof(revenue_str), "$ %.1fM", revenue / 10.0);
 
     char conversion_str[32];
     snprintf(conversion_str, sizeof(conversion_str), "%.1f%%", conversion);
@@ -96,7 +96,7 @@ static void update_dashboard_metrics(void) {
     }
 
     char deploy_str[64];
-    snprintf(deploy_str, sizeof(deploy_str), "Deploy em andamento (%d%%)", (int)(progress * 100));
+    snprintf(deploy_str, sizeof(deploy_str), "Deploy in progress (%d%%)", (int)(progress * 100));
 
     eg_view_model_set_int(dashboard_vm, "active_users", active_users);
     eg_view_model_set_int(dashboard_vm, "new_signups", new_signups);
@@ -139,7 +139,7 @@ static void set_theme(bool dark, bool sync_switch) {
     }
 
     if (theme_state_label != NULL) {
-        eg_label_set_text(theme_state_label, dark ? "Escuro" : "Claro");
+        eg_label_set_text(theme_state_label, dark ? "Dark" : "Light");
     }
 
     if (sync_switch && theme_switch != NULL) {
@@ -185,7 +185,7 @@ static void style_window_button(EgButton *button) {
 }
 
 /* ------------------------------------------------------------- */
-/* Construção de widgets                                         */
+/* Widget Construction                                           */
 /* ------------------------------------------------------------- */
 
 static EgWidget *create_theme_toggle_control(void) {
@@ -194,10 +194,10 @@ static EgWidget *create_theme_toggle_control(void) {
     EgBox *theme_group = eg_box_new_horizontal(4);
     eg_widget_add_css_class(eg_box_as_widget(theme_group), "theme-toggle");
 
-    EgLabel *caption = eg_label_new("Tema");
+    EgLabel *caption = eg_label_new("Theme");
     eg_widget_add_css_class(eg_label_as_widget(caption), "theme-toggle-caption");
 
-    theme_state_label = eg_label_new("Claro");
+    theme_state_label = eg_label_new("Light");
     eg_widget_add_css_class(eg_label_as_widget(theme_state_label), "theme-toggle-state");
 
     theme_switch = eg_switch_new();
@@ -336,10 +336,10 @@ static EgWidget *create_stats_section(void) {
     eg_widget_add_css_class(eg_box_as_widget(stats), "stat-grid");
 
     EgWidget *cards[] = {
-        create_stat_card("Usuários ativos", "active_users", true),
-        create_stat_card("Novas assinaturas", "new_signups", false),
-        create_stat_card("Receita mensal", "revenue_label", false),
-        create_stat_card("Taxa de conversão", "conversion_label", false)
+        create_stat_card("Active users", "active_users", true),
+        create_stat_card("New signups", "new_signups", false),
+        create_stat_card("Monthly revenue", "revenue_label", false),
+        create_stat_card("Conversion rate", "conversion_label", false)
     };
 
     for (size_t i = 0; i < sizeof(cards) / sizeof(cards[0]); i++) {
@@ -353,9 +353,9 @@ static EgWidget *create_timeline_section(void) {
     EgBox *timeline = eg_box_new_vertical(12);
 
     const char *events[][2] = {
-        {"09:42", "Nova campanha de marketing publicada"},
-        {"10:05", "Time de vendas fechou contrato Enterprise"},
-        {"11:20", "Atualização do app móvel enviada às lojas"}
+        {"09:42", "New marketing campaign published"},
+        {"10:05", "Sales team closed Enterprise contract"},
+        {"11:20", "Mobile app update sent to stores"}
     };
 
     for (size_t i = 0; i < sizeof(events) / sizeof(events[0]); i++) {
@@ -382,7 +382,7 @@ static EgWidget *create_deployment_card(void) {
 
     EgBox *box = eg_box_new_vertical(8);
 
-    EgLabel *title = eg_label_new("Pipeline de deploy");
+    EgLabel *title = eg_label_new("Deploy pipeline");
     eg_widget_add_css_class(eg_label_as_widget(title), "stat-title");
 
     EgLabel *status = eg_label_new("—");
@@ -403,11 +403,11 @@ static EgWidget *create_deployment_card(void) {
 static EgWidget *create_actions_row(void) {
     EgBox *row = eg_box_new_horizontal(12);
 
-    EgButton *refresh = eg_button_new("Atualizar métricas");
+    EgButton *refresh = eg_button_new("Refresh metrics");
     eg_widget_add_css_class(eg_button_as_widget(refresh), "accent-button");
     eg_button_on_click(refresh, on_refresh_click, NULL);
 
-    EgButton *secondary = eg_button_new("Ver relatórios");
+    EgButton *secondary = eg_button_new("View reports");
     eg_widget_add_css_class(eg_button_as_widget(secondary), "pill-button");
 
     eg_box_append(row, eg_button_as_widget(refresh));
@@ -418,14 +418,14 @@ static EgWidget *create_actions_row(void) {
 static EgWidget *create_status_row(void) {
     EgBox *row = eg_box_new_horizontal(24);
 
-    EgLabel *last_sync_title = eg_label_new("Última sincronização");
+    EgLabel *last_sync_title = eg_label_new("Last sync");
     eg_widget_add_css_class(eg_label_as_widget(last_sync_title), "page-subtitle");
 
     EgLabel *last_sync_value = eg_label_new("—");
     eg_widget_add_css_class(eg_label_as_widget(last_sync_value), "badge");
     eg_bind(eg_label_as_widget(last_sync_value), dashboard_vm, "last_sync");
 
-    EgLabel *tickets_title = eg_label_new("Tickets abertos");
+    EgLabel *tickets_title = eg_label_new("Open tickets");
     eg_widget_add_css_class(eg_label_as_widget(tickets_title), "page-subtitle");
 
     EgLabel *tickets_value = eg_label_new("0");
@@ -440,7 +440,7 @@ static EgWidget *create_status_row(void) {
 }
 
 /* ------------------------------------------------------------- */
-/* Ciclo da aplicação                                            */
+/* Application Lifecycle                                         */
 /* ------------------------------------------------------------- */
 
 static void on_activate(EgWidget *widget, void *user_data) {
@@ -453,10 +453,10 @@ static void on_activate(EgWidget *widget, void *user_data) {
     eg_view_model_add_property(dashboard_vm, eg_property_new_int("active_users", 0));
     eg_view_model_add_property(dashboard_vm, eg_property_new_int("new_signups", 0));
     eg_view_model_add_property(dashboard_vm, eg_property_new_int("open_tickets", 0));
-    eg_view_model_add_property(dashboard_vm, eg_property_new_string("revenue_label", "R$ 0"));
+    eg_view_model_add_property(dashboard_vm, eg_property_new_string("revenue_label", "$ 0"));
     eg_view_model_add_property(dashboard_vm, eg_property_new_string("conversion_label", "0%"));
     eg_view_model_add_property(dashboard_vm, eg_property_new_string("last_sync", "—"));
-    eg_view_model_add_property(dashboard_vm, eg_property_new_string("deployment_status", "Pronto"));
+    eg_view_model_add_property(dashboard_vm, eg_property_new_string("deployment_status", "Ready"));
 
     EgWindow *window = eg_window_new(app, "EasyGTK Dashboard", 1000, 640);
     dashboard_window = window;
@@ -479,7 +479,7 @@ static void on_activate(EgWidget *widget, void *user_data) {
     eg_widget_set_valign(eg_box_as_widget(root), EG_ALIGN_FILL);
     root_container = root;
 
-    EgLabel *title = eg_label_new("Visão geral do produto");
+    EgLabel *title = eg_label_new("Product Overview");
     eg_widget_add_css_class(eg_label_as_widget(title), "page-title");
 
     EgBox *content = eg_box_new_horizontal(18);

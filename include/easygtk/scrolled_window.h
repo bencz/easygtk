@@ -13,9 +13,6 @@
 extern "C" {
 #endif
 
-/* Tipo opaco */
-typedef struct EgScrolledWindow EgScrolledWindow;
-
 /* Política de exibição das barras de rolagem */
 typedef enum EgScrollPolicy {
     EG_SCROLL_AUTOMATIC = 0,  /* Mostra quando necessário */

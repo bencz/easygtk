@@ -17,7 +17,6 @@ extern "C" {
 #endif
 
 /* Forward declarations */
-typedef struct EgWidget EgWidget;
 typedef struct EgValidatorChain EgValidatorChain;
 
 /* ============================================

@@ -13,11 +13,6 @@
 extern "C" {
 #endif
 
-/* Forward declaration */
-typedef struct EgWindow EgWindow;
-
-/* Tipo opaco */
-typedef struct EgAboutDialog EgAboutDialog;
 
 /**
  * Cria um novo diálogo "Sobre".

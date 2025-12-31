@@ -1,7 +1,7 @@
 /**
- * EasyGTK - Exemplo de Widgets de Input
+ * EasyGTK - Input Widgets Example
  * 
- * Demonstra SpinButton, Scale e TextView.
+ * Demonstrates SpinButton, Scale and TextView.
  */
 
 #include <easygtk/easygtk.h>
@@ -9,7 +9,7 @@
 
 static EgLabel *status_label = NULL;
 
-/* Callback do SpinButton */
+/* SpinButton callback */
 static void on_spin_changed(EgWidget *widget, void *user_data) {
     (void)user_data;
     EgSpinButton *spin = (EgSpinButton *)widget;
@@ -18,7 +18,7 @@ static void on_spin_changed(EgWidget *widget, void *user_data) {
     eg_label_set_text(status_label, buf);
 }
 
-/* Callback do Scale */
+/* Scale callback */
 static void on_scale_changed(EgWidget *widget, void *user_data) {
     (void)user_data;
     EgScale *scale = (EgScale *)widget;
@@ -27,10 +27,10 @@ static void on_scale_changed(EgWidget *widget, void *user_data) {
     eg_label_set_text(status_label, buf);
 }
 
-/* Callback do TextView */
+/* TextView callback */
 static void on_text_changed(EgWidget *widget, void *user_data) {
     (void)widget; (void)user_data;
-    eg_label_set_text(status_label, "TextView: texto alterado");
+    eg_label_set_text(status_label, "TextView: text changed");
 }
 
 static void on_activate(EgWidget *widget, void *user_data) {
@@ -42,9 +42,9 @@ static void on_activate(EgWidget *widget, void *user_data) {
     EgBox *main_box = eg_box_new_vertical(15);
     eg_widget_set_margin(eg_box_as_widget(main_box), 20);
     
-    /* Título */
+    /* Title */
     EgLabel *title = eg_label_new(NULL);
-    eg_label_set_markup(title, "<span size='x-large' weight='bold'>Widgets de Input</span>");
+    eg_label_set_markup(title, "<span size='x-large' weight='bold'>Input Widgets</span>");
     eg_widget_set_halign(eg_label_as_widget(title), EG_ALIGN_CENTER);
     
     /* === SpinButton === */
@@ -52,7 +52,7 @@ static void on_activate(EgWidget *widget, void *user_data) {
     EgBox *spin_box = eg_box_new_horizontal(10);
     eg_widget_set_margin(eg_box_as_widget(spin_box), 10);
     
-    EgLabel *spin_label = eg_label_new("Quantidade:");
+    EgLabel *spin_label = eg_label_new("Quantity:");
     EgSpinButton *spin = eg_spin_button_new_int(0, 100, 1);
     eg_spin_button_set_value(spin, 50);
     eg_spin_button_on_value_changed(spin, on_spin_changed, NULL);
@@ -86,12 +86,12 @@ static void on_activate(EgWidget *widget, void *user_data) {
     eg_widget_set_margin(eg_box_as_widget(text_box), 10);
     
     EgTextView *text_view = eg_text_view_new();
-    eg_text_view_set_text(text_view, "Este é um campo de texto\nmulti-linha.\n\nVocê pode editar livremente!");
+    eg_text_view_set_text(text_view, "This is a multi-line\ntext field.\n\nYou can edit freely!");
     eg_text_view_set_wrap_mode(text_view, 2); /* word wrap */
     eg_text_view_on_changed(text_view, on_text_changed, NULL);
     eg_widget_set_size_request(eg_text_view_as_widget(text_view), -1, 100);
     
-    /* Coloca TextView dentro de ScrolledWindow */
+    /* Put TextView inside ScrolledWindow */
     EgScrolledWindow *scroll = eg_scrolled_window_new();
     eg_scrolled_window_set_child(scroll, eg_text_view_as_widget(text_view));
     eg_scrolled_window_set_min_content_size(scroll, -1, 100);
@@ -101,11 +101,11 @@ static void on_activate(EgWidget *widget, void *user_data) {
     eg_frame_set_child(text_frame, eg_box_as_widget(text_box));
     
     /* === Status === */
-    status_label = eg_label_new("Interaja com os widgets acima");
+    status_label = eg_label_new("Interact with the widgets above");
     eg_widget_set_halign(eg_label_as_widget(status_label), EG_ALIGN_START);
     eg_widget_add_css_class(eg_label_as_widget(status_label), "dim-label");
     
-    /* Monta UI */
+    /* Build UI */
     eg_box_append(main_box, eg_label_as_widget(title));
     eg_box_append(main_box, eg_frame_as_widget(spin_frame));
     eg_box_append(main_box, eg_frame_as_widget(scale_frame));

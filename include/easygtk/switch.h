@@ -13,9 +13,6 @@
 extern "C" {
 #endif
 
-/* Tipo opaco */
-typedef struct EgSwitch EgSwitch;
-
 /**
  * Cria um novo switch.
  * 

@@ -15,7 +15,6 @@ extern "C" {
 #endif
 
 /* Tipos opacos */
-typedef struct EgSignal EgSignal;
 typedef uint32_t EgHandlerId;
 
 /* Callback genérico para signals */

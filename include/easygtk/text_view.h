@@ -13,9 +13,6 @@
 extern "C" {
 #endif
 
-/* Tipo opaco */
-typedef struct EgTextView EgTextView;
-
 /**
  * Cria um novo text view.
  * 

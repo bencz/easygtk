@@ -14,9 +14,6 @@
 extern "C" {
 #endif
 
-/* Tipo opaco do pool */
-typedef struct EgMemoryPool EgMemoryPool;
-
 /**
  * Cria um novo pool de memória.
  * 

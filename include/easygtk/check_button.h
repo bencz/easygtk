@@ -13,9 +13,6 @@
 extern "C" {
 #endif
 
-/* Tipo opaco */
-typedef struct EgCheckButton EgCheckButton;
-
 /**
  * Cria um novo check button.
  * 

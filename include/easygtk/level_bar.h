@@ -13,9 +13,6 @@
 extern "C" {
 #endif
 
-/* Tipo opaco */
-typedef struct EgLevelBar EgLevelBar;
-
 /* Modo da barra de nível */
 typedef enum EgLevelBarMode {
     EG_LEVEL_BAR_MODE_CONTINUOUS = 0,  /* Barra contínua */

@@ -13,9 +13,6 @@
 extern "C" {
 #endif
 
-/* Tipo opaco */
-typedef struct EgFrame EgFrame;
-
 /**
  * Cria um novo frame.
  * 

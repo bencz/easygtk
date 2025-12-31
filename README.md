@@ -1,21 +1,21 @@
 # EasyGTK
 
-Uma biblioteca C99 para simplificar o desenvolvimento de interfaces gráficas com GTK4.
+A C99 library to simplify GUI development with GTK4.
 
-## Características
+## Features
 
-- **API Simples**: Sem macros públicas, apenas funções claras e diretas
-- **Componentização**: Sistema baseado em vtables para extensibilidade
-- **C99**: Compatível com o padrão C99
-- **MVVM Completo**: ViewModel, Model, Properties observáveis e Data Binding declarativo
-- **Computed Properties**: Propriedades calculadas automaticamente
-- **Command Pattern**: Commands com validação can_execute
-- **Reatividade**: Sistema de binding bidirecional automático
-- **Validação Declarativa**: Sistema de validação com feedback visual automático
-- **API Genérica de Containers**: Manipulação polimórfica de qualquer container via vtable
-- **Gerenciamento de Memória**: Sistema simplificado de ciclo de vida dos widgets
+- **Simple API**: No public macros, just clear and straightforward functions
+- **Componentization**: VTable-based system for extensibility
+- **C99**: Compatible with the C99 standard
+- **Complete MVVM**: ViewModel, Model, Observable Properties and Declarative Data Binding
+- **Computed Properties**: Automatically calculated properties
+- **Command Pattern**: Commands with can_execute validation
+- **Reactivity**: Automatic bidirectional binding system
+- **Declarative Validation**: Validation system with automatic visual feedback
+- **Generic Container API**: Polymorphic manipulation of any container via vtable
+- **Memory Management**: Simplified widget lifecycle management system
 
-## Compilação
+## Building
 
 ```bash
 mkdir build && cd build
@@ -23,19 +23,19 @@ cmake ..
 make
 ```
 
-## Dependências
+## Dependencies
 
-- GTK4 (`gtk4-devel` no Fedora, `libgtk-4-dev` no Debian/Ubuntu)
+- GTK4 (`gtk4-devel` on Fedora, `libgtk-4-dev` on Debian/Ubuntu)
 - CMake 3.10+
-- Compilador C99
+- C99 compiler
 
-## Exemplo Básico
+## Basic Example
 
 ```c
 #include <easygtk/easygtk.h>
 
 void on_button_click(EgWidget *widget, void *user_data) {
-    eg_label_set_text((EgLabel *)user_data, "Botão clicado!");
+    eg_label_set_text((EgLabel *)user_data, "Button clicked!");
 }
 
 void on_activate(EgWidget *widget, void *user_data) {
@@ -44,8 +44,8 @@ void on_activate(EgWidget *widget, void *user_data) {
     EgWindow *window = eg_window_new(app, "Hello EasyGTK", 400, 300);
     EgBox *box = eg_box_new_vertical(10);
     
-    EgLabel *label = eg_label_new("Olá, Mundo!");
-    EgButton *button = eg_button_new("Clique aqui");
+    EgLabel *label = eg_label_new("Hello, World!");
+    EgButton *button = eg_button_new("Click here");
     
     eg_button_on_click(button, on_button_click, label);
     
@@ -63,7 +63,7 @@ int main(int argc, char *argv[]) {
 }
 ```
 
-## Exemplo MVVM com Data Binding
+## MVVM Example with Data Binding
 
 ```c
 #include <easygtk/easygtk.h>
@@ -86,30 +86,30 @@ static void cmd_reset(EgCommand *cmd, void *param, void *data) {
 void on_activate(EgWidget *widget, void *user_data) {
     EgApp *app = (EgApp *)user_data;
 
-    // Criar ViewModel
+    // Create ViewModel
     vm = eg_view_model_new();
     eg_view_model_add_property(vm, eg_property_new_int("counter", 0));
 
-    // Criar Commands
+    // Create Commands
     eg_view_model_add_command(vm,
         eg_command_new("increment", cmd_increment, NULL, NULL));
     eg_view_model_add_command(vm,
         eg_command_new("reset", cmd_reset, cmd_reset_can_execute, NULL));
 
-    // UI com Data Binding Declarativo
+    // UI with Declarative Data Binding
     EgWindow *window = eg_window_new(app, "MVVM Demo", 300, 200);
     EgBox *box = eg_box_new_vertical(10);
 
-    // Label ligado automaticamente ao counter
+    // Label automatically bound to counter
     EgLabel *label = eg_label_new("0");
     eg_bind_label_text(label, vm, "counter");  // One-way binding
 
-    // Botões ligados aos commands
+    // Buttons bound to commands
     EgButton *btn_inc = eg_button_new("Increment");
     eg_bind_button_command(btn_inc, vm, "increment");  // Command binding
 
     EgButton *btn_reset = eg_button_new("Reset");
-    eg_bind_button_command(btn_reset, vm, "reset");  // Auto-disable quando counter = 0
+    eg_bind_button_command(btn_reset, vm, "reset");  // Auto-disable when counter = 0
 
     eg_box_append(box, eg_label_as_widget(label));
     eg_box_append(box, eg_button_as_widget(btn_inc));
@@ -128,101 +128,101 @@ int main(int argc, char *argv[]) {
 }
 ```
 
-## Widgets Disponíveis
+## Available Widgets
 
-### Básicos
-- **EgWindow**: Janela principal
-- **EgButton**: Botão
-- **EgLabel**: Texto estático
-- **EgEntry**: Campo de entrada de texto
+### Basic
+- **EgWindow**: Main window
+- **EgButton**: Button
+- **EgLabel**: Static text
+- **EgEntry**: Text input field
 
 ### Input
-- **EgCheckButton**: Checkbox (suporta agrupamento como radio buttons)
-- **EgSwitch**: Toggle switch liga/desliga
-- **EgProgressBar**: Barra de progresso (determinada e indeterminada)
-- **EgComboBox**: Dropdown de seleção
-- **EgSpinButton**: Campo numérico com incremento/decremento
-- **EgScale**: Slider para seleção de valores
-- **EgTextView**: Campo de texto multi-linha
+- **EgCheckButton**: Checkbox (supports grouping as radio buttons)
+- **EgSwitch**: On/off toggle switch
+- **EgProgressBar**: Progress bar (determinate and indeterminate)
+- **EgComboBox**: Selection dropdown
+- **EgSpinButton**: Numeric field with increment/decrement
+- **EgScale**: Slider for value selection
+- **EgTextView**: Multi-line text field
 
 ### Containers
-- **EgBox**: Container linear (horizontal/vertical)
-- **EgGrid**: Container em grade
-- **EgScrolledWindow**: Container com barras de rolagem
-- **EgStack**: Container que mostra um filho por vez (com transições)
-- **EgStackSwitcher**: Botões para alternar páginas do Stack
-- **EgNotebook**: Container com abas (tabs)
-- **EgPaned**: Container dividido em dois painéis redimensionáveis
-- **EgFrame**: Container com borda e título
-- **EgExpander**: Container expansível/recolhível
+- **EgBox**: Linear container (horizontal/vertical)
+- **EgGrid**: Grid container
+- **EgScrolledWindow**: Container with scrollbars
+- **EgStack**: Container that shows one child at a time (with transitions)
+- **EgStackSwitcher**: Buttons to switch Stack pages
+- **EgNotebook**: Container with tabs
+- **EgPaned**: Container split into two resizable panels
+- **EgFrame**: Container with border and title
+- **EgExpander**: Expandable/collapsible container
 
 ### Menus
-- **EgPopoverMenu**: Menu popup com itens, ícones e separadores
-- **EgMenuButton**: Botão que abre um menu popover
+- **EgPopoverMenu**: Popup menu with items, icons and separators
+- **EgMenuButton**: Button that opens a popover menu
 
-### Listas e Tabelas
-- **EgListView**: Lista de itens com seleção simples/múltipla
-- **EgColumnView**: Tabela com múltiplas colunas
+### Lists and Tables
+- **EgListView**: List of items with single/multiple selection
+- **EgColumnView**: Table with multiple columns
 
-## Diálogos
+## Dialogs
 
-- **eg_dialog_info()**: Diálogo de informação
-- **eg_dialog_warning()**: Diálogo de aviso
-- **eg_dialog_error()**: Diálogo de erro
-- **eg_dialog_question()**: Diálogo Sim/Não com callback
-- **eg_dialog_confirm()**: Diálogo OK/Cancelar com callback
+- **eg_dialog_info()**: Information dialog
+- **eg_dialog_warning()**: Warning dialog
+- **eg_dialog_error()**: Error dialog
+- **eg_dialog_question()**: Yes/No dialog with callback
+- **eg_dialog_confirm()**: OK/Cancel dialog with callback
 
 ## Core Features
 
-### Sistema MVVM/Reatividade
-- **EgProperty**: Properties observáveis com notificação automática
-- **Computed Properties**: `eg_property_set_computed()` - propriedades calculadas automaticamente
-- **EgModel**: Camada de dados com validação
-- **EgViewModel**: Gerenciamento de estado da aplicação
-- **EgCommand**: Commands com validação `can_execute` (ICommand pattern)
-- **Data Binding Declarativo**:
-  - `eg_bind()` - Binding genérico via vtable (detecta modo automaticamente)
-  - `eg_bind_cmd()` - Binding de command genérico
-  - `eg_bind_widget_visible()` - One-way para visibilidade
-  - `eg_bind_widget_sensitive()` - One-way para habilitado/desabilitado
+### MVVM/Reactivity System
+- **EgProperty**: Observable properties with automatic notification
+- **Computed Properties**: `eg_property_set_computed()` - automatically calculated properties
+- **EgModel**: Data layer with validation
+- **EgViewModel**: Application state management
+- **EgCommand**: Commands with `can_execute` validation (ICommand pattern)
+- **Declarative Data Binding**:
+  - `eg_bind()` - Generic binding via vtable (auto-detects mode)
+  - `eg_bind_cmd()` - Generic command binding
+  - `eg_bind_widget_visible()` - One-way for visibility
+  - `eg_bind_widget_sensitive()` - One-way for enabled/disabled
 
-### Sistema de Validação
-- **EgValidatorChain**: Chain de validadores executados em sequência
-- **Validadores Built-in**:
-  - `eg_validator_add_required()` - Campo obrigatório
-  - `eg_validator_add_min_length()` / `eg_validator_add_max_length()` - Tamanho de string
-  - `eg_validator_add_email()` - Formato de email
-  - `eg_validator_add_pattern()` - Expressão regular
-  - `eg_validator_add_range_int()` / `eg_validator_add_range_double()` - Range numérico
-  - `eg_validator_add_custom()` - Validador customizado via callback
-- **Integração com Widgets**:
-  - `eg_widget_set_validators()` - Associa validadores a um widget
-  - `eg_widget_validate()` - Valida e mostra erro visual (CSS + tooltip)
-  - `eg_widget_validate_on_focus_out()` - Validação automática ao perder foco
-  - `eg_validate_all()` - Valida múltiplos widgets de uma vez
+### Validation System
+- **EgValidatorChain**: Chain of validators executed in sequence
+- **Built-in Validators**:
+  - `eg_validator_add_required()` - Required field
+  - `eg_validator_add_min_length()` / `eg_validator_add_max_length()` - String length
+  - `eg_validator_add_email()` - Email format
+  - `eg_validator_add_pattern()` - Regular expression
+  - `eg_validator_add_range_int()` / `eg_validator_add_range_double()` - Numeric range
+  - `eg_validator_add_custom()` - Custom validator via callback
+- **Widget Integration**:
+  - `eg_widget_set_validators()` - Associates validators with a widget
+  - `eg_widget_validate()` - Validates and shows visual error (CSS + tooltip)
+  - `eg_widget_validate_on_focus_out()` - Automatic validation on focus loss
+  - `eg_validate_all()` - Validates multiple widgets at once
 
-### API Genérica de Containers
-- **Polimorfismo via VTable**: Opera em qualquer container de forma genérica
-- `eg_widget_is_container()` - Verifica se widget é container
-- `eg_container_add()` / `eg_container_remove()` - Adiciona/remove filhos
-- `eg_container_add_named()` - Adiciona filho com nome (Stack, Notebook)
-- `eg_container_get_child_count()` / `eg_container_get_child_at()` - Itera filhos
-- `eg_container_clear()` - Remove todos os filhos
-- `eg_container_supports_multiple()` / `eg_container_supports_named()` - Verifica capacidades
+### Generic Container API
+- **Polymorphism via VTable**: Operates on any container generically
+- `eg_widget_is_container()` - Checks if widget is a container
+- `eg_container_add()` / `eg_container_remove()` - Adds/removes children
+- `eg_container_add_named()` - Adds named child (Stack, Notebook)
+- `eg_container_get_child_count()` / `eg_container_get_child_at()` - Iterates children
+- `eg_container_clear()` - Removes all children
+- `eg_container_supports_multiple()` / `eg_container_supports_named()` - Checks capabilities
 
-### Sistema de Eventos
-- **EgSignal**: Sistema de eventos com múltiplos listeners
-- **Eventos**: Teclado, mouse (motion, enter, leave, scroll, click), foco
+### Event System
+- **EgSignal**: Event system with multiple listeners
+- **Events**: Keyboard, mouse (motion, enter, leave, scroll, click), focus
 - **Clipboard**: `eg_clipboard_set_text()`, `eg_clipboard_get_text()`
 - **Drag and Drop**: `eg_widget_set_drag_source()`, `eg_widget_set_drop_target()`
 
-### Utilitários
+### Utilities
 - **Timers**: `eg_timeout_add()`, `eg_idle_add()`
 - **CSS**: `eg_css_load_from_file()`, `eg_css_load_from_string()`
 - **Tooltip**: `eg_widget_set_tooltip()`, `eg_widget_set_tooltip_markup()`
 - **Cursor**: `eg_widget_set_cursor()`
 - **Opacity**: `eg_widget_set_opacity()`, `eg_widget_get_opacity()`
-- **Nome/ID**: `eg_widget_set_name()`, `eg_widget_get_name()`
+- **Name/ID**: `eg_widget_set_name()`, `eg_widget_get_name()`
 - **Logging**: `eg_log_debug()`, `eg_log_info()`, `eg_log_warning()`, `eg_log_error()`
 - **Type Casting**: `eg_widget_cast_to_*()`, `eg_widget_is_type()`, `eg_widget_is_container()`
 - **Ref-counting**: `eg_widget_ref()`, `eg_widget_unref()`
@@ -234,39 +234,39 @@ int main(int argc, char *argv[]) {
 - **Fullscreen**: `eg_window_fullscreen()`, `eg_window_unfullscreen()`, `eg_window_is_fullscreen()`
 - **Decoration**: `eg_window_set_decorated()` - Enable/disable system window decorations
 
-## Exemplos
+## Examples
 
-Após compilar, os exemplos estarão em `build/`:
+After building, examples will be in `build/`:
 
 ```bash
-./build/hello_world           # Exemplo básico
-./build/form_example          # Formulário com grid
-./build/counter_example       # Contador simples
-./build/mvvm_example          # Demonstração MVVM
-./build/spa_example           # SPA completa com MVVM, binding e computed properties
+./build/hello_world           # Basic example
+./build/form_example          # Form with grid
+./build/counter_example       # Simple counter
+./build/mvvm_example          # MVVM demonstration
+./build/spa_example           # Complete SPA with MVVM, binding and computed properties
 ./build/widgets_example       # CheckButton, Switch, ProgressBar
-./build/dialogs_example       # Diálogos, ComboBox, ScrolledWindow
-./build/events_example        # Eventos de teclado, mouse, foco, clipboard
+./build/dialogs_example       # Dialogs, ComboBox, ScrolledWindow
+./build/events_example        # Keyboard, mouse, focus, clipboard events
 ./build/dnd_example           # Drag and Drop
 ./build/input_widgets_example # SpinButton, Scale, TextView, Frame
 ./build/containers_example    # Stack, Notebook, Paned, Expander
 ./build/menu_example          # PopoverMenu, MenuButton
-./build/menubar_example       # Barra de menu tradicional (File, Edit, View, Help)
-./build/listview_example      # ListView e ColumnView (tabela)
-./build/dashboard_example     # Dashboard com gráficos e métricas
-./build/validation_example    # Sistema de validação de formulários
-./build/container_api_example # API genérica de containers via vtable
+./build/menubar_example       # Traditional menu bar (File, Edit, View, Help)
+./build/listview_example      # ListView and ColumnView (table)
+./build/dashboard_example     # Dashboard with charts and metrics
+./build/validation_example    # Form validation system
+./build/container_api_example # Generic container API via vtable
 ```
 
-**Destaque**: O `spa_example` demonstra uma aplicação completa estilo SPA (Single Page Application) com:
-- Navegação entre múltiplas páginas (Home, Products, Profile)
-- Data binding declarativo (two-way e one-way)
-- Computed properties (estatísticas calculadas automaticamente)
-- Commands com validação can_execute
-- Formulários reativos
+**Highlight**: The `spa_example` demonstrates a complete SPA-style (Single Page Application) application with:
+- Navigation between multiple pages (Home, Products, Profile)
+- Declarative data binding (two-way and one-way)
+- Computed properties (automatically calculated statistics)
+- Commands with can_execute validation
+- Reactive forms
 
-Veja `examples/SPA_README.md` para mais detalhes.
+See `examples/SPA_README.md` for more details.
 
-## Licença
+## License
 
 MIT License

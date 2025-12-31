@@ -13,9 +13,6 @@
 extern "C" {
 #endif
 
-/* Tipo opaco para provider CSS */
-typedef struct EgCssProvider EgCssProvider;
-
 /**
  * Carrega CSS de uma string e aplica globalmente.
  * 

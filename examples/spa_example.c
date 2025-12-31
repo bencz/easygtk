@@ -1,23 +1,23 @@
 /**
  * EasyGTK - SPA (Single Page Application) Example
  *
- * Demonstra um aplicativo estilo SPA com:
- * - Navegação entre páginas (Home, Products, Profile)
- * - ViewModel global compartilhado
- * - Data binding declarativo
+ * Demonstrates a SPA-style application with:
+ * - Navigation between pages (Home, Products, Profile)
+ * - Shared global ViewModel
+ * - Declarative data binding
  * - Computed properties
- * - Model para dados de produtos
- * - Commands para navegação e ações
+ * - Model for product data
+ * - Commands for navigation and actions
  */
 
 #include <easygtk/easygtk.h>
 #include <stdio.h>
 
 /* ============================================
- * Models - Dados de Domínio
+ * Models - Domain Data
  * ============================================ */
 
-/* Produto */
+/* Product */
 typedef struct {
     int id;
     char name[64];
@@ -38,7 +38,7 @@ typedef enum {
     PAGE_PROFILE
 } AppPage;
 
-/* Produtos de exemplo */
+/* Sample products */
 static Product products[] = {
     {1, "Laptop", 999.99, 5},
     {2, "Mouse", 29.99, 15},
@@ -48,13 +48,13 @@ static Product products[] = {
 static const int product_count = 4;
 
 /* ============================================
- * Computed Property: Total de produtos
+ * Computed Property: Total products
  * ============================================ */
 
 static void compute_total_products(EgProperty *computed, void *user_data) {
     (void)user_data;
 
-    /* Calcula total baseado nos produtos disponíveis */
+    /* Calculate total based on available products */
     int total = 0;
     for (int i = 0; i < product_count; i++) {
         total += products[i].quantity;
@@ -64,13 +64,13 @@ static void compute_total_products(EgProperty *computed, void *user_data) {
 }
 
 /* ============================================
- * Computed Property: Valor total do estoque
+ * Computed Property: Total inventory value
  * ============================================ */
 
 static void compute_total_value(EgProperty *computed, void *user_data) {
     (void)user_data;
 
-    /* Calcula valor total do estoque */
+    /* Calculate total inventory value */
     double total = 0.0;
     for (int i = 0; i < product_count; i++) {
         total += products[i].price * products[i].quantity;
@@ -80,7 +80,7 @@ static void compute_total_value(EgProperty *computed, void *user_data) {
 }
 
 /* ============================================
- * Commands - Navegação
+ * Commands - Navigation
  * ============================================ */
 
 static EgStack *page_stack = NULL;
@@ -110,17 +110,17 @@ static void cmd_navigate_profile(EgCommand *cmd, void *param, void *user_data) {
 static void cmd_refresh_products(EgCommand *cmd, void *param, void *user_data) {
     (void)cmd; (void)param; (void)user_data;
 
-    /* Simula atualização de dados */
+    /* Simulate data update */
     for (int i = 0; i < product_count; i++) {
         products[i].quantity += 1;
     }
 
-    /* Força recálculo das computed properties de forma segura */
+    /* Force recalculation of computed properties safely */
     EgProperty *total_products = eg_view_model_get_property(app_vm, "total_products");
     EgProperty *total_value = eg_view_model_get_property(app_vm, "total_value");
 
     if (total_products && total_value) {
-        /* Calcula novos valores */
+        /* Calculate new values */
         int total = 0;
         double value = 0.0;
         for (int i = 0; i < product_count; i++) {
@@ -128,7 +128,7 @@ static void cmd_refresh_products(EgCommand *cmd, void *param, void *user_data) {
             value += products[i].price * products[i].quantity;
         }
 
-        /* Atualiza as properties (isso dispara os signals automaticamente) */
+        /* Update properties (this triggers signals automatically) */
         eg_property_set_int(total_products, total);
         eg_property_set_double(total_value, value);
     }
@@ -162,7 +162,7 @@ static void cmd_save_profile(EgCommand *cmd, void *param, void *user_data) {
 static bool cmd_save_profile_can_execute(EgCommand *cmd, void *param, void *user_data) {
     (void)cmd; (void)param; (void)user_data;
 
-    /* Só pode salvar se username não estiver vazio */
+    /* Can only save if username is not empty */
     const char *username = eg_view_model_get_string(app_vm, "username");
     return username != NULL && username[0] != '\0';
 }
@@ -171,7 +171,7 @@ static bool cmd_save_profile_can_execute(EgCommand *cmd, void *param, void *user
  * UI - Home Page
  * ============================================ */
 
-/* Callback para formatar valor como moeda */
+/* Callback to format value as currency */
 static void on_total_value_changed(EgProperty *prop, void *user_data) {
     EgLabel *label = (EgLabel *)user_data;
     char buf[64];
@@ -186,15 +186,15 @@ static EgWidget *create_home_page(void) {
     eg_widget_set_halign(eg_box_as_widget(page), EG_ALIGN_CENTER);
     eg_widget_set_valign(eg_box_as_widget(page), EG_ALIGN_CENTER);
 
-    /* Título */
+    /* Title */
     EgLabel *title = eg_label_new("");
     eg_label_set_markup(title, "<span size='xx-large' weight='bold'>Welcome to SPA Demo</span>");
 
-    /* Subtítulo */
+    /* Subtitle */
     EgLabel *subtitle = eg_label_new("Built with EasyGTK MVVM");
     eg_widget_add_css_class(eg_label_as_widget(subtitle), "dim-label");
 
-    /* Estatísticas */
+    /* Statistics */
     EgBox *stats_box = eg_box_new_horizontal(30);
     eg_widget_set_halign(eg_box_as_widget(stats_box), EG_ALIGN_CENTER);
 
@@ -218,10 +218,10 @@ static EgWidget *create_home_page(void) {
     EgLabel *stat2_value = eg_label_new("$0.00");
     eg_label_set_markup(stat2_value, "<span size='x-large' weight='bold'>$0.00</span>");
 
-    /* Formata valor como moeda */
+    /* Format value as currency */
     EgProperty *total_value_prop = eg_view_model_get_property(app_vm, "total_value");
     eg_property_on_changed(total_value_prop, on_total_value_changed, stat2_value);
-    /* Atualiza valor inicial */
+    /* Update initial value */
     on_total_value_changed(total_value_prop, stat2_value);
 
     eg_box_append(stat2, eg_label_as_widget(stat2_label));
@@ -230,7 +230,7 @@ static EgWidget *create_home_page(void) {
     eg_box_append(stats_box, eg_box_as_widget(stat1));
     eg_box_append(stats_box, eg_box_as_widget(stat2));
 
-    /* Botões de navegação */
+    /* Navigation buttons */
     EgBox *nav_box = eg_box_new_horizontal(10);
     eg_widget_set_halign(eg_box_as_widget(nav_box), EG_ALIGN_CENTER);
 
@@ -244,7 +244,7 @@ static EgWidget *create_home_page(void) {
     eg_box_append(nav_box, eg_button_as_widget(btn_products));
     eg_box_append(nav_box, eg_button_as_widget(btn_profile));
 
-    /* Montagem */
+    /* Assembly */
     eg_box_append(page, eg_label_as_widget(title));
     eg_box_append(page, eg_label_as_widget(subtitle));
     eg_box_append(page, eg_box_as_widget(stats_box));
@@ -261,7 +261,7 @@ static EgWidget *create_products_page(void) {
     EgBox *page = eg_box_new_vertical(20);
     eg_widget_set_margin(eg_box_as_widget(page), 40);
 
-    /* Cabeçalho */
+    /* Header */
     EgBox *header = eg_box_new_horizontal(10);
 
     EgLabel *title = eg_label_new("");
@@ -278,7 +278,7 @@ static EgWidget *create_products_page(void) {
     eg_box_append(header, eg_button_as_widget(btn_refresh));
     eg_box_append(header, eg_button_as_widget(btn_back));
 
-    /* Lista de produtos */
+    /* Product list */
     EgBox *products_list = eg_box_new_vertical(10);
 
     for (int i = 0; i < product_count; i++) {
@@ -287,7 +287,7 @@ static EgWidget *create_products_page(void) {
         EgBox *product_box = eg_box_new_horizontal(20);
         eg_widget_set_margin(eg_box_as_widget(product_box), 15);
 
-        /* Nome e preço */
+        /* Name and price */
         EgBox *info_box = eg_box_new_vertical(5);
         eg_widget_set_hexpand(eg_box_as_widget(info_box), true);
 
@@ -307,7 +307,7 @@ static EgWidget *create_products_page(void) {
         eg_box_append(info_box, eg_label_as_widget(name_label));
         eg_box_append(info_box, eg_label_as_widget(price_label));
 
-        /* Quantidade */
+        /* Quantity */
         char qty_text[64];
         snprintf(qty_text, sizeof(qty_text), "Stock: %d", products[i].quantity);
         EgLabel *qty_label = eg_label_new(qty_text);
@@ -319,13 +319,13 @@ static EgWidget *create_products_page(void) {
         eg_box_append(products_list, eg_frame_as_widget(product_frame));
     }
 
-    /* ScrolledWindow para lista */
+    /* ScrolledWindow for list */
     EgScrolledWindow *scroll = eg_scrolled_window_new();
     eg_scrolled_window_set_child(scroll, eg_box_as_widget(products_list));
     eg_scrolled_window_set_policy(scroll, EG_SCROLL_NEVER, EG_SCROLL_AUTOMATIC);
     eg_widget_set_vexpand(eg_scrolled_window_as_widget(scroll), true);
 
-    /* Montagem */
+    /* Assembly */
     eg_box_append(page, eg_box_as_widget(header));
     eg_box_append(page, eg_scrolled_window_as_widget(scroll));
 
@@ -341,7 +341,7 @@ static EgWidget *create_profile_page(void) {
     eg_widget_set_margin(eg_box_as_widget(page), 40);
     eg_widget_set_halign(eg_box_as_widget(page), EG_ALIGN_CENTER);
 
-    /* Cabeçalho */
+    /* Header */
     EgBox *header = eg_box_new_horizontal(10);
     eg_widget_set_halign(eg_box_as_widget(header), EG_ALIGN_CENTER);
 
@@ -350,7 +350,7 @@ static EgWidget *create_profile_page(void) {
 
     eg_box_append(header, eg_label_as_widget(title));
 
-    /* Formulário */
+    /* Form */
     EgBox *form = eg_box_new_vertical(15);
     eg_widget_set_size_request(eg_box_as_widget(form), 400, -1);
 
@@ -374,7 +374,7 @@ static EgWidget *create_profile_page(void) {
     EgCheckButton *notifications_check = eg_check_button_new("Enable notifications");
     eg_bind(eg_check_button_as_widget(notifications_check), app_vm, "notifications_enabled");
 
-    /* Botões */
+    /* Buttons */
     EgBox *button_box = eg_box_new_horizontal(10);
     eg_widget_set_halign(eg_box_as_widget(button_box), EG_ALIGN_CENTER);
 
@@ -388,7 +388,7 @@ static EgWidget *create_profile_page(void) {
     eg_box_append(button_box, eg_button_as_widget(btn_save));
     eg_box_append(button_box, eg_button_as_widget(btn_cancel));
 
-    /* Montagem do formulário */
+    /* Form assembly */
     eg_box_append(form, eg_label_as_widget(username_label));
     eg_box_append(form, eg_entry_as_widget(username_entry));
     eg_box_append(form, eg_label_as_widget(email_label));
@@ -396,7 +396,7 @@ static EgWidget *create_profile_page(void) {
     eg_box_append(form, eg_check_button_as_widget(notifications_check));
     eg_box_append(form, eg_box_as_widget(button_box));
 
-    /* Montagem final */
+    /* Final assembly */
     eg_box_append(page, eg_box_as_widget(header));
     eg_box_append(page, eg_box_as_widget(form));
 
@@ -407,7 +407,7 @@ static EgWidget *create_profile_page(void) {
  * ViewModel Setup
  * ============================================ */
 
-/* Callback para atualizar can_execute do comando save quando username mudar */
+/* Callback to update can_execute of save command when username changes */
 static void on_username_changed_for_save(EgProperty *property, void *user_data) {
     (void)property;
     EgCommand *save_cmd = (EgCommand *)user_data;
@@ -417,7 +417,7 @@ static void on_username_changed_for_save(EgProperty *property, void *user_data) 
 static void setup_viewmodel(void) {
     app_vm = eg_view_model_new();
 
-    /* Properties de estado */
+    /* State properties */
     eg_view_model_add_property(app_vm, eg_property_new_int("current_page", PAGE_HOME));
 
     /* Profile properties */
@@ -432,11 +432,11 @@ static void setup_viewmodel(void) {
     EgProperty *total_value = eg_property_new_double("total_value", 0.0);
     eg_view_model_add_property(app_vm, total_value);
 
-    /* Configura computed properties (sem dependências explícitas neste caso) */
+    /* Setup computed properties (no explicit dependencies in this case) */
     compute_total_products(total_products, NULL);
     compute_total_value(total_value, NULL);
 
-    /* Commands de navegação */
+    /* Navigation commands */
     eg_view_model_add_command(app_vm,
         eg_command_new("navigate_home", cmd_navigate_home, NULL, NULL));
     eg_view_model_add_command(app_vm,
@@ -444,13 +444,13 @@ static void setup_viewmodel(void) {
     eg_view_model_add_command(app_vm,
         eg_command_new("navigate_profile", cmd_navigate_profile, NULL, NULL));
 
-    /* Commands de ações */
+    /* Action commands */
     eg_view_model_add_command(app_vm,
         eg_command_new("refresh_products", cmd_refresh_products, NULL, NULL));
     eg_view_model_add_command(app_vm,
         eg_command_new("save_profile", cmd_save_profile, cmd_save_profile_can_execute, NULL));
 
-    /* Observa mudanças no username para atualizar can_execute do save */
+    /* Observe username changes to update save command can_execute */
     EgProperty *username_prop = eg_view_model_get_property(app_vm, "username");
     EgCommand *save_cmd = eg_view_model_get_command(app_vm, "save_profile");
     eg_property_on_changed(username_prop, on_username_changed_for_save, save_cmd);
@@ -467,10 +467,10 @@ static void on_activate(EgWidget *widget, void *user_data) {
     /* Setup ViewModel */
     setup_viewmodel();
 
-    /* Janela principal */
+    /* Main window */
     EgWindow *window = eg_window_new(app, "EasyGTK SPA Demo", 800, 600);
 
-    /* Stack para páginas */
+    /* Stack for pages */
     page_stack = eg_stack_new();
     eg_stack_add_named(page_stack, create_home_page(), "home");
     eg_stack_add_named(page_stack, create_products_page(), "products");

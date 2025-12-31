@@ -15,9 +15,6 @@
 extern "C" {
 #endif
 
-/* Tipo opaco */
-typedef struct EgModel EgModel;
-
 /* VTable para Model - permite extensão */
 typedef struct EgModelVTable {
     const char *type_name;

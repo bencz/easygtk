@@ -14,10 +14,6 @@ extern "C" {
 #endif
 
 /* Forward declaration */
-typedef struct EgWindow EgWindow;
-
-/* Tipo opaco para filtro de arquivo */
-typedef struct EgFileFilter EgFileFilter;
 
 /* Callback para resultado do diálogo de arquivo */
 typedef void (*EgFileChooserCallback)(const char *path, void *user_data);

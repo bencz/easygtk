@@ -50,6 +50,29 @@ typedef struct EgMenuButton EgMenuButton;
 typedef struct EgListView EgListView;
 typedef struct EgColumnView EgColumnView;
 typedef struct EgListStore EgListStore;
+typedef struct EgSignal EgSignal;
+typedef struct EgViewModel EgViewModel;
+typedef struct EgCommand EgCommand;
+typedef struct EgProperty EgProperty;
+typedef struct EgBinding EgBinding;
+typedef struct EgCssProvider EgCssProvider;
+typedef struct EgMemoryPool EgMemoryPool;
+typedef struct EgModel EgModel;
+typedef struct EgFileFilter EgFileFilter;
+typedef struct EgAboutDialog EgAboutDialog;
+
+/**
+ * Tipo da função de comparação para ordenação.
+ * Retorna < 0 se a < b, 0 se a == b, > 0 se a > b.
+ */
+typedef int (*EgListViewCompareFunc)(const char *a, const char *b, void *user_data);
+
+/**
+ * Tipo da função de comparação para ordenação de colunas.
+ * Retorna < 0 se a < b, 0 se a == b, > 0 se a > b.
+ * Os parâmetros são os valores das células na coluna sendo ordenada.
+ */
+typedef int (*EgColumnViewCompareFunc)(const char *a, const char *b, void *user_data);
 
 /* Enumerações */
 typedef enum EgOrientation {

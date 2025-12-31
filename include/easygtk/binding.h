@@ -15,18 +15,6 @@
 extern "C" {
 #endif
 
-/* Forward declarations */
-typedef struct EgWidget EgWidget;
-typedef struct EgEntry EgEntry;
-typedef struct EgLabel EgLabel;
-typedef struct EgCheckButton EgCheckButton;
-typedef struct EgSwitch EgSwitch;
-typedef struct EgSpinButton EgSpinButton;
-typedef struct EgScale EgScale;
-typedef struct EgButton EgButton;
-typedef struct EgListView EgListView;
-typedef struct EgColumnView EgColumnView;
-
 /* ============================================
  * Binding Modes
  * ============================================ */

@@ -13,9 +13,6 @@
 extern "C" {
 #endif
 
-/* Tipo opaco */
-typedef struct EgImage EgImage;
-
 /**
  * Cria uma nova imagem vazia.
  * 

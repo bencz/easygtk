@@ -13,9 +13,6 @@
 extern "C" {
 #endif
 
-/* Forward declaration */
-typedef struct EgWindow EgWindow;
-
 /* Estrutura para representar uma cor RGBA */
 typedef struct EgColor {
     double red;    /* 0.0 a 1.0 */

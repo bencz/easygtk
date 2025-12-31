@@ -9,7 +9,7 @@ add_compile_options(-Wall -Wextra -Werror)
 
 # Find GTK4
 find_package(PkgConfig REQUIRED)
-pkg_check_modules(GTK4 REQUIRED gtk4)
+pkg_check_modules(GTK4 REQUIRED IMPORTED_TARGET gtk4)
 
 # Library sources
 set(EASYGTK_SOURCES
@@ -78,11 +78,9 @@ target_include_directories(easygtk
         $<INSTALL_INTERFACE:include>
     PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}/src
-        ${GTK4_INCLUDE_DIRS}
 )
 
-target_link_libraries(easygtk PRIVATE ${GTK4_LIBRARIES})
-target_compile_options(easygtk PRIVATE ${GTK4_CFLAGS_OTHER})
+target_link_libraries(easygtk PUBLIC PkgConfig::GTK4)
 
 # Static library
 add_library(easygtk_static STATIC ${EASYGTK_SOURCES})
@@ -93,87 +91,67 @@ target_include_directories(easygtk_static
         $<INSTALL_INTERFACE:include>
     PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}/src
-        ${GTK4_INCLUDE_DIRS}
 )
 
-target_link_libraries(easygtk_static PRIVATE ${GTK4_LIBRARIES})
-target_compile_options(easygtk_static PRIVATE ${GTK4_CFLAGS_OTHER})
+target_link_libraries(easygtk_static PUBLIC PkgConfig::GTK4)
 
 # Examples
 option(BUILD_EXAMPLES "Build examples" ON)
 
 if(BUILD_EXAMPLES)
     add_executable(hello_world examples/hello_world.c)
-    target_link_libraries(hello_world PRIVATE easygtk ${GTK4_LIBRARIES})
-    target_include_directories(hello_world PRIVATE ${GTK4_INCLUDE_DIRS})
+    target_link_libraries(hello_world PRIVATE easygtk)
 
     add_executable(form_example examples/form_example.c)
-    target_link_libraries(form_example PRIVATE easygtk ${GTK4_LIBRARIES})
-    target_include_directories(form_example PRIVATE ${GTK4_INCLUDE_DIRS})
+    target_link_libraries(form_example PRIVATE easygtk)
 
     add_executable(counter_example examples/counter_example.c)
-    target_link_libraries(counter_example PRIVATE easygtk ${GTK4_LIBRARIES})
-    target_include_directories(counter_example PRIVATE ${GTK4_INCLUDE_DIRS})
+    target_link_libraries(counter_example PRIVATE easygtk)
 
     add_executable(mvvm_example examples/mvvm_example.c)
-    target_link_libraries(mvvm_example PRIVATE easygtk ${GTK4_LIBRARIES})
-    target_include_directories(mvvm_example PRIVATE ${GTK4_INCLUDE_DIRS})
+    target_link_libraries(mvvm_example PRIVATE easygtk)
 
     add_executable(widgets_example examples/widgets_example.c)
-    target_link_libraries(widgets_example PRIVATE easygtk ${GTK4_LIBRARIES})
-    target_include_directories(widgets_example PRIVATE ${GTK4_INCLUDE_DIRS})
+    target_link_libraries(widgets_example PRIVATE easygtk)
 
     add_executable(dialogs_example examples/dialogs_example.c)
-    target_link_libraries(dialogs_example PRIVATE easygtk ${GTK4_LIBRARIES})
-    target_include_directories(dialogs_example PRIVATE ${GTK4_INCLUDE_DIRS})
+    target_link_libraries(dialogs_example PRIVATE easygtk)
 
     add_executable(events_example examples/events_example.c)
-    target_link_libraries(events_example PRIVATE easygtk ${GTK4_LIBRARIES})
-    target_include_directories(events_example PRIVATE ${GTK4_INCLUDE_DIRS})
+    target_link_libraries(events_example PRIVATE easygtk)
 
     add_executable(dnd_example examples/dnd_example.c)
-    target_link_libraries(dnd_example PRIVATE easygtk ${GTK4_LIBRARIES})
-    target_include_directories(dnd_example PRIVATE ${GTK4_INCLUDE_DIRS})
+    target_link_libraries(dnd_example PRIVATE easygtk)
 
     add_executable(input_widgets_example examples/input_widgets_example.c)
-    target_link_libraries(input_widgets_example PRIVATE easygtk ${GTK4_LIBRARIES})
-    target_include_directories(input_widgets_example PRIVATE ${GTK4_INCLUDE_DIRS})
+    target_link_libraries(input_widgets_example PRIVATE easygtk)
 
     add_executable(containers_example examples/containers_example.c)
-    target_link_libraries(containers_example PRIVATE easygtk ${GTK4_LIBRARIES})
-    target_include_directories(containers_example PRIVATE ${GTK4_INCLUDE_DIRS})
+    target_link_libraries(containers_example PRIVATE easygtk)
 
     add_executable(new_widgets_example examples/new_widgets_example.c)
-    target_link_libraries(new_widgets_example PRIVATE easygtk ${GTK4_LIBRARIES})
-    target_include_directories(new_widgets_example PRIVATE ${GTK4_INCLUDE_DIRS})
+    target_link_libraries(new_widgets_example PRIVATE easygtk)
 
     add_executable(spa_example examples/spa_example.c)
-    target_link_libraries(spa_example PRIVATE easygtk ${GTK4_LIBRARIES})
-    target_include_directories(spa_example PRIVATE ${GTK4_INCLUDE_DIRS})
+    target_link_libraries(spa_example PRIVATE easygtk)
 
     add_executable(menu_example examples/menu_example.c)
-    target_link_libraries(menu_example PRIVATE easygtk ${GTK4_LIBRARIES})
-    target_include_directories(menu_example PRIVATE ${GTK4_INCLUDE_DIRS})
+    target_link_libraries(menu_example PRIVATE easygtk)
 
     add_executable(menubar_example examples/menubar_example.c)
-    target_link_libraries(menubar_example PRIVATE easygtk ${GTK4_LIBRARIES})
-    target_include_directories(menubar_example PRIVATE ${GTK4_INCLUDE_DIRS})
+    target_link_libraries(menubar_example PRIVATE easygtk)
 
     add_executable(listview_example examples/listview_example.c)
-    target_link_libraries(listview_example PRIVATE easygtk ${GTK4_LIBRARIES})
-    target_include_directories(listview_example PRIVATE ${GTK4_INCLUDE_DIRS})
+    target_link_libraries(listview_example PRIVATE easygtk)
 
     add_executable(dashboard_example examples/dashboard_example.c)
-    target_link_libraries(dashboard_example PRIVATE easygtk ${GTK4_LIBRARIES})
-    target_include_directories(dashboard_example PRIVATE ${GTK4_INCLUDE_DIRS})
+    target_link_libraries(dashboard_example PRIVATE easygtk)
 
     add_executable(validation_example examples/validation_example.c)
-    target_link_libraries(validation_example PRIVATE easygtk ${GTK4_LIBRARIES})
-    target_include_directories(validation_example PRIVATE ${GTK4_INCLUDE_DIRS})
+    target_link_libraries(validation_example PRIVATE easygtk)
 
     add_executable(container_api_example examples/container_api_example.c)
-    target_link_libraries(container_api_example PRIVATE easygtk ${GTK4_LIBRARIES})
-    target_include_directories(container_api_example PRIVATE ${GTK4_INCLUDE_DIRS})
+    target_link_libraries(container_api_example PRIVATE easygtk)
 endif()
 
 # Install

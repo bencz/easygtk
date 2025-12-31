@@ -187,12 +187,6 @@ void eg_list_view_scroll_to(EgListView *list_view, unsigned int position);
  * ============================================ */
 
 /**
- * Tipo da função de comparação para ordenação.
- * Retorna < 0 se a < b, 0 se a == b, > 0 se a > b.
- */
-typedef int (*EgListViewCompareFunc)(const char *a, const char *b, void *user_data);
-
-/**
  * Ordena a lista em ordem alfabética ascendente.
  *
  * @param list_view Ponteiro para a lista

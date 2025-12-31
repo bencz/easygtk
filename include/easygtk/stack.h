@@ -13,10 +13,6 @@
 extern "C" {
 #endif
 
-/* Tipos opacos */
-typedef struct EgStack EgStack;
-typedef struct EgStackSwitcher EgStackSwitcher;
-
 /* Tipo de transição */
 typedef enum EgStackTransition {
     EG_STACK_TRANSITION_NONE = 0,

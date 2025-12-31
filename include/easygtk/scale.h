@@ -13,9 +13,6 @@
 extern "C" {
 #endif
 
-/* Tipo opaco */
-typedef struct EgScale EgScale;
-
 /**
  * Cria um novo scale.
  * 

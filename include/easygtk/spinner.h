@@ -13,9 +13,6 @@
 extern "C" {
 #endif
 
-/* Tipo opaco */
-typedef struct EgSpinner EgSpinner;
-
 /**
  * Cria um novo spinner.
  * 

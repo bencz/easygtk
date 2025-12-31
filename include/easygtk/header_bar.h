@@ -13,9 +13,6 @@
 extern "C" {
 #endif
 
-/* Tipo opaco */
-typedef struct EgHeaderBar EgHeaderBar;
-
 /**
  * Cria uma nova barra de título.
  * 

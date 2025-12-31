@@ -1,7 +1,7 @@
 /**
- * EasyGTK - Exemplo de Contador
+ * EasyGTK - Counter Example
  * 
- * Demonstra interatividade e atualização de estado.
+ * Demonstrates interactivity and state updates.
  */
 
 #include <easygtk/easygtk.h>
@@ -42,30 +42,30 @@ static void on_activate(EgWidget *widget, void *user_data) {
     (void)widget;
     EgApp *app = (EgApp *)user_data;
     
-    /* Cria a janela */
-    EgWindow *window = eg_window_new(app, "Contador", 300, 200);
+    /* Create the window */
+    EgWindow *window = eg_window_new(app, "Counter", 300, 200);
     eg_window_set_resizable(window, false);
     
-    /* Box principal */
+    /* Main box */
     EgBox *main_box = eg_box_new_vertical(20);
     eg_widget_set_margin(eg_box_as_widget(main_box), 30);
     eg_widget_set_halign(eg_box_as_widget(main_box), EG_ALIGN_CENTER);
     eg_widget_set_valign(eg_box_as_widget(main_box), EG_ALIGN_CENTER);
     
-    /* Título */
-    EgLabel *title = eg_label_new("Contador Simples");
+    /* Title */
+    EgLabel *title = eg_label_new("Simple Counter");
     eg_widget_set_halign(eg_label_as_widget(title), EG_ALIGN_CENTER);
     
-    /* Label do contador */
+    /* Counter label */
     label_counter = eg_label_new(NULL);
     eg_widget_set_halign(eg_label_as_widget(label_counter), EG_ALIGN_CENTER);
     update_counter_label();
     
-    /* Box para botões */
+    /* Button box */
     EgBox *button_box = eg_box_new_horizontal(10);
     eg_widget_set_halign(eg_box_as_widget(button_box), EG_ALIGN_CENTER);
     
-    /* Botões */
+    /* Buttons */
     EgButton *btn_dec = eg_button_new("-");
     eg_widget_set_size_request(eg_button_as_widget(btn_dec), 50, -1);
     eg_button_on_click(btn_dec, on_decrement, NULL);
@@ -83,7 +83,7 @@ static void on_activate(EgWidget *widget, void *user_data) {
     eg_box_append(button_box, eg_button_as_widget(btn_reset));
     eg_box_append(button_box, eg_button_as_widget(btn_inc));
     
-    /* Monta a interface */
+    /* Build the interface */
     eg_box_append(main_box, eg_label_as_widget(title));
     eg_box_append(main_box, eg_label_as_widget(label_counter));
     eg_box_append(main_box, eg_box_as_widget(button_box));

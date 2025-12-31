@@ -15,10 +15,6 @@
 extern "C" {
 #endif
 
-/* Tipos opacos */
-typedef struct EgProperty EgProperty;
-typedef struct EgBinding EgBinding;
-
 /* Tipos de propriedade */
 typedef enum EgPropertyType {
     EG_PROPERTY_TYPE_NONE = -1,         /* Nenhum tipo (para widgets sem value binding) */
