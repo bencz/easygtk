@@ -66,10 +66,4 @@ bool eg_widget_is_type(EgWidget *widget, EgWidgetType type) {
     return widget->vtable->type == type;
 }
 
-bool eg_widget_is_container(EgWidget *widget) {
-    if (widget == NULL || widget->vtable == NULL) return false;
-    EgWidgetType type = widget->vtable->type;
-    return type == EG_WIDGET_TYPE_BOX ||
-           type == EG_WIDGET_TYPE_GRID ||
-           type == EG_WIDGET_TYPE_SCROLLED_WINDOW;
-}
+/* eg_widget_is_container foi movido para container.c */

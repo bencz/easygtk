@@ -52,13 +52,13 @@ static void compute_total_products(EgProperty *computed, void *user_data) {
 ### 2. Data Binding Declarativo
 ```c
 /* Two-way binding: Entry <-> Property */
-eg_bind_entry_text(username_entry, app_vm, "username");
+eg_bind(eg_entry_as_widget(username_entry), app_vm, "username");
 
 /* One-way binding: Label <- Property */
-eg_bind_label_text(stat1_value, app_vm, "total_products");
+eg_bind(eg_label_as_widget(stat1_value), app_vm, "total_products");
 
 /* Command binding: Button -> Command */
-eg_bind_button_command(btn_save, app_vm, "save_profile");
+eg_bind_cmd(eg_button_as_widget(btn_save), app_vm, "save_profile");
 ```
 
 ### 3. Commands com Validação

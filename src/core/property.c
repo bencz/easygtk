@@ -293,6 +293,9 @@ static void copy_property_value(EgProperty *source, EgProperty *target) {
         case EG_PROPERTY_TYPE_POINTER:
             eg_property_set_pointer(target, eg_property_get_pointer(source));
             break;
+        case EG_PROPERTY_TYPE_NONE:
+            /* Tipo NONE não tem valor para copiar */
+            break;
     }
 }
 
@@ -348,6 +351,9 @@ static bool apply_transform(EgProperty *source, EgProperty *target,
             }
             break;
         }
+        case EG_PROPERTY_TYPE_NONE:
+            /* Tipo NONE não tem valor para transformar */
+            break;
     }
     return false;
 }

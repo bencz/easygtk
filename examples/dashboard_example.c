@@ -322,7 +322,7 @@ static EgWidget *create_stat_card(const char *title, const char *prop_name, bool
 
     EgLabel *value = eg_label_new("—");
     eg_widget_add_css_class(eg_label_as_widget(value), "stat-value");
-    eg_bind_label_text(value, dashboard_vm, prop_name);
+    eg_bind(eg_label_as_widget(value), dashboard_vm, prop_name);
 
     eg_box_append(box, eg_label_as_widget(label));
     eg_box_append(box, eg_label_as_widget(value));
@@ -387,7 +387,7 @@ static EgWidget *create_deployment_card(void) {
 
     EgLabel *status = eg_label_new("—");
     eg_widget_add_css_class(eg_label_as_widget(status), "page-subtitle");
-    eg_bind_label_text(status, dashboard_vm, "deployment_status");
+    eg_bind(eg_label_as_widget(status), dashboard_vm, "deployment_status");
 
     deployment_progress = eg_progress_bar_new();
     eg_progress_bar_set_fraction(deployment_progress, 0.15);
@@ -423,14 +423,14 @@ static EgWidget *create_status_row(void) {
 
     EgLabel *last_sync_value = eg_label_new("—");
     eg_widget_add_css_class(eg_label_as_widget(last_sync_value), "badge");
-    eg_bind_label_text(last_sync_value, dashboard_vm, "last_sync");
+    eg_bind(eg_label_as_widget(last_sync_value), dashboard_vm, "last_sync");
 
     EgLabel *tickets_title = eg_label_new("Tickets abertos");
     eg_widget_add_css_class(eg_label_as_widget(tickets_title), "page-subtitle");
 
     EgLabel *tickets_value = eg_label_new("0");
     eg_widget_add_css_class(eg_label_as_widget(tickets_value), "badge");
-    eg_bind_label_text(tickets_value, dashboard_vm, "open_tickets");
+    eg_bind(eg_label_as_widget(tickets_value), dashboard_vm, "open_tickets");
 
     eg_box_append(row, eg_label_as_widget(last_sync_title));
     eg_box_append(row, eg_label_as_widget(last_sync_value));

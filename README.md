@@ -11,6 +11,8 @@ Uma biblioteca C99 para simplificar o desenvolvimento de interfaces gráficas co
 - **Computed Properties**: Propriedades calculadas automaticamente
 - **Command Pattern**: Commands com validação can_execute
 - **Reatividade**: Sistema de binding bidirecional automático
+- **Validação Declarativa**: Sistema de validação com feedback visual automático
+- **API Genérica de Containers**: Manipulação polimórfica de qualquer container via vtable
 - **Gerenciamento de Memória**: Sistema simplificado de ciclo de vida dos widgets
 
 ## Compilação
@@ -179,15 +181,34 @@ int main(int argc, char *argv[]) {
 - **EgViewModel**: Gerenciamento de estado da aplicação
 - **EgCommand**: Commands com validação `can_execute` (ICommand pattern)
 - **Data Binding Declarativo**:
-  - `eg_bind_entry_text()` - Two-way binding para Entry
-  - `eg_bind_label_text()` - One-way binding para Label (auto-converte tipos)
-  - `eg_bind_check_button_active()` - Two-way para CheckButton
-  - `eg_bind_switch_active()` - Two-way para Switch
-  - `eg_bind_spin_button_value()` - Two-way para SpinButton
-  - `eg_bind_scale_value()` - Two-way para Scale
+  - `eg_bind()` - Binding genérico via vtable (detecta modo automaticamente)
+  - `eg_bind_cmd()` - Binding de command genérico
   - `eg_bind_widget_visible()` - One-way para visibilidade
   - `eg_bind_widget_sensitive()` - One-way para habilitado/desabilitado
-  - `eg_bind_button_command()` - Liga botão a command com auto-enable/disable
+
+### Sistema de Validação
+- **EgValidatorChain**: Chain de validadores executados em sequência
+- **Validadores Built-in**:
+  - `eg_validator_add_required()` - Campo obrigatório
+  - `eg_validator_add_min_length()` / `eg_validator_add_max_length()` - Tamanho de string
+  - `eg_validator_add_email()` - Formato de email
+  - `eg_validator_add_pattern()` - Expressão regular
+  - `eg_validator_add_range_int()` / `eg_validator_add_range_double()` - Range numérico
+  - `eg_validator_add_custom()` - Validador customizado via callback
+- **Integração com Widgets**:
+  - `eg_widget_set_validators()` - Associa validadores a um widget
+  - `eg_widget_validate()` - Valida e mostra erro visual (CSS + tooltip)
+  - `eg_widget_validate_on_focus_out()` - Validação automática ao perder foco
+  - `eg_validate_all()` - Valida múltiplos widgets de uma vez
+
+### API Genérica de Containers
+- **Polimorfismo via VTable**: Opera em qualquer container de forma genérica
+- `eg_widget_is_container()` - Verifica se widget é container
+- `eg_container_add()` / `eg_container_remove()` - Adiciona/remove filhos
+- `eg_container_add_named()` - Adiciona filho com nome (Stack, Notebook)
+- `eg_container_get_child_count()` / `eg_container_get_child_at()` - Itera filhos
+- `eg_container_clear()` - Remove todos os filhos
+- `eg_container_supports_multiple()` / `eg_container_supports_named()` - Verifica capacidades
 
 ### Sistema de Eventos
 - **EgSignal**: Sistema de eventos com múltiplos listeners
@@ -232,6 +253,9 @@ Após compilar, os exemplos estarão em `build/`:
 ./build/menu_example          # PopoverMenu, MenuButton
 ./build/menubar_example       # Barra de menu tradicional (File, Edit, View, Help)
 ./build/listview_example      # ListView e ColumnView (tabela)
+./build/dashboard_example     # Dashboard com gráficos e métricas
+./build/validation_example    # Sistema de validação de formulários
+./build/container_api_example # API genérica de containers via vtable
 ```
 
 **Destaque**: O `spa_example` demonstra uma aplicação completa estilo SPA (Single Page Application) com:

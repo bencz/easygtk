@@ -30,7 +30,7 @@ EgWidget *page_dashboard_create(void) {
 
         EgLabel *value = eg_label_new("0");
         eg_widget_add_css_class(eg_label_as_widget(value), "stat-value");
-        eg_bind_label_text(value, g_app_state->view_model, prop_names[i]);
+        eg_bind(eg_label_as_widget(value), g_app_state->view_model, prop_names[i]);
 
         eg_box_append(card_box, eg_label_as_widget(value));
         eg_box_append(card_box, eg_label_as_widget(label));

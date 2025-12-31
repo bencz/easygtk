@@ -2089,28 +2089,50 @@ EgProperty *deps[] = {qty_prop, price_prop};
 eg_property_set_computed(total_prop, compute_total, deps, 2, NULL);
 ```
 
-### Data Binding Declarativo
+### Data Binding Declarativo (API Genérica via VTable)
 
-Liga widgets automaticamente a properties do ViewModel:
+A API de binding usa vtables para descobrir automaticamente como fazer o binding para cada tipo de widget.
 
 ```c
-// Two-way bindings
-bool eg_bind_entry_text(EgEntry *entry, EgViewModel *vm, const char *property_name);
-bool eg_bind_check_button_active(EgCheckButton *cb, EgViewModel *vm, const char *property_name);
-bool eg_bind_switch_active(EgSwitch *sw, EgViewModel *vm, const char *property_name);
-bool eg_bind_spin_button_value(EgSpinButton *sb, EgViewModel *vm, const char *property_name);
-bool eg_bind_scale_value(EgScale *scale, EgViewModel *vm, const char *property_name);
+/* API Genérica (Recomendada) */
 
-// One-way bindings
-bool eg_bind_label_text(EgLabel *label, EgViewModel *vm, const char *property_name);
-bool eg_bind_widget_visible(EgWidget *widget, EgViewModel *vm, const char *property_name);
-bool eg_bind_widget_sensitive(EgWidget *widget, EgViewModel *vm, const char *property_name);
+// Binding de valor - usa vtable do widget para determinar modo (one-way/two-way)
+EgWidgetBinding *eg_bind(EgWidget *widget, EgViewModel *vm, const char *property_name);
 
-// Command binding
-bool eg_bind_button_command(EgButton *button, EgViewModel *vm, const char *command_name);
+// Binding com modo explícito
+EgWidgetBinding *eg_bind_with_mode(EgWidget *widget, EgViewModel *vm,
+                                    const char *property_name, EgBindingMode mode);
+
+// Binding de command - para botões e widgets com ação
+EgWidgetBinding *eg_bind_cmd(EgWidget *widget, EgViewModel *vm, const char *command_name);
+
+// Remove um binding
+void eg_unbind(EgWidgetBinding *binding);
+
+// Utilitários
+bool eg_widget_supports_binding(EgWidget *widget);
+bool eg_widget_supports_command_binding(EgWidget *widget);
+EgPropertyType eg_widget_get_binding_type(EgWidget *widget);
 ```
 
-**Exemplo MVVM Completo com Binding:**
+**Modos de Binding:**
+```c
+typedef enum EgBindingMode {
+    EG_BINDING_MODE_NONE = 0,           // Widget não suporta binding
+    EG_BINDING_MODE_ONE_WAY = 1,        // Property -> Widget
+    EG_BINDING_MODE_TWO_WAY = 2,        // Property <-> Widget
+    EG_BINDING_MODE_ONE_WAY_TO_SOURCE = 3  // Widget -> Property
+} EgBindingMode;
+```
+
+**Bindings específicos (ainda disponíveis):**
+```c
+// Estes não são cobertos por eg_bind() pois afetam atributos especiais
+bool eg_bind_widget_visible(EgWidget *widget, EgViewModel *vm, const char *property_name);
+bool eg_bind_widget_sensitive(EgWidget *widget, EgViewModel *vm, const char *property_name);
+```
+
+**Exemplo MVVM Completo com API Genérica:**
 ```c
 static EgViewModel *vm = NULL;
 
@@ -2139,18 +2161,45 @@ void setup_mvvm_with_binding(EgLabel *label, EgButton *btn_inc, EgButton *btn_re
     eg_view_model_add_command(vm,
         eg_command_new("reset", cmd_reset, cmd_reset_can_execute, NULL));
 
-    // Data binding declarativo (automático!)
-    eg_bind_label_text(label, vm, "counter");           // Label atualiza automaticamente
-    eg_bind_button_command(btn_inc, vm, "increment");   // Botão executa command
-    eg_bind_button_command(btn_reset, vm, "reset");     // Auto-disable quando counter = 0
+    // Data binding declarativo com API genérica
+    eg_bind(eg_label_as_widget(label), vm, "counter");        // One-way (auto-detectado)
+    eg_bind_cmd(eg_button_as_widget(btn_inc), vm, "increment");  // Command binding
+    eg_bind_cmd(eg_button_as_widget(btn_reset), vm, "reset");    // Auto-disable quando counter = 0
 }
 ```
 
-**Vantagens do Binding Declarativo:**
-- Sem código manual de sincronização
-- Atualização bidirecional automática
-- Commands com can_execute atualizam sensibilidade do botão automaticamente
-- Label converte tipos automaticamente (int, double, bool, string)
+**Como funciona a VTable de Binding:**
+
+Cada widget declara suas capacidades de binding na vtable:
+```c
+// Exemplo: Label (one-way, aceita STRING/INT/DOUBLE/BOOL)
+static const EgBindingCapabilities eg_label_binding_caps = {
+    .primary_type = EG_PROPERTY_TYPE_STRING,
+    .default_mode = EG_BINDING_MODE_ONE_WAY,
+    .supports_command = false
+};
+
+// Exemplo: Entry (two-way, apenas STRING)
+static const EgBindingCapabilities eg_entry_binding_caps = {
+    .primary_type = EG_PROPERTY_TYPE_STRING,
+    .default_mode = EG_BINDING_MODE_TWO_WAY,
+    .supports_command = false
+};
+
+// Exemplo: Button (apenas command)
+static const EgBindingCapabilities eg_button_binding_caps = {
+    .primary_type = EG_PROPERTY_TYPE_NONE,
+    .default_mode = EG_BINDING_MODE_NONE,
+    .supports_command = true
+};
+```
+
+**Vantagens da API Genérica:**
+- Uma única função `eg_bind()` para todos os widgets
+- Widget sabe automaticamente se é one-way ou two-way
+- Novos widgets ganham binding ao implementar vtable
+- Widgets customizados podem ter binding sem modificar o core
+- Código mais limpo e consistente
 
 ---
 
@@ -2808,6 +2857,350 @@ int main(void) {
     return eg_app_run(app);
 }
 ```
+
+---
+
+## Sistema de Validação
+
+Sistema declarativo de validação para widgets de input (Entry, SpinButton).
+
+### Conceito
+
+A validação usa uma **chain de validadores** que são executados em sequência. Cada validador pode ter uma mensagem de erro customizada.
+
+### Tipos de Validadores Built-in
+
+```c
+typedef enum EgValidatorType {
+    EG_VALIDATOR_REQUIRED,      /* Campo obrigatório (não vazio) */
+    EG_VALIDATOR_MIN_LENGTH,    /* Tamanho mínimo de string */
+    EG_VALIDATOR_MAX_LENGTH,    /* Tamanho máximo de string */
+    EG_VALIDATOR_PATTERN,       /* Expressão regular */
+    EG_VALIDATOR_RANGE_INT,     /* Range de inteiros [min, max] */
+    EG_VALIDATOR_RANGE_DOUBLE,  /* Range de doubles [min, max] */
+    EG_VALIDATOR_EMAIL,         /* Formato de email básico */
+    EG_VALIDATOR_CUSTOM         /* Validador customizado via callback */
+} EgValidatorType;
+```
+
+### Resultado de Validação
+
+```c
+typedef struct EgValidationResult {
+    bool is_valid;              /* true se passou na validação */
+    const char *error_message;  /* NULL se válido, mensagem de erro caso contrário */
+} EgValidationResult;
+```
+
+### Valor para Validação
+
+```c
+typedef struct EgValidationValue {
+    EgPropertyType type;        /* Tipo do valor (STRING, INT, DOUBLE, BOOL) */
+    union {
+        const char *string_val;
+        int int_val;
+        double double_val;
+        bool bool_val;
+    };
+} EgValidationValue;
+```
+
+### Criação de Chain de Validadores
+
+```c
+EgValidatorChain *eg_validator_chain_new(void);
+void eg_validator_chain_free(EgValidatorChain *chain);
+```
+
+### Adicionando Validadores
+
+```c
+/* Campo obrigatório */
+void eg_validator_add_required(EgValidatorChain *chain, const char *error_msg);
+
+/* Tamanho de string */
+void eg_validator_add_min_length(EgValidatorChain *chain, size_t min_length, const char *error_msg);
+void eg_validator_add_max_length(EgValidatorChain *chain, size_t max_length, const char *error_msg);
+
+/* Expressão regular */
+void eg_validator_add_pattern(EgValidatorChain *chain, const char *regex, const char *error_msg);
+
+/* Range numérico */
+void eg_validator_add_range_int(EgValidatorChain *chain, int min, int max, const char *error_msg);
+void eg_validator_add_range_double(EgValidatorChain *chain, double min, double max, const char *error_msg);
+
+/* Email */
+void eg_validator_add_email(EgValidatorChain *chain, const char *error_msg);
+
+/* Validador customizado */
+typedef EgValidationResult (*EgValidateFunc)(const EgValidationValue *value, void *user_data);
+void eg_validator_add_custom(EgValidatorChain *chain, EgValidateFunc func,
+                              void *user_data, const char *error_msg);
+```
+
+### Associando Validadores a Widgets
+
+```c
+/* Define validadores para um widget */
+bool eg_widget_set_validators(EgWidget *widget, EgValidatorChain *chain);
+
+/* Verifica se widget suporta validação */
+bool eg_widget_supports_validation(EgWidget *widget);
+
+/* Valida manualmente e mostra erro visual */
+EgValidationResult eg_widget_validate(EgWidget *widget);
+
+/* Limpa erro visual */
+void eg_widget_clear_validation_error(EgWidget *widget);
+
+/* Valida automaticamente ao perder foco */
+void eg_widget_validate_on_focus_out(EgWidget *widget, bool enable);
+```
+
+### Validação em Lote
+
+```c
+/* Valida múltiplos widgets de uma vez */
+bool eg_validate_all(EgWidget **widgets, size_t count, EgValidationResult *results);
+
+/* Retorna índice do primeiro widget inválido (-1 se todos válidos) */
+int eg_validate_first_invalid(EgWidget **widgets, size_t count);
+```
+
+### Exemplo Completo
+
+```c
+static EgEntry *entry_email = NULL;
+static EgEntry *entry_password = NULL;
+static EgSpinButton *spin_age = NULL;
+
+/* Validador customizado para senha forte */
+static EgValidationResult validate_strong_password(const EgValidationValue *value, void *user_data) {
+    (void)user_data;
+    EgValidationResult result = { .is_valid = true, .error_message = NULL };
+
+    const char *pwd = value->string_val;
+    if (pwd == NULL) {
+        result.is_valid = false;
+        result.error_message = "Senha obrigatória";
+        return result;
+    }
+
+    bool has_upper = false, has_lower = false, has_digit = false;
+    for (const char *p = pwd; *p; p++) {
+        if (isupper(*p)) has_upper = true;
+        if (islower(*p)) has_lower = true;
+        if (isdigit(*p)) has_digit = true;
+    }
+
+    if (!has_upper || !has_lower || !has_digit) {
+        result.is_valid = false;
+        result.error_message = "Senha deve ter maiúscula, minúscula e número";
+    }
+
+    return result;
+}
+
+void setup_validators(void) {
+    /* Email: obrigatório + formato válido */
+    EgValidatorChain *email_chain = eg_validator_chain_new();
+    eg_validator_add_required(email_chain, "Email é obrigatório");
+    eg_validator_add_email(email_chain, "Email inválido");
+    eg_widget_set_validators(eg_entry_as_widget(entry_email), email_chain);
+    eg_widget_validate_on_focus_out(eg_entry_as_widget(entry_email), true);
+
+    /* Senha: obrigatório + mínimo 8 chars + senha forte */
+    EgValidatorChain *pwd_chain = eg_validator_chain_new();
+    eg_validator_add_required(pwd_chain, "Senha é obrigatória");
+    eg_validator_add_min_length(pwd_chain, 8, "Mínimo 8 caracteres");
+    eg_validator_add_custom(pwd_chain, validate_strong_password, NULL, NULL);
+    eg_widget_set_validators(eg_entry_as_widget(entry_password), pwd_chain);
+    eg_widget_validate_on_focus_out(eg_entry_as_widget(entry_password), true);
+
+    /* Idade: range 18-120 */
+    EgValidatorChain *age_chain = eg_validator_chain_new();
+    eg_validator_add_range_double(age_chain, 18.0, 120.0, "Idade deve ser entre 18 e 120");
+    eg_widget_set_validators(eg_spin_button_as_widget(spin_age), age_chain);
+}
+
+/* Validar todos no submit */
+void on_submit(EgWidget *widget, void *user_data) {
+    EgWidget *widgets[] = {
+        eg_entry_as_widget(entry_email),
+        eg_entry_as_widget(entry_password),
+        eg_spin_button_as_widget(spin_age)
+    };
+
+    EgValidationResult results[3];
+    if (eg_validate_all(widgets, 3, results)) {
+        printf("Formulário válido!\n");
+    } else {
+        int first = eg_validate_first_invalid(widgets, 3);
+        eg_widget_grab_focus(widgets[first]);
+    }
+}
+```
+
+### VTable de Validação
+
+Widgets que suportam validação implementam uma vtable:
+
+```c
+typedef struct EgValidationCapabilities {
+    EgPropertyType value_type;      /* Tipo de valor (STRING, DOUBLE, etc.) */
+    bool supports_inline_error;     /* Pode mostrar erro inline */
+    bool supports_error_style;      /* Pode adicionar CSS de erro */
+} EgValidationCapabilities;
+
+typedef struct EgValidationVTable {
+    const EgValidationCapabilities *caps;
+    EgValue (*get_value)(EgWidget *widget);      /* Obtém valor atual */
+    void (*show_error)(EgWidget *widget, const char *message);
+    void (*clear_error)(EgWidget *widget);
+} EgValidationVTable;
+```
+
+Widgets com suporte: `EgEntry`, `EgSpinButton`
+
+---
+
+## API Genérica de Containers
+
+API unificada para manipular qualquer tipo de container via vtable.
+
+### Conceito
+
+Ao invés de usar funções específicas por container (`eg_box_append`, `eg_stack_add_named`, etc.), a API genérica permite operar em qualquer container de forma polimórfica.
+
+### Verificação de Container
+
+```c
+/* Verifica se widget é um container (usa vtable) */
+bool eg_widget_is_container(EgWidget *widget);
+```
+
+### Capacidades do Container
+
+```c
+/* Verifica se suporta múltiplos filhos (Box, Grid = true; Frame = false) */
+bool eg_container_supports_multiple(EgWidget *container);
+
+/* Verifica se suporta filhos nomeados (Stack, Notebook = true) */
+bool eg_container_supports_named(EgWidget *container);
+
+/* Retorna máximo de filhos (0 = ilimitado, 1 = single, 2 = paned) */
+size_t eg_container_max_children(EgWidget *container);
+```
+
+### Operações Genéricas
+
+```c
+/* Adiciona filho ao container */
+void eg_container_add(EgWidget *container, EgWidget *child);
+
+/* Remove filho do container */
+void eg_container_remove(EgWidget *container, EgWidget *child);
+
+/* Adiciona filho com nome (para Stack, Notebook) */
+void eg_container_add_named(EgWidget *container, EgWidget *child, const char *name);
+
+/* Conta filhos */
+size_t eg_container_get_child_count(EgWidget *container);
+
+/* Obtém filho por índice */
+EgWidget *eg_container_get_child_at(EgWidget *container, size_t index);
+
+/* Remove todos os filhos */
+void eg_container_clear(EgWidget *container);
+```
+
+### Exemplo
+
+```c
+/* Função genérica que opera em qualquer container */
+void print_container_info(EgWidget *container, const char *name) {
+    printf("=== %s ===\n", name);
+
+    if (!eg_widget_is_container(container)) {
+        printf("  Não é um container!\n");
+        return;
+    }
+
+    printf("  Suporta múltiplos filhos: %s\n",
+           eg_container_supports_multiple(container) ? "sim" : "não");
+    printf("  Suporta filhos nomeados: %s\n",
+           eg_container_supports_named(container) ? "sim" : "não");
+
+    size_t max = eg_container_max_children(container);
+    if (max == 0) {
+        printf("  Máximo de filhos: ilimitado\n");
+    } else {
+        printf("  Máximo de filhos: %zu\n", max);
+    }
+
+    size_t count = eg_container_get_child_count(container);
+    printf("  Filhos atuais: %zu\n", count);
+
+    for (size_t i = 0; i < count; i++) {
+        EgWidget *child = eg_container_get_child_at(container, i);
+        if (child != NULL) {
+            printf("    [%zu] tipo=%d\n", i, eg_widget_get_type(child));
+        }
+    }
+}
+
+/* Uso com diferentes containers */
+EgBox *box = eg_box_new_vertical(5);
+EgStack *stack = eg_stack_new();
+EgFrame *frame = eg_frame_new("Título");
+
+/* Adicionar usando API genérica */
+EgLabel *label = eg_label_new("Item");
+eg_container_add(eg_box_as_widget(box), eg_label_as_widget(label));
+
+/* Stack com nome */
+eg_container_add_named(eg_stack_as_widget(stack), page1, "page-1");
+eg_container_add_named(eg_stack_as_widget(stack), page2, "page-2");
+
+/* Frame (single child) */
+eg_container_add(eg_frame_as_widget(frame), content);
+
+/* Limpar todos */
+eg_container_clear(eg_box_as_widget(box));
+```
+
+### VTable de Container
+
+```c
+typedef struct EgContainerCapabilities {
+    bool supports_multiple_children;  /* Box, Grid = true; Frame = false */
+    bool supports_named_children;     /* Stack, Notebook = true */
+    bool supports_positioning;        /* Grid = true (row/col) */
+    size_t max_children;              /* 0 = ilimitado */
+} EgContainerCapabilities;
+
+typedef struct EgContainerVTable {
+    const EgContainerCapabilities *caps;
+
+    /* Operações básicas */
+    void (*add_child)(EgWidget *container, EgWidget *child);
+    void (*remove_child)(EgWidget *container, EgWidget *child);
+
+    /* Operações com nome (opcional) */
+    void (*add_child_named)(EgWidget *container, EgWidget *child, const char *name);
+    EgWidget *(*get_child_by_name)(EgWidget *container, const char *name);
+
+    /* Iteração */
+    size_t (*get_child_count)(EgWidget *container);
+    EgWidget *(*get_child_at)(EgWidget *container, size_t index);
+
+    /* Limpar */
+    void (*clear)(EgWidget *container);
+} EgContainerVTable;
+```
+
+Containers com suporte: `EgBox`, `EgGrid`, `EgStack`, `EgNotebook`, `EgFrame`, `EgPaned`, `EgScrolledWindow`, `EgExpander`
 
 ---
 

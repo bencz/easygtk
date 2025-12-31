@@ -205,7 +205,7 @@ static EgWidget *create_home_page(void) {
 
     EgLabel *stat1_value = eg_label_new("0");
     eg_label_set_markup(stat1_value, "<span size='x-large' weight='bold'>0</span>");
-    eg_bind_label_text(stat1_value, app_vm, "total_products");
+    eg_bind(eg_label_as_widget(stat1_value), app_vm, "total_products");
 
     eg_box_append(stat1, eg_label_as_widget(stat1_label));
     eg_box_append(stat1, eg_label_as_widget(stat1_value));
@@ -236,10 +236,10 @@ static EgWidget *create_home_page(void) {
 
     EgButton *btn_products = eg_button_new("View Products");
     eg_widget_add_css_class(eg_button_as_widget(btn_products), "suggested-action");
-    eg_bind_button_command(btn_products, app_vm, "navigate_products");
+    eg_bind_cmd(eg_button_as_widget(btn_products), app_vm, "navigate_products");
 
     EgButton *btn_profile = eg_button_new("Edit Profile");
-    eg_bind_button_command(btn_profile, app_vm, "navigate_profile");
+    eg_bind_cmd(eg_button_as_widget(btn_profile), app_vm, "navigate_profile");
 
     eg_box_append(nav_box, eg_button_as_widget(btn_products));
     eg_box_append(nav_box, eg_button_as_widget(btn_profile));
@@ -269,10 +269,10 @@ static EgWidget *create_products_page(void) {
     eg_widget_set_hexpand(eg_label_as_widget(title), true);
 
     EgButton *btn_refresh = eg_button_new("Refresh");
-    eg_bind_button_command(btn_refresh, app_vm, "refresh_products");
+    eg_bind_cmd(eg_button_as_widget(btn_refresh), app_vm, "refresh_products");
 
     EgButton *btn_back = eg_button_new("← Back");
-    eg_bind_button_command(btn_back, app_vm, "navigate_home");
+    eg_bind_cmd(eg_button_as_widget(btn_back), app_vm, "navigate_home");
 
     eg_box_append(header, eg_label_as_widget(title));
     eg_box_append(header, eg_button_as_widget(btn_refresh));
@@ -360,7 +360,7 @@ static EgWidget *create_profile_page(void) {
 
     EgEntry *username_entry = eg_entry_new();
     eg_entry_set_placeholder(username_entry, "Enter your username");
-    eg_bind_entry_text(username_entry, app_vm, "username");
+    eg_bind(eg_entry_as_widget(username_entry), app_vm, "username");
 
     /* Email */
     EgLabel *email_label = eg_label_new("Email:");
@@ -368,11 +368,11 @@ static EgWidget *create_profile_page(void) {
 
     EgEntry *email_entry = eg_entry_new();
     eg_entry_set_placeholder(email_entry, "your@email.com");
-    eg_bind_entry_text(email_entry, app_vm, "email");
+    eg_bind(eg_entry_as_widget(email_entry), app_vm, "email");
 
     /* Notifications */
     EgCheckButton *notifications_check = eg_check_button_new("Enable notifications");
-    eg_bind_check_button_active(notifications_check, app_vm, "notifications_enabled");
+    eg_bind(eg_check_button_as_widget(notifications_check), app_vm, "notifications_enabled");
 
     /* Botões */
     EgBox *button_box = eg_box_new_horizontal(10);
@@ -380,10 +380,10 @@ static EgWidget *create_profile_page(void) {
 
     EgButton *btn_save = eg_button_new("Save Changes");
     eg_widget_add_css_class(eg_button_as_widget(btn_save), "suggested-action");
-    eg_bind_button_command(btn_save, app_vm, "save_profile");
+    eg_bind_cmd(eg_button_as_widget(btn_save), app_vm, "save_profile");
 
     EgButton *btn_cancel = eg_button_new("Cancel");
-    eg_bind_button_command(btn_cancel, app_vm, "navigate_home");
+    eg_bind_cmd(eg_button_as_widget(btn_cancel), app_vm, "navigate_home");
 
     eg_box_append(button_box, eg_button_as_widget(btn_save));
     eg_box_append(button_box, eg_button_as_widget(btn_cancel));

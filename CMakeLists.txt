@@ -23,6 +23,17 @@ set(EASYGTK_SOURCES
     src/core/model.c
     src/core/viewmodel.c
     src/core/binding.c
+    src/core/events.c
+    src/core/clipboard.c
+    src/core/dnd.c
+    src/core/log.c
+    src/core/cast.c
+    src/core/refcount.c
+    src/core/pool.c
+    src/core/container.c
+    src/core/validation.c
+    src/internal/widget_helpers.c
+    src/internal/event_helpers.c
     src/widgets/window.c
     src/widgets/button.c
     src/widgets/label.c
@@ -56,13 +67,6 @@ set(EASYGTK_SOURCES
     src/widgets/color_chooser.c
     src/widgets/about_dialog.c
     src/widgets/dialog.c
-    src/core/events.c
-    src/core/clipboard.c
-    src/core/dnd.c
-    src/core/log.c
-    src/core/cast.c
-    src/core/refcount.c
-    src/core/pool.c
 )
 
 # Create shared library
@@ -162,6 +166,14 @@ if(BUILD_EXAMPLES)
     add_executable(dashboard_example examples/dashboard_example.c)
     target_link_libraries(dashboard_example PRIVATE easygtk ${GTK4_LIBRARIES})
     target_include_directories(dashboard_example PRIVATE ${GTK4_INCLUDE_DIRS})
+
+    add_executable(validation_example examples/validation_example.c)
+    target_link_libraries(validation_example PRIVATE easygtk ${GTK4_LIBRARIES})
+    target_include_directories(validation_example PRIVATE ${GTK4_INCLUDE_DIRS})
+
+    add_executable(container_api_example examples/container_api_example.c)
+    target_link_libraries(container_api_example PRIVATE easygtk ${GTK4_LIBRARIES})
+    target_include_directories(container_api_example PRIVATE ${GTK4_INCLUDE_DIRS})
 endif()
 
 # Install

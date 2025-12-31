@@ -4,6 +4,8 @@
 
 #include <gtk/gtk.h>
 #include "internal/internal.h"
+#include "internal/vtable.h"
+#include <easygtk/viewmodel.h>
 
 /* Funções da vtable */
 static void button_destroy(EgWidget *widget);
@@ -13,6 +15,17 @@ static bool button_get_visible(EgWidget *widget);
 static void button_set_sensitive(EgWidget *widget, bool sensitive);
 static bool button_get_sensitive(EgWidget *widget);
 
+/* Funções de binding */
+static void *button_bind_command(EgWidget *widget, EgCommand *command);
+static void button_unbind(EgWidget *widget, void *binding_data);
+
+/* Capacidades de binding */
+static const EgBindingCapabilities eg_button_binding_caps = {
+    .primary_type = EG_PROPERTY_TYPE_NONE,
+    .default_mode = EG_BINDING_MODE_NONE,
+    .supports_command = true
+};
+
 const EgWidgetVTable eg_button_vtable = {
     .type = EG_WIDGET_TYPE_BUTTON,
     .type_name = "EgButton",
@@ -21,7 +34,12 @@ const EgWidgetVTable eg_button_vtable = {
     .set_visible = button_set_visible,
     .get_visible = button_get_visible,
     .set_sensitive = button_set_sensitive,
-    .get_sensitive = button_get_sensitive
+    .get_sensitive = button_get_sensitive,
+    /* Binding support */
+    .binding_caps = &eg_button_binding_caps,
+    .bind_value = NULL,
+    .bind_command = button_bind_command,
+    .unbind = button_unbind
 };
 
 static void button_destroy(EgWidget *widget) {
@@ -143,4 +161,76 @@ EgWidget *eg_button_as_widget(EgButton *button) {
 void *eg_button_get_native(EgButton *button) {
     if (button == NULL) return NULL;
     return button->base.native;
+}
+
+/* ============================================
+ * Binding Implementation (Command)
+ * ============================================ */
+
+typedef struct {
+    EgButton *button;
+    EgCommand *command;
+    EgSignal *can_execute_signal;
+    EgHandlerId can_execute_handler;
+    gulong gtk_signal_id;
+} ButtonBindingData;
+
+static void button_binding_on_can_execute_changed(void *sender, void *event_data, void *user_data) {
+    (void)sender;
+    (void)event_data;
+    ButtonBindingData *data = (ButtonBindingData *)user_data;
+    if (data == NULL || data->button == NULL || data->command == NULL) return;
+
+    bool can_execute = eg_command_can_execute(data->command, NULL);
+    eg_button_set_sensitive(data->button, can_execute);
+}
+
+static void button_binding_on_clicked(GtkButton *gtk_button, gpointer user_data) {
+    (void)gtk_button;
+    ButtonBindingData *data = (ButtonBindingData *)user_data;
+    if (data == NULL || data->command == NULL) return;
+
+    eg_command_execute(data->command, NULL);
+}
+
+static void *button_bind_command(EgWidget *widget, EgCommand *command) {
+    EgButton *button = (EgButton *)widget;
+    if (button == NULL || command == NULL) return NULL;
+
+    ButtonBindingData *data = EG_ALLOC(ButtonBindingData);
+    if (data == NULL) return NULL;
+
+    data->button = button;
+    data->command = command;
+
+    /* Conecta ao sinal can-execute-changed */
+    data->can_execute_signal = eg_command_get_can_execute_changed_signal(command);
+    if (data->can_execute_signal != NULL) {
+        data->can_execute_handler = eg_signal_connect(data->can_execute_signal,
+                                                       button_binding_on_can_execute_changed, data);
+    }
+
+    /* Conecta ao clique do botão */
+    data->gtk_signal_id = g_signal_connect(widget->native, "clicked",
+                                            G_CALLBACK(button_binding_on_clicked), data);
+
+    /* Sincroniza estado inicial */
+    button_binding_on_can_execute_changed(NULL, NULL, data);
+
+    return data;
+}
+
+static void button_unbind(EgWidget *widget, void *binding_data) {
+    ButtonBindingData *data = (ButtonBindingData *)binding_data;
+    if (data == NULL) return;
+
+    if (data->can_execute_signal != NULL && data->can_execute_handler != 0) {
+        eg_signal_disconnect(data->can_execute_signal, data->can_execute_handler);
+    }
+
+    if (widget != NULL && widget->native != NULL && data->gtk_signal_id != 0) {
+        g_signal_handler_disconnect(widget->native, data->gtk_signal_id);
+    }
+
+    eg_free(data);
 }

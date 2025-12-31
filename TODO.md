@@ -62,19 +62,25 @@ eg_bind(scale, vm, "volume");        /* Scale sabe que é two-way double */
 - Código mais limpo e consistente
 
 **Implementação:**
-- [ ] Adicionar campos de binding na EgWidgetVTable
-- [ ] Implementar `eg_bind(widget, vm, property_name)` genérico
-- [ ] Migrar widgets existentes para usar vtable
-- [ ] Deprecar funções `eg_bind_<widget>_*` antigas
+- [x] Adicionar campos de binding na EgWidgetVTable
+- [x] Implementar `eg_bind(widget, vm, property_name)` genérico
+- [x] Migrar widgets existentes para usar vtable
+- [x] Deprecar funções `eg_bind_<widget>_*` antigas
 - [ ] Documentar como criar widgets com binding customizado
 
 ---
 
 #### Outras Melhorias MVVM
-- [ ] Validação reativa com feedback visual automático
-  - [ ] Entry fica com classe CSS "error" automaticamente
-  - [ ] Mensagens de erro bindadas a labels
-  - [ ] eg_bind_validation(widget, vm, prop, error_label)
+- [x] Validação reativa com feedback visual automático
+  - [x] Entry fica com classe CSS "error" automaticamente
+  - [x] SpinButton fica com classe CSS "error" automaticamente
+  - [x] Tooltip mostra mensagem de erro
+  - [x] Sistema de validação declarativo via EgValidatorChain
+  - [x] Validadores built-in: required, min/max length, email, pattern, range
+  - [x] Validadores customizados via callback
+  - [x] Validação automática on_focus_out
+  - [x] Validação em lote (eg_validate_all, eg_validate_first_invalid)
+  - [ ] eg_bind_validation(widget, vm, prop, error_label) - binding de erro a label
 - [ ] CSS class binding
   - [ ] eg_bind_css_class(widget, vm, "class-name", "bool_property")
 - [ ] Converters reutilizáveis
@@ -117,10 +123,10 @@ EgProperty *total = eg_property_new_int("total", 0);
 EgProperty *deps[] = {counter_prop};
 eg_property_set_computed(total, compute_total, deps, 1, NULL);
 
-// Binding declarativo automático
-eg_bind_entry_text(entry, vm, "username");         // Two-way
-eg_bind_label_text(label, vm, "counter");          // One-way
-eg_bind_button_command(button, vm, "increment");   // Command binding
+// Binding declarativo automático (nova API genérica)
+eg_bind(eg_entry_as_widget(entry), vm, "username");   // Two-way (auto-detectado)
+eg_bind(eg_label_as_widget(label), vm, "counter");    // One-way (auto-detectado)
+eg_bind_cmd(eg_button_as_widget(button), vm, "increment"); // Command binding
 
 // Model para dados
 EgModel *user_model = eg_model_new();
@@ -328,6 +334,20 @@ void eg_button_free(EgButton *btn) {
 - [x] eg_expander_new(label)
 - [x] eg_expander_set_child
 - [x] eg_expander_set_expanded
+
+### API Genérica de Containers (via VTable)
+- [x] EgContainerVTable com capacidades
+- [x] eg_widget_is_container() - detecção via vtable
+- [x] eg_container_supports_multiple() - múltiplos filhos
+- [x] eg_container_supports_named() - filhos nomeados
+- [x] eg_container_max_children() - limite de filhos
+- [x] eg_container_add() - adicionar filho genérico
+- [x] eg_container_remove() - remover filho genérico
+- [x] eg_container_add_named() - adicionar com nome
+- [x] eg_container_get_child_count() - contar filhos
+- [x] eg_container_get_child_at() - obter por índice
+- [x] eg_container_clear() - remover todos
+- [x] Containers com suporte: Box, Grid, Stack, Notebook, Frame, Paned, ScrolledWindow, Expander
 
 ### Overlay - A Implementar
 - [ ] eg_overlay_new()
@@ -637,3 +657,4 @@ void eg_button_free(EgButton *btn) {
 - **v0.4**: Menus, ListView, ColumnView, Notebook, HeaderBar, Image, Spinner, LevelBar
 - **v0.5**: MVVM completo (ViewModel, Model, Property, Command, Binding declarativo)
 - **v0.6**: Click-to-sort em ColumnView, window modal/transient, ListView/ColumnView bindings
+- **v0.7**: Sistema de Validação (EgValidatorChain, validadores built-in, validação automática), API genérica de Containers (EgContainerVTable), refatoração de eventos via event_helpers

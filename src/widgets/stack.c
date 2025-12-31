@@ -1,88 +1,160 @@
 /**
  * EasyGTK - Stack
+ *
+ * Container que mostra um filho por vez, com transições.
  */
 
 #include <gtk/gtk.h>
 #include "internal/internal.h"
 #include <easygtk/stack.h>
 
-/* Funções da vtable - Stack */
-static void stack_destroy(EgWidget *widget);
-static void *stack_get_native(EgWidget *widget);
-static void stack_set_visible(EgWidget *widget, bool visible);
-static bool stack_get_visible(EgWidget *widget);
-static void stack_set_sensitive(EgWidget *widget, bool sensitive);
-static bool stack_get_sensitive(EgWidget *widget);
+/* ============================================
+ * Stack Container VTable
+ * ============================================ */
 
-const EgWidgetVTable eg_stack_vtable = {
-    .type = EG_WIDGET_TYPE_STACK,
-    .type_name = "EgStack",
-    .destroy = stack_destroy,
-    .get_native = stack_get_native,
-    .set_visible = stack_set_visible,
-    .get_visible = stack_get_visible,
-    .set_sensitive = stack_set_sensitive,
-    .get_sensitive = stack_get_sensitive
+static void stack_destroy(EgWidget *widget);
+static void stack_add_child(EgWidget *container, EgWidget *child);
+static void stack_remove_child(EgWidget *container, EgWidget *child);
+static void stack_add_named(EgWidget *container, EgWidget *child, const char *name);
+static size_t stack_get_child_count(EgWidget *container);
+static EgWidget *stack_get_child_at(EgWidget *container, size_t index);
+static void stack_clear(EgWidget *container);
+
+static const EgContainerCapabilities stack_caps = {
+    .supports_multiple = true,
+    .supports_named = true,
+    .supports_positioned = false,
+    .max_children = 0  /* Ilimitado */
 };
 
-/* Funções da vtable - StackSwitcher */
-static void stack_switcher_destroy(EgWidget *widget);
-static void *stack_switcher_get_native(EgWidget *widget);
+const EgContainerVTable eg_stack_vtable = {
+    .base = {
+        .type = EG_WIDGET_TYPE_STACK,
+        .type_name = "EgStack",
+        .destroy = stack_destroy,
+        .get_native = eg_widget_get_native_default,
+        .set_visible = eg_widget_set_visible_default,
+        .get_visible = eg_widget_get_visible_default,
+        .set_sensitive = eg_widget_set_sensitive_default,
+        .get_sensitive = eg_widget_get_sensitive_default,
+        .binding_caps = NULL,
+        .bind_value = NULL,
+        .bind_command = NULL,
+        .unbind = NULL,
+        .events = NULL,
+        .validation = NULL
+    },
+    .caps = &stack_caps,
+    .add_child = stack_add_child,
+    .remove_child = stack_remove_child,
+    .add_named = stack_add_named,
+    .get_by_name = NULL,  /* TODO: implementar se necessário */
+    .get_child_count = stack_get_child_count,
+    .get_child_at = stack_get_child_at,
+    .clear = stack_clear
+};
+
+/* ============================================
+ * StackSwitcher VTable
+ * ============================================ */
 
 const EgWidgetVTable eg_stack_switcher_vtable = {
     .type = EG_WIDGET_TYPE_STACK_SWITCHER,
     .type_name = "EgStackSwitcher",
-    .destroy = stack_switcher_destroy,
-    .get_native = stack_switcher_get_native,
-    .set_visible = stack_set_visible,
-    .get_visible = stack_get_visible,
-    .set_sensitive = stack_set_sensitive,
-    .get_sensitive = stack_get_sensitive
+    .destroy = eg_widget_destroy_simple,
+    .get_native = eg_widget_get_native_default,
+    .set_visible = eg_widget_set_visible_default,
+    .get_visible = eg_widget_get_visible_default,
+    .set_sensitive = eg_widget_set_sensitive_default,
+    .get_sensitive = eg_widget_get_sensitive_default,
+    .binding_caps = NULL,
+    .bind_value = NULL,
+    .bind_command = NULL,
+    .unbind = NULL,
+    .events = NULL,
+    .validation = NULL
 };
+
+/* ============================================
+ * VTable Implementations
+ * ============================================ */
 
 static void stack_destroy(EgWidget *widget) {
     EgStack *stack = (EgStack *)widget;
     if (stack == NULL) return;
+
+    /* Destrói todos os filhos */
+    for (size_t i = 0; i < stack->children.count; i++) {
+        EgWidget *child = stack->children.children[i];
+        if (child != NULL && child->vtable != NULL && child->vtable->destroy != NULL) {
+            child->vtable->destroy(child);
+        }
+    }
+
+    eg_child_list_free(&stack->children);
     eg_free(stack);
 }
 
-static void *stack_get_native(EgWidget *widget) {
-    if (widget == NULL) return NULL;
-    return widget->native;
+static void stack_add_child(EgWidget *container, EgWidget *child) {
+    EgStack *stack = (EgStack *)container;
+    if (stack == NULL || stack->base.native == NULL) return;
+    if (child == NULL || child->native == NULL) return;
+
+    /* Adiciona sem nome (usa nome gerado) */
+    gtk_stack_add_child(GTK_STACK(stack->base.native), child->native);
+    eg_child_list_add(&stack->children, child);
 }
 
-static void stack_set_visible(EgWidget *widget, bool visible) {
-    if (widget == NULL || widget->native == NULL) return;
-    gtk_widget_set_visible(widget->native, visible);
+static void stack_remove_child(EgWidget *container, EgWidget *child) {
+    EgStack *stack = (EgStack *)container;
+    if (stack == NULL || stack->base.native == NULL) return;
+    if (child == NULL || child->native == NULL) return;
+
+    gtk_stack_remove(GTK_STACK(stack->base.native), child->native);
+    eg_child_list_remove(&stack->children, child);
 }
 
-static bool stack_get_visible(EgWidget *widget) {
-    if (widget == NULL || widget->native == NULL) return false;
-    return gtk_widget_get_visible(widget->native);
+static void stack_add_named(EgWidget *container, EgWidget *child, const char *name) {
+    EgStack *stack = (EgStack *)container;
+    if (stack == NULL || stack->base.native == NULL) return;
+    if (child == NULL || child->native == NULL) return;
+
+    gtk_stack_add_named(GTK_STACK(stack->base.native), child->native, name);
+    eg_child_list_add(&stack->children, child);
 }
 
-static void stack_set_sensitive(EgWidget *widget, bool sensitive) {
-    if (widget == NULL || widget->native == NULL) return;
-    gtk_widget_set_sensitive(widget->native, sensitive);
+static size_t stack_get_child_count(EgWidget *container) {
+    EgStack *stack = (EgStack *)container;
+    if (stack == NULL) return 0;
+    return stack->children.count;
 }
 
-static bool stack_get_sensitive(EgWidget *widget) {
-    if (widget == NULL || widget->native == NULL) return false;
-    return gtk_widget_get_sensitive(widget->native);
+static EgWidget *stack_get_child_at(EgWidget *container, size_t index) {
+    EgStack *stack = (EgStack *)container;
+    if (stack == NULL) return NULL;
+    return eg_child_list_get(&stack->children, index);
 }
 
-static void stack_switcher_destroy(EgWidget *widget) {
-    EgStackSwitcher *switcher = (EgStackSwitcher *)widget;
-    if (switcher == NULL) return;
-    eg_free(switcher);
+static void stack_clear(EgWidget *container) {
+    EgStack *stack = (EgStack *)container;
+    if (stack == NULL || stack->base.native == NULL) return;
+
+    /* Remove todos os filhos do GTK */
+    GtkWidget *native = stack->base.native;
+    GtkWidget *child;
+    while ((child = gtk_stack_get_child_by_name(GTK_STACK(native),
+            gtk_stack_get_visible_child_name(GTK_STACK(native)))) != NULL) {
+        gtk_stack_remove(GTK_STACK(native), child);
+    }
+
+    /* Limpa a lista */
+    eg_child_list_clear(&stack->children);
 }
 
-static void *stack_switcher_get_native(EgWidget *widget) {
-    if (widget == NULL) return NULL;
-    return widget->native;
-}
+/* ============================================
+ * Conversão de Transição
+ * ============================================ */
 
-/* Converte EgStackTransition para GtkStackTransitionType */
 static GtkStackTransitionType eg_to_gtk_transition(EgStackTransition transition) {
     switch (transition) {
         case EG_STACK_TRANSITION_NONE: return GTK_STACK_TRANSITION_TYPE_NONE;
@@ -105,17 +177,23 @@ static GtkStackTransitionType eg_to_gtk_transition(EgStackTransition transition)
     }
 }
 
+/* ============================================
+ * API Pública - Stack
+ * ============================================ */
+
 EgStack *eg_stack_new(void) {
     EgStack *stack = EG_ALLOC(EgStack);
     if (stack == NULL) return NULL;
-    
+
     GtkWidget *gtk_stack = gtk_stack_new();
     if (gtk_stack == NULL) {
         eg_free(stack);
         return NULL;
     }
-    
-    eg_widget_init(&stack->base, EG_WIDGET_TYPE_STACK, gtk_stack, &eg_stack_vtable);
+
+    eg_widget_init(&stack->base, EG_WIDGET_TYPE_STACK, gtk_stack, &eg_stack_vtable.base);
+    eg_child_list_init(&stack->children);
+
     return stack;
 }
 
@@ -124,21 +202,19 @@ void eg_stack_free(EgStack *stack) {
 }
 
 void eg_stack_add_named(EgStack *stack, EgWidget *child, const char *name) {
-    if (stack == NULL || stack->base.native == NULL) return;
-    if (child == NULL || child->native == NULL) return;
-    gtk_stack_add_named(GTK_STACK(stack->base.native), child->native, name);
+    stack_add_named((EgWidget *)stack, child, name);
 }
 
 void eg_stack_add_titled(EgStack *stack, EgWidget *child, const char *name, const char *title) {
     if (stack == NULL || stack->base.native == NULL) return;
     if (child == NULL || child->native == NULL) return;
+
     gtk_stack_add_titled(GTK_STACK(stack->base.native), child->native, name, title);
+    eg_child_list_add(&stack->children, child);
 }
 
 void eg_stack_remove(EgStack *stack, EgWidget *child) {
-    if (stack == NULL || stack->base.native == NULL) return;
-    if (child == NULL || child->native == NULL) return;
-    gtk_stack_remove(GTK_STACK(stack->base.native), child->native);
+    stack_remove_child((EgWidget *)stack, child);
 }
 
 void eg_stack_set_visible_child_name(EgStack *stack, const char *name) {
@@ -158,8 +234,18 @@ void eg_stack_set_visible_child(EgStack *stack, EgWidget *child) {
 }
 
 EgWidget *eg_stack_get_visible_child(EgStack *stack) {
-    (void)stack;
-    /* Nota: Retornar o EgWidget requer mapeamento reverso que não temos */
+    if (stack == NULL || stack->base.native == NULL) return NULL;
+
+    GtkWidget *visible = gtk_stack_get_visible_child(GTK_STACK(stack->base.native));
+    if (visible == NULL) return NULL;
+
+    /* Procura o EgWidget correspondente */
+    for (size_t i = 0; i < stack->children.count; i++) {
+        EgWidget *child = stack->children.children[i];
+        if (child != NULL && child->native == visible) {
+            return child;
+        }
+    }
     return NULL;
 }
 
@@ -193,25 +279,25 @@ void *eg_stack_get_native(EgStack *stack) {
 }
 
 /* ============================================
- * StackSwitcher
+ * API Pública - StackSwitcher
  * ============================================ */
 
 EgStackSwitcher *eg_stack_switcher_new(void) {
     EgStackSwitcher *switcher = EG_ALLOC(EgStackSwitcher);
     if (switcher == NULL) return NULL;
-    
+
     GtkWidget *gtk_switcher = gtk_stack_switcher_new();
     if (gtk_switcher == NULL) {
         eg_free(switcher);
         return NULL;
     }
-    
+
     eg_widget_init(&switcher->base, EG_WIDGET_TYPE_STACK_SWITCHER, gtk_switcher, &eg_stack_switcher_vtable);
     return switcher;
 }
 
 void eg_stack_switcher_free(EgStackSwitcher *switcher) {
-    stack_switcher_destroy((EgWidget *)switcher);
+    eg_widget_destroy_simple((EgWidget *)switcher);
 }
 
 void eg_stack_switcher_set_stack(EgStackSwitcher *switcher, EgStack *stack) {

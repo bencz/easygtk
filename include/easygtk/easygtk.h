@@ -57,6 +57,8 @@
 #include "cast.h"
 #include "refcount.h"
 #include "pool.h"
+#include "container.h"
+#include "validation.h"
 
 #ifdef __cplusplus
 extern "C" {

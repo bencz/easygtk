@@ -157,13 +157,13 @@ app_state_navigate_to(PAGE_SETTINGS);
 ### Data Binding
 ```c
 // Label se atualiza automaticamente quando property muda
-eg_bind_label_text(label, view_model, "total_users");
+eg_bind(eg_label_as_widget(label), view_model, "total_users");
 
 // Entry com two-way binding
-eg_bind_entry_text(entry, view_model, "username");
+eg_bind(eg_entry_as_widget(entry), view_model, "username");
 
 // Button executa command automaticamente
-eg_bind_button_command(button, view_model, "logout");
+eg_bind_cmd(eg_button_as_widget(button), view_model, "logout");
 ```
 
 ## 📊 Banco de Dados

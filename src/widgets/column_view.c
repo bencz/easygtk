@@ -7,6 +7,7 @@
 
 #include <gtk/gtk.h>
 #include "internal/internal.h"
+#include "internal/vtable.h"
 #include <easygtk/column_view.h>
 #include <stdlib.h>
 #include <string.h>
@@ -86,6 +87,17 @@ static bool column_view_get_visible(EgWidget *widget);
 static void column_view_set_sensitive(EgWidget *widget, bool sensitive);
 static bool column_view_get_sensitive(EgWidget *widget);
 
+/* Funções de binding */
+static void *column_view_bind_value(EgWidget *widget, const EgBindingContext *ctx);
+static void column_view_unbind(EgWidget *widget, void *binding_data);
+
+/* Capacidades de binding - selection binding com INT */
+static const EgBindingCapabilities eg_column_view_binding_caps = {
+    .primary_type = EG_PROPERTY_TYPE_INT,
+    .default_mode = EG_BINDING_MODE_TWO_WAY,
+    .supports_command = false
+};
+
 const EgWidgetVTable eg_column_view_vtable = {
     .type = EG_WIDGET_TYPE_COLUMN_VIEW,
     .type_name = "EgColumnView",
@@ -94,7 +106,12 @@ const EgWidgetVTable eg_column_view_vtable = {
     .set_visible = column_view_set_visible,
     .get_visible = column_view_get_visible,
     .set_sensitive = column_view_set_sensitive,
-    .get_sensitive = column_view_get_sensitive
+    .get_sensitive = column_view_get_sensitive,
+    /* Binding support */
+    .binding_caps = &eg_column_view_binding_caps,
+    .bind_value = column_view_bind_value,
+    .bind_command = NULL,
+    .unbind = column_view_unbind
 };
 
 static void column_view_destroy(EgWidget *widget) {
@@ -669,4 +686,92 @@ void eg_column_view_set_column_sortable(EgColumnView *column_view, int column_id
         }
         g_object_unref(column);
     }
+}
+
+/* ============================================
+ * Binding Implementation (Selection)
+ * ============================================ */
+
+typedef struct {
+    EgColumnView *column_view;
+    EgProperty *property;
+    EgHandlerId property_handler;
+    gulong gtk_signal_id;
+    bool updating;
+} ColumnViewBindingData;
+
+static void column_view_binding_on_property_changed(EgProperty *property, void *user_data) {
+    ColumnViewBindingData *data = (ColumnViewBindingData *)user_data;
+    if (data == NULL || data->column_view == NULL || data->updating) return;
+
+    data->updating = true;
+    int value = eg_property_get_int(property);
+    if (value >= 0) {
+        eg_column_view_select_row(data->column_view, (unsigned int)value);
+    } else {
+        eg_column_view_unselect_all(data->column_view);
+    }
+    data->updating = false;
+}
+
+static void column_view_binding_on_selection_changed(GtkSelectionModel *model,
+                                                      guint position, guint n_items,
+                                                      gpointer user_data) {
+    (void)model;
+    (void)position;
+    (void)n_items;
+    ColumnViewBindingData *data = (ColumnViewBindingData *)user_data;
+    if (data == NULL || data->column_view == NULL || data->updating) return;
+
+    data->updating = true;
+    int selected = eg_column_view_get_selected_row(data->column_view);
+    eg_property_set_int(data->property, selected);
+    data->updating = false;
+}
+
+static void *column_view_bind_value(EgWidget *widget, const EgBindingContext *ctx) {
+    EgColumnView *cv = (EgColumnView *)widget;
+    if (cv == NULL || ctx == NULL || ctx->property == NULL) return NULL;
+
+    if (eg_property_get_type(ctx->property) != EG_PROPERTY_TYPE_INT) {
+        return NULL;
+    }
+
+    ColumnViewBindingData *data = EG_ALLOC(ColumnViewBindingData);
+    if (data == NULL) return NULL;
+
+    data->column_view = cv;
+    data->property = ctx->property;
+    data->updating = false;
+
+    /* Property -> Widget */
+    data->property_handler = eg_property_on_changed(ctx->property,
+                                                     column_view_binding_on_property_changed, data);
+
+    /* Widget -> Property (se two-way) */
+    if (ctx->mode == EG_BINDING_MODE_TWO_WAY && cv->selection_model != NULL) {
+        data->gtk_signal_id = g_signal_connect(cv->selection_model, "selection-changed",
+                                                G_CALLBACK(column_view_binding_on_selection_changed), data);
+    }
+
+    /* Sincroniza valor inicial */
+    column_view_binding_on_property_changed(ctx->property, data);
+
+    return data;
+}
+
+static void column_view_unbind(EgWidget *widget, void *binding_data) {
+    ColumnViewBindingData *data = (ColumnViewBindingData *)binding_data;
+    if (data == NULL) return;
+
+    if (data->property != NULL && data->property_handler != 0) {
+        eg_property_disconnect(data->property, data->property_handler);
+    }
+
+    EgColumnView *cv = (EgColumnView *)widget;
+    if (cv != NULL && cv->selection_model != NULL && data->gtk_signal_id != 0) {
+        g_signal_handler_disconnect(cv->selection_model, data->gtk_signal_id);
+    }
+
+    eg_free(data);
 }

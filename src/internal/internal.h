@@ -116,6 +116,7 @@ struct EgComboBox {
 /* Estrutura de scrolled window */
 struct EgScrolledWindow {
     EgWidget base;
+    EgWidget *child;  /* Single child */
 };
 
 /* Estrutura de spin button */
@@ -140,9 +141,10 @@ struct EgTextView {
     void *changed_data;
 };
 
-/* Estrutura de stack */
+/* Estrutura de stack (container com filhos nomeados) */
 struct EgStack {
     EgWidget base;
+    EgChildList children;
 };
 
 /* Estrutura de stack switcher */
@@ -150,21 +152,25 @@ struct EgStackSwitcher {
     EgWidget base;
 };
 
-/* Estrutura de notebook */
+/* Estrutura de notebook (container com filhos nomeados) */
 struct EgNotebook {
     EgWidget base;
+    EgChildList children;
     EgCallback on_page_changed;
     void *page_changed_data;
 };
 
-/* Estrutura de paned */
+/* Estrutura de paned (container com 2 filhos) */
 struct EgPaned {
     EgWidget base;
+    EgWidget *child1;
+    EgWidget *child2;
 };
 
-/* Estrutura de frame */
+/* Estrutura de frame (container com 1 filho) */
 struct EgFrame {
     EgWidget base;
+    EgWidget *child;
 };
 
 /* Estrutura de expander */

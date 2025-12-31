@@ -1,5 +1,7 @@
 /**
  * SPA App - Login Page
+ *
+ * Demonstra uso do sistema de validacao em uma pagina real.
  */
 
 #include "../include/pages.h"
@@ -11,32 +13,68 @@ static EgEntry *entry_username = NULL;
 static EgEntry *entry_password = NULL;
 static EgLabel *label_error = NULL;
 
+/* ============================================
+ * Validacao e Login
+ * ============================================ */
+
 static void on_login_click(EgWidget *widget, void *user_data) {
     (void)widget; (void)user_data;
 
+    /* Valida campos usando o sistema de validacao */
+    EgWidget *fields[] = {
+        eg_entry_as_widget(entry_username),
+        eg_entry_as_widget(entry_password)
+    };
+
+    /* Valida todos os campos */
+    int first_invalid = eg_validate_first_invalid(fields, 2);
+    if (first_invalid >= 0) {
+        eg_widget_grab_focus(fields[first_invalid]);
+        return;
+    }
+
+    /* Campos validos - tenta login */
     const char *username = eg_entry_get_text(entry_username);
     const char *password = eg_entry_get_text(entry_password);
 
-    if (!username || strlen(username) == 0) {
-        eg_label_set_markup(label_error, "<span color='#f38ba8'>Please enter username</span>");
-        return;
-    }
-
-    if (!password || strlen(password) == 0) {
-        eg_label_set_markup(label_error, "<span color='#f38ba8'>Please enter password</span>");
-        return;
-    }
-
-    /* Attempt login */
     if (app_state_login(username, password)) {
         eg_label_set_text(label_error, "");
         eg_entry_set_text(entry_username, "");
         eg_entry_set_text(entry_password, "");
+
+        /* Limpa estado de erro visual */
+        eg_widget_clear_validation_error(eg_entry_as_widget(entry_username));
+        eg_widget_clear_validation_error(eg_entry_as_widget(entry_password));
+
         app_state_navigate_to(PAGE_DASHBOARD);
     } else {
         eg_label_set_markup(label_error, "<span color='#f38ba8'>Invalid username or password</span>");
     }
 }
+
+/* ============================================
+ * Setup de Validadores
+ * ============================================ */
+
+static void setup_validators(void) {
+    /* Username: obrigatorio, minimo 3 caracteres */
+    EgValidatorChain *username_chain = eg_validator_chain_new();
+    eg_validator_add_required(username_chain, "Username is required");
+    eg_validator_add_min_length(username_chain, 3, "Username must be at least 3 characters");
+    eg_widget_set_validators(eg_entry_as_widget(entry_username), username_chain);
+    eg_widget_validate_on_focus_out(eg_entry_as_widget(entry_username), true);
+
+    /* Password: obrigatorio, minimo 4 caracteres */
+    EgValidatorChain *password_chain = eg_validator_chain_new();
+    eg_validator_add_required(password_chain, "Password is required");
+    eg_validator_add_min_length(password_chain, 4, "Password must be at least 4 characters");
+    eg_widget_set_validators(eg_entry_as_widget(entry_password), password_chain);
+    eg_widget_validate_on_focus_out(eg_entry_as_widget(entry_password), true);
+}
+
+/* ============================================
+ * Criacao da Pagina
+ * ============================================ */
 
 EgWidget *page_login_create(void) {
     /* Main container */
@@ -79,6 +117,9 @@ EgWidget *page_login_create(void) {
     entry_password = eg_entry_new();
     eg_entry_set_placeholder(entry_password, "Enter your password");
     eg_entry_set_visibility(entry_password, false);
+
+    /* Setup validadores APOS criar os widgets */
+    setup_validators();
 
     /* Error label */
     label_error = eg_label_new("");

@@ -4,6 +4,7 @@
 
 #include <gtk/gtk.h>
 #include "internal/internal.h"
+#include "internal/vtable.h"
 #include <easygtk/list_view.h>
 #include <stdlib.h>
 
@@ -15,6 +16,17 @@ static bool list_view_get_visible(EgWidget *widget);
 static void list_view_set_sensitive(EgWidget *widget, bool sensitive);
 static bool list_view_get_sensitive(EgWidget *widget);
 
+/* Funções de binding */
+static void *list_view_bind_value(EgWidget *widget, const EgBindingContext *ctx);
+static void list_view_unbind(EgWidget *widget, void *binding_data);
+
+/* Capacidades de binding - selection binding com INT */
+static const EgBindingCapabilities eg_list_view_binding_caps = {
+    .primary_type = EG_PROPERTY_TYPE_INT,
+    .default_mode = EG_BINDING_MODE_TWO_WAY,
+    .supports_command = false
+};
+
 const EgWidgetVTable eg_list_view_vtable = {
     .type = EG_WIDGET_TYPE_LIST_VIEW,
     .type_name = "EgListView",
@@ -23,7 +35,12 @@ const EgWidgetVTable eg_list_view_vtable = {
     .set_visible = list_view_set_visible,
     .get_visible = list_view_get_visible,
     .set_sensitive = list_view_set_sensitive,
-    .get_sensitive = list_view_get_sensitive
+    .get_sensitive = list_view_get_sensitive,
+    /* Binding support */
+    .binding_caps = &eg_list_view_binding_caps,
+    .bind_value = list_view_bind_value,
+    .bind_command = NULL,
+    .unbind = list_view_unbind
 };
 
 static void list_view_destroy(EgWidget *widget) {
@@ -492,4 +509,92 @@ void eg_list_view_set_auto_sort(EgListView *list_view, bool ascending) {
 void eg_list_view_disable_auto_sort(EgListView *list_view) {
     if (list_view == NULL) return;
     list_view->auto_sort_enabled = false;
+}
+
+/* ============================================
+ * Binding Implementation (Selection)
+ * ============================================ */
+
+typedef struct {
+    EgListView *list_view;
+    EgProperty *property;
+    EgHandlerId property_handler;
+    gulong gtk_signal_id;
+    bool updating;
+} ListViewBindingData;
+
+static void list_view_binding_on_property_changed(EgProperty *property, void *user_data) {
+    ListViewBindingData *data = (ListViewBindingData *)user_data;
+    if (data == NULL || data->list_view == NULL || data->updating) return;
+
+    data->updating = true;
+    int value = eg_property_get_int(property);
+    if (value >= 0) {
+        eg_list_view_select(data->list_view, (unsigned int)value);
+    } else {
+        eg_list_view_unselect_all(data->list_view);
+    }
+    data->updating = false;
+}
+
+static void list_view_binding_on_selection_changed(GtkSelectionModel *model,
+                                                    guint position, guint n_items,
+                                                    gpointer user_data) {
+    (void)model;
+    (void)position;
+    (void)n_items;
+    ListViewBindingData *data = (ListViewBindingData *)user_data;
+    if (data == NULL || data->list_view == NULL || data->updating) return;
+
+    data->updating = true;
+    int selected = eg_list_view_get_selected(data->list_view);
+    eg_property_set_int(data->property, selected);
+    data->updating = false;
+}
+
+static void *list_view_bind_value(EgWidget *widget, const EgBindingContext *ctx) {
+    EgListView *lv = (EgListView *)widget;
+    if (lv == NULL || ctx == NULL || ctx->property == NULL) return NULL;
+
+    if (eg_property_get_type(ctx->property) != EG_PROPERTY_TYPE_INT) {
+        return NULL;
+    }
+
+    ListViewBindingData *data = EG_ALLOC(ListViewBindingData);
+    if (data == NULL) return NULL;
+
+    data->list_view = lv;
+    data->property = ctx->property;
+    data->updating = false;
+
+    /* Property -> Widget */
+    data->property_handler = eg_property_on_changed(ctx->property,
+                                                     list_view_binding_on_property_changed, data);
+
+    /* Widget -> Property (se two-way) */
+    if (ctx->mode == EG_BINDING_MODE_TWO_WAY && lv->selection_model != NULL) {
+        data->gtk_signal_id = g_signal_connect(lv->selection_model, "selection-changed",
+                                                G_CALLBACK(list_view_binding_on_selection_changed), data);
+    }
+
+    /* Sincroniza valor inicial */
+    list_view_binding_on_property_changed(ctx->property, data);
+
+    return data;
+}
+
+static void list_view_unbind(EgWidget *widget, void *binding_data) {
+    ListViewBindingData *data = (ListViewBindingData *)binding_data;
+    if (data == NULL) return;
+
+    if (data->property != NULL && data->property_handler != 0) {
+        eg_property_disconnect(data->property, data->property_handler);
+    }
+
+    EgListView *lv = (EgListView *)widget;
+    if (lv != NULL && lv->selection_model != NULL && data->gtk_signal_id != 0) {
+        g_signal_handler_disconnect(lv->selection_model, data->gtk_signal_id);
+    }
+
+    eg_free(data);
 }

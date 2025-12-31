@@ -4,6 +4,7 @@
 
 #include <gtk/gtk.h>
 #include "internal/internal.h"
+#include "internal/vtable.h"
 #include <easygtk/scale.h>
 
 /* Funções da vtable */
@@ -14,6 +15,17 @@ static bool scale_get_visible(EgWidget *widget);
 static void scale_set_sensitive(EgWidget *widget, bool sensitive);
 static bool scale_get_sensitive(EgWidget *widget);
 
+/* Funções de binding */
+static void *scale_bind_value(EgWidget *widget, const EgBindingContext *ctx);
+static void scale_unbind(EgWidget *widget, void *binding_data);
+
+/* Capacidades de binding */
+static const EgBindingCapabilities eg_scale_binding_caps = {
+    .primary_type = EG_PROPERTY_TYPE_DOUBLE,
+    .default_mode = EG_BINDING_MODE_TWO_WAY,
+    .supports_command = false
+};
+
 const EgWidgetVTable eg_scale_vtable = {
     .type = EG_WIDGET_TYPE_SCALE,
     .type_name = "EgScale",
@@ -22,7 +34,12 @@ const EgWidgetVTable eg_scale_vtable = {
     .set_visible = scale_set_visible,
     .get_visible = scale_get_visible,
     .set_sensitive = scale_set_sensitive,
-    .get_sensitive = scale_get_sensitive
+    .get_sensitive = scale_get_sensitive,
+    /* Binding support */
+    .binding_caps = &eg_scale_binding_caps,
+    .bind_value = scale_bind_value,
+    .bind_command = NULL,
+    .unbind = scale_unbind
 };
 
 static void scale_destroy(EgWidget *widget) {
@@ -167,4 +184,95 @@ EgWidget *eg_scale_as_widget(EgScale *scale) {
 void *eg_scale_get_native(EgScale *scale) {
     if (scale == NULL) return NULL;
     return scale->base.native;
+}
+
+/* ============================================
+ * Binding Implementation
+ * ============================================ */
+
+typedef struct {
+    EgScale *scale;
+    EgProperty *property;
+    EgPropertyType prop_type;
+    EgHandlerId property_handler;
+    gulong gtk_signal_id;
+    bool updating;
+} ScaleBindingData;
+
+static void scale_binding_on_property_changed(EgProperty *property, void *user_data) {
+    ScaleBindingData *data = (ScaleBindingData *)user_data;
+    if (data == NULL || data->scale == NULL || data->updating) return;
+
+    data->updating = true;
+    double value;
+    if (data->prop_type == EG_PROPERTY_TYPE_INT) {
+        value = (double)eg_property_get_int(property);
+    } else {
+        value = eg_property_get_double(property);
+    }
+    eg_scale_set_value(data->scale, value);
+    data->updating = false;
+}
+
+static void scale_binding_on_value_changed(GtkRange *range, gpointer user_data) {
+    (void)range;
+    ScaleBindingData *data = (ScaleBindingData *)user_data;
+    if (data == NULL || data->scale == NULL || data->updating) return;
+
+    data->updating = true;
+    double value = eg_scale_get_value(data->scale);
+    if (data->prop_type == EG_PROPERTY_TYPE_INT) {
+        eg_property_set_int(data->property, (int)value);
+    } else {
+        eg_property_set_double(data->property, value);
+    }
+    data->updating = false;
+}
+
+static void *scale_bind_value(EgWidget *widget, const EgBindingContext *ctx) {
+    EgScale *scale = (EgScale *)widget;
+    if (scale == NULL || ctx == NULL || ctx->property == NULL) return NULL;
+
+    EgPropertyType prop_type = eg_property_get_type(ctx->property);
+    if (prop_type != EG_PROPERTY_TYPE_INT && prop_type != EG_PROPERTY_TYPE_DOUBLE) {
+        return NULL;
+    }
+
+    ScaleBindingData *data = EG_ALLOC(ScaleBindingData);
+    if (data == NULL) return NULL;
+
+    data->scale = scale;
+    data->property = ctx->property;
+    data->prop_type = prop_type;
+    data->updating = false;
+
+    /* Property -> Widget */
+    data->property_handler = eg_property_on_changed(ctx->property,
+                                                     scale_binding_on_property_changed, data);
+
+    /* Widget -> Property (se two-way) */
+    if (ctx->mode == EG_BINDING_MODE_TWO_WAY) {
+        data->gtk_signal_id = g_signal_connect(widget->native, "value-changed",
+                                                G_CALLBACK(scale_binding_on_value_changed), data);
+    }
+
+    /* Sincroniza valor inicial */
+    scale_binding_on_property_changed(ctx->property, data);
+
+    return data;
+}
+
+static void scale_unbind(EgWidget *widget, void *binding_data) {
+    ScaleBindingData *data = (ScaleBindingData *)binding_data;
+    if (data == NULL) return;
+
+    if (data->property != NULL && data->property_handler != 0) {
+        eg_property_disconnect(data->property, data->property_handler);
+    }
+
+    if (widget != NULL && widget->native != NULL && data->gtk_signal_id != 0) {
+        g_signal_handler_disconnect(widget->native, data->gtk_signal_id);
+    }
+
+    eg_free(data);
 }

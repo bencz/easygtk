@@ -3,6 +3,7 @@
  */
 
 #include "internal/internal.h"
+#include "internal/vtable.h"
 #include <easygtk/binding.h>
 #include <easygtk/entry.h>
 #include <easygtk/label.h>
@@ -15,6 +16,170 @@
 #include <easygtk/column_view.h>
 #include <stdio.h>
 #include <string.h>
+
+/* ============================================
+ * EgWidgetBinding Structure
+ * ============================================ */
+
+struct EgWidgetBinding {
+    EgWidget *widget;           /* Widget bindado */
+    EgProperty *property;       /* Property bindada (pode ser NULL para command) */
+    EgCommand *command;         /* Command bindado (pode ser NULL para value) */
+    EgBindingMode mode;         /* Modo de binding */
+    void *binding_data;         /* Dados específicos do widget (retornado pela vtable) */
+};
+
+/* ============================================
+ * Generic Binding API Implementation
+ * ============================================ */
+
+EgWidgetBinding *eg_bind(EgWidget *widget, EgViewModel *vm, const char *property_name) {
+    if (widget == NULL || vm == NULL || property_name == NULL) return NULL;
+
+    /* Verifica se widget tem vtable e suporta binding */
+    if (widget->vtable == NULL || widget->vtable->binding_caps == NULL) {
+        return NULL;
+    }
+
+    /* Usa o modo padrão do widget */
+    EgBindingMode mode = widget->vtable->binding_caps->default_mode;
+    return eg_bind_with_mode(widget, vm, property_name, mode);
+}
+
+EgWidgetBinding *eg_bind_with_mode(EgWidget *widget, EgViewModel *vm,
+                                    const char *property_name, EgBindingMode mode) {
+    if (widget == NULL || vm == NULL || property_name == NULL) return NULL;
+
+    /* Verifica se widget tem vtable e suporta binding */
+    if (widget->vtable == NULL || widget->vtable->binding_caps == NULL) {
+        return NULL;
+    }
+
+    /* Verifica se tem função bind_value */
+    if (widget->vtable->bind_value == NULL) {
+        return NULL;
+    }
+
+    /* Obtém a property do ViewModel */
+    EgProperty *property = eg_view_model_get_property(vm, property_name);
+    if (property == NULL) {
+        return NULL;
+    }
+
+    /* Prepara o contexto de binding */
+    EgBindingContext ctx = {
+        .property = property,
+        .mode = mode
+    };
+
+    /* Chama a função de binding da vtable */
+    void *binding_data = widget->vtable->bind_value(widget, &ctx);
+    if (binding_data == NULL) {
+        return NULL;
+    }
+
+    /* Cria o handle de binding */
+    EgWidgetBinding *binding = EG_ALLOC(EgWidgetBinding);
+    if (binding == NULL) {
+        /* Cleanup: chama unbind se disponível */
+        if (widget->vtable->unbind != NULL) {
+            widget->vtable->unbind(widget, binding_data);
+        }
+        return NULL;
+    }
+
+    binding->widget = widget;
+    binding->property = property;
+    binding->command = NULL;
+    binding->mode = mode;
+    binding->binding_data = binding_data;
+
+    return binding;
+}
+
+EgWidgetBinding *eg_bind_cmd(EgWidget *widget, EgViewModel *vm, const char *command_name) {
+    if (widget == NULL || vm == NULL || command_name == NULL) return NULL;
+
+    /* Verifica se widget tem vtable e suporta command binding */
+    if (widget->vtable == NULL) {
+        return NULL;
+    }
+
+    /* Verifica se suporta command */
+    if (widget->vtable->binding_caps == NULL ||
+        !widget->vtable->binding_caps->supports_command) {
+        return NULL;
+    }
+
+    /* Verifica se tem função bind_command */
+    if (widget->vtable->bind_command == NULL) {
+        return NULL;
+    }
+
+    /* Obtém o command do ViewModel */
+    EgCommand *command = eg_view_model_get_command(vm, command_name);
+    if (command == NULL) {
+        return NULL;
+    }
+
+    /* Chama a função de binding da vtable */
+    void *binding_data = widget->vtable->bind_command(widget, command);
+    if (binding_data == NULL) {
+        return NULL;
+    }
+
+    /* Cria o handle de binding */
+    EgWidgetBinding *binding = EG_ALLOC(EgWidgetBinding);
+    if (binding == NULL) {
+        if (widget->vtable->unbind != NULL) {
+            widget->vtable->unbind(widget, binding_data);
+        }
+        return NULL;
+    }
+
+    binding->widget = widget;
+    binding->property = NULL;
+    binding->command = command;
+    binding->mode = EG_BINDING_MODE_NONE;
+    binding->binding_data = binding_data;
+
+    return binding;
+}
+
+void eg_unbind(EgWidgetBinding *binding) {
+    if (binding == NULL) return;
+
+    /* Chama unbind da vtable se disponível */
+    if (binding->widget != NULL &&
+        binding->widget->vtable != NULL &&
+        binding->widget->vtable->unbind != NULL &&
+        binding->binding_data != NULL) {
+        binding->widget->vtable->unbind(binding->widget, binding->binding_data);
+    }
+
+    eg_free(binding);
+}
+
+bool eg_widget_supports_binding(EgWidget *widget) {
+    if (widget == NULL || widget->vtable == NULL) return false;
+    return widget->vtable->binding_caps != NULL &&
+           widget->vtable->bind_value != NULL;
+}
+
+bool eg_widget_supports_command_binding(EgWidget *widget) {
+    if (widget == NULL || widget->vtable == NULL) return false;
+    return widget->vtable->binding_caps != NULL &&
+           widget->vtable->binding_caps->supports_command &&
+           widget->vtable->bind_command != NULL;
+}
+
+EgPropertyType eg_widget_get_binding_type(EgWidget *widget) {
+    if (widget == NULL || widget->vtable == NULL ||
+        widget->vtable->binding_caps == NULL) {
+        return EG_PROPERTY_TYPE_STRING;
+    }
+    return widget->vtable->binding_caps->primary_type;
+}
 
 /* ============================================
  * Entry <-> String Property (Two-Way)

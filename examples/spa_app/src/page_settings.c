@@ -54,7 +54,7 @@ EgWidget *page_settings_create(void) {
     eg_box_append(user_row, eg_label_as_widget(user_label));
 
     EgLabel *username = eg_label_new("");
-    eg_bind_label_text(username, g_app_state->view_model, "username");
+    eg_bind(eg_label_as_widget(username), g_app_state->view_model, "username");
     eg_widget_add_css_class(eg_label_as_widget(username), "text-primary");
     eg_box_append(user_row, eg_label_as_widget(username));
 
